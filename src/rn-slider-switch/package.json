@@ -1,0 +1,69 @@
+{
+  "_from": "rn-slider-switch",
+  "_id": "rn-slider-switch@0.0.3",
+  "_inBundle": false,
+  "_integrity": "sha1-/HGsd4cpQ8tL9yqs/sRtxk9Xyfc=",
+  "_location": "/rn-slider-switch",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "rn-slider-switch",
+    "name": "rn-slider-switch",
+    "escapedName": "rn-slider-switch",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/rn-slider-switch/-/rn-slider-switch-0.0.3.tgz",
+  "_shasum": "fc71ac77872943cb4bf72aacfec46dc64f57c9f7",
+  "_spec": "rn-slider-switch",
+  "_where": "/Users/alanyoho/yugioh",
+  "author": {
+    "name": "Vicky"
+  },
+  "bugs": {
+    "url": "https://github.com/victorkvarghese/rn-slider-switch/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Multi slider switch component in React Native (iOs & android)",
+  "devDependencies": {
+    "babel-eslint": "^8.2.1",
+    "babel-jest": "22.1.0",
+    "babel-preset-react-native": "4.0.0",
+    "eslint": "^4.16.0",
+    "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-react-native": "^3.2.1",
+    "jest": "22.1.4",
+    "prettier-eslint": "^8.8.1",
+    "react-test-renderer": "16.2.0"
+  },
+  "homepage": "https://github.com/victorkvarghese/rn-slider-switch#readme",
+  "jest": {
+    "preset": "react-native"
+  },
+  "keywords": [
+    "react-native",
+    "react-native-slider-switch",
+    "react-native-slider",
+    "rn-slider-switch",
+    "rn-switch",
+    "react-native-switch",
+    "rn-multi-switch",
+    "react-native-multi-switch"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "rn-slider-switch",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorkvarghese/rn-slider-switch.git"
+  },
+  "version": "0.0.3"
+}
