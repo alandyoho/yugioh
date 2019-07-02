@@ -33,7 +33,7 @@ export default class DeckSelectPage extends Component {
             return
         }
         const exists = await updateDeckInfo({ username, deck: deckName })
-        if (!exists) {
+        if (exists === false) {
             this.setState({ dialogVisible: true })
         }
         this.setState({ visible: false, deckName: "" })

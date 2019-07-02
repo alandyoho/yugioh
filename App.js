@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { LogInSignUpPage, DeckSelectPage, HomePage, DeckConstructorPage, DrawerPage, DuelingRoomPage } from "./src"
+import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage } from "./src"
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import userReducer from './src/reducer';
@@ -14,12 +14,6 @@ const AppStack = createStackNavigator({
       header: null
     }
   },
-  DeckSelectPage: {
-    screen: DeckSelectPage,
-    navigationOptions: {
-      header: null
-    }
-  },
   DeckConstructorPage: {
     screen: DeckConstructorPage,
     navigationOptions: {
@@ -27,7 +21,7 @@ const AppStack = createStackNavigator({
     }
   },
   DuelingRoomPage: {
-    screen: DuelingRoomPage,
+    screen: DuelingRoomPage, 
     navigationOptions: {
       header: null
     }

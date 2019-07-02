@@ -6,7 +6,7 @@ import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import PhotoReel from './PhotoReel';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-import DuelingRoomPage from "./DuelingRoomPage"
+import DuelingRoomSelectPage from "./DuelingRoomSelectPage"
 import DeckSelectPage from "./DeckSelectPage"
 import { updateSelectedDeck } from "./actions"
 
@@ -14,13 +14,13 @@ class HomePage extends Component {
     constructor() {
         super()
         this.state = {
-            duelingRoomPageVisible: false,
+            duelingRoomSelectPageVisible: false,
             deckSelectPageVisible: false
         }
     }
     render() {
         const { user, navigation, updateSelectedDeck } = this.props
-        const { duelingRoomPageVisible, deckSelectPageVisible } = this.state
+        const { duelingRoomSelectPageVisible, deckSelectPageVisible } = this.state
         return (
             <View style={styles.container}>
                 <PhotoReel />
@@ -58,7 +58,7 @@ class HomePage extends Component {
                         alignSelf: "center"
                     }}
                     loading={false}
-                    onPress={() => this.setState({ duelingRoomPageVisible: true })}
+                    onPress={() => this.setState({ duelingRoomSelectPageVisible: true })}
                 />
                 <Dialog
                     visible={deckSelectPageVisible}
@@ -77,7 +77,7 @@ class HomePage extends Component {
                     </DialogContent>
                 </Dialog>
                 <Dialog
-                    visible={duelingRoomPageVisible}
+                    visible={duelingRoomSelectPageVisible}
                     width={0.85}
                     height={0.40}
                     dialogAnimation={new ScaleAnimation({
@@ -85,11 +85,11 @@ class HomePage extends Component {
                         useNativeDriver: true, // optional
                     })}
                     onTouchOutside={() => {
-                        this.setState({ duelingRoomPageVisible: false });
+                        this.setState({ duelingRoomSelectPageVisible: false });
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
-                        <DuelingRoomPage user={user} />
+                        <DuelingRoomSelectPage user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} />
                     </DialogContent>
                 </Dialog>
             </View>

@@ -1,87 +1,55 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, Dimensions, Image, Text } from 'react-native';
 import { Button } from 'react-native-elements';
-import { hostDuel, returnAvailableDuels, joinDuel } from "../Firebase/FireMethods"
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { createUser } from "./actions"
+import { updateSelectedDeck } from "./actions"
 
-export default class DuelingRoomPage extends Component {
+class DuelingRoomPage extends Component {
     constructor() {
         super()
         this.state = {
-            rooms: [],
-            hostedRoom: null
-        }
-    }
-    async componentDidMount() {
-        const rooms = await returnAvailableDuels(this.props.user.username)
-        this.setState({ rooms })
-    }
 
-    renderItem = ({ item }) => {
-        return (
-            <TouchableOpacity style={[styles.listItem, { alignSelf: "flex-start", backgroundColor: 'white' }]} onPress={() => joinDuel({ hostUsername: item, username: this.props.user.username })}>
-                <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{`${item}`}</Text>
-            </TouchableOpacity>
-        )
-    }
-    FlatListItemSeparator = () => {
-        return (
-            <View
-                style={{
-                    height: 1,
-                    width: "100%",
-                    backgroundColor: "#607D8B",
-                }}
-            />
-        );
+        }
     }
     render() {
         return (
             <View style={styles.container}>
-                <View style={{ flex: 3 / 4 }}>
-                    <Text style={{ fontSize: 30, alignSelf: "center" }}>Join Room</Text>
-                    <FlatList
-                        data={this.state.rooms}
-                        renderItem={(item) => this.renderItem(item)}
-                        keyExtractor={(item, index) => index.toString()}
-                        ItemSeparatorComponent={this.FlatListItemSeparator}
-                    />
-                </View>
-                <View style={{ flex: 1 / 4 }}>
-                    <Text style={{ fontSize: 15, alignSelf: "center" }}>—or—</Text>
-                    <Button
-                        title="Create Room"
-                        titleStyle={{
-                            color: 'white',
-                            fontWeight: '800',
-                            fontSize: 18
-                        }}
-                        buttonStyle={{
-                            backgroundColor: 'rgb(130, 69, 91)',
-                            marginTop: 10,
-                            borderRadius: 10,
-                            height: 50,
-                            alignSelf: "center"
-                        }}
-                        loading={false}
-                        onPress={() => {
-                            this.setState({ hostedRoom: true })
-                            hostDuel(this.props.user.username)
-                        }}
-                    />
-                </View>
+
             </View>
         )
     }
 }
 
 const styles = StyleSheet.create({
+    panelStyles: {
+        flex: 1,
+        backgroundColor: 'white',
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignItems: 'center',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        padding: 20
+    },
     container: {
         flex: 1,
-        flexDirection: "column",
-    },
-    listItem: {
-        height: 75,
-        alignItems: 'center',
+        backgroundColor: '#FFF',
         justifyContent: 'center',
+        alignItems: 'center'
     },
-})
+});
+
+const mapStateToProps = (state) => {
+    const { user, cards } = state
+    return { user, cards }
+};
+const mapDispatchToProps = dispatch => (
+    bindActionCreators({
+        createUser,
+        updateSelectedDeck
+    }, dispatch)
+);
+
+export default connect(mapStateToProps, mapDispatchToProps)(DuelingRoomPage);
