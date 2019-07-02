@@ -1,18 +1,12 @@
 import React, { Component } from 'react';
 import {
-    ActivityIndicator,
-    AsyncStorage,
-    StatusBar,
-    StyleSheet,
     View,
     Image,
-    Dimensions
 } from 'react-native';
 import * as firebase from "firebase"
 import { createUser } from "./actions"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { UserDimensions } from 'firebase-functions/lib/providers/analytics';
 
 class AuthLoadingScreen extends Component {
     constructor(props) {
@@ -47,10 +41,6 @@ class AuthLoadingScreen extends Component {
         );
     }
 }
-
-
-
-
 
 const mapStateToProps = (state) => {
     const { user, cards } = state

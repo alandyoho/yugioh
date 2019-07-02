@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Button } from 'react-native-elements';
-import { hostDuel, returnAvailableDuels, joinDuel } from "../Firebase/FireMethods"
+import { hostDuel, returnAvailableDuels, joinDuel } from "../../Firebase/FireMethods"
 
 export default class DuelingRoomSelectPage extends Component {
     constructor() {

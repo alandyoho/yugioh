@@ -4,7 +4,7 @@ import { Button } from 'react-native-elements';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import Swipeable from 'react-native-swipeable';
 import { TextInput } from "react-native-gesture-handler";
-import { updateDeckInfo, retrieveDeckInfo, deleteDeck } from "../Firebase/FireMethods"
+import { updateDeckInfo, retrieveDeckInfo, deleteDeck } from "../../Firebase/FireMethods"
 
 export default class DeckSelectPage extends Component {
     constructor(props) {

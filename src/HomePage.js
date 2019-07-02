@@ -6,8 +6,7 @@ import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import PhotoReel from './PhotoReel';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-import DuelingRoomSelectPage from "./DuelingRoomSelectPage"
-import DeckSelectPage from "./DeckSelectPage"
+import { DuelingRoomSelectPage, DeckSelectPage } from "./HomePageComponents"
 import { updateSelectedDeck } from "./actions"
 
 class HomePage extends Component {

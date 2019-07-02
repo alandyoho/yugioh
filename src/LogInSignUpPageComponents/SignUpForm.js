@@ -1,9 +1,8 @@
 import { GiftedForm, GiftedFormManager } from "react-native-gifted-form"
 import React, { Component } from "react"
-import moment from "moment"
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { auth, functions } from "../../Firebase/Fire"
+import { auth } from "../../Firebase/Fire"
 import signUpFormValidators from "./SignUpFormValidators"
 import defaultAvatarImage from "../../assets/default-image.jpg"
 import { updateUserInfo } from "../../Firebase/FireMethods"
@@ -19,9 +18,6 @@ export default class SignUpForm extends Component {
     }
     focusNextField = (key) => {
         this.inputs[key].focus();
-    }
-    componentDidMount() {
-
     }
     signUp = async (user) => {
         try {
