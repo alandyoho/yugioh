@@ -21,23 +21,27 @@ export default class DeckSelectPage extends Component {
         await this.refreshDeckInfo()
     }
     refreshDeckInfo = async () => {
-        const { decks } = await retrieveDeckInfo(this.props.user.username)
+        const { username } = this.props.user
+        const { decks } = await retrieveDeckInfo(username)
         this.setState({ decks })
     }
 
     addNewDeck = async () => {
-        if (this.state.deckName == "") {
+        const { deckName } = this.state
+        const { username } = this.props.user
+        if (deckName == "") {
             return
         }
-        const exists = await updateDeckInfo({ username: this.props.user.username, deck: this.state.deckName })
-        if (exists === false) {
+        const exists = await updateDeckInfo({ username, deck: deckName })
+        if (!exists) {
             this.setState({ dialogVisible: true })
         }
         this.setState({ visible: false, deckName: "" })
         await this.refreshDeckInfo()
     }
     deleteDeck = async (deck) => {
-        await deleteDeck({ username: this.props.user.username, deck: deck })
+        const { username } = this.props.user
+        await deleteDeck({ username, deck })
         await this.refreshDeckInfo()
     }
 
@@ -54,11 +58,9 @@ export default class DeckSelectPage extends Component {
             if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
                 currentlyOpenSwipeable.recenter();
             }
-
             this.setState({ currentlyOpenSwipeable: swipeable });
         }
         const onClose = () => this.setState({ currentlyOpenSwipeable: null })
-
         return (
             <Swipeable
                 style={{ height: 60 }}
@@ -73,7 +75,6 @@ export default class DeckSelectPage extends Component {
                 <TouchableOpacity style={[styles.listItem, { alignSelf: "flex-start", backgroundColor: 'white' }]} onPress={() => this.onPressItem(item)}>
                     <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{`${item}`}</Text>
                 </TouchableOpacity>
-
             </Swipeable>
         )
     }
@@ -90,12 +91,13 @@ export default class DeckSelectPage extends Component {
         );
     }
     render() {
+        const { decks, visible, deckName, dialogVisible } = this.state
         return (
             <View style={styles.container}>
                 <View style={{ flex: 3 / 4 }}>
                     <Text style={{ fontSize: 30, alignSelf: "center" }}>Select Deck</Text>
                     <FlatList
-                        data={this.state.decks}
+                        data={decks}
                         renderItem={(item) => this.renderItem(item)}
                         keyExtractor={(item, index) => index.toString()}
                         ItemSeparatorComponent={this.FlatListItemSeparator}
@@ -124,7 +126,7 @@ export default class DeckSelectPage extends Component {
 
                 </View>
                 <Dialog
-                    visible={this.state.visible}
+                    visible={visible}
                     dialogTitle={<DialogTitle title="New Deck Name" />}
                     onTouchOutside={() => {
                         this.setState({ visible: false });
@@ -148,7 +150,7 @@ export default class DeckSelectPage extends Component {
                             <TextInput
                                 style={{ height: 40, borderColor: 'black', borderWidth: 1, width: Dimensions.get("window").width * 0.70 }}
                                 onChangeText={(deckName) => this.setState({ deckName })}
-                                value={this.state.deckName}
+                                value={deckName}
                                 defaultValue={"deck name"}
                                 onSubmitEditing={this.addNewDeck}
                                 autoFocus={true}
@@ -157,7 +159,7 @@ export default class DeckSelectPage extends Component {
                     </DialogContent>
                 </Dialog>
                 <Dialog
-                    visible={this.state.dialogVisible}
+                    visible={dialogVisible}
                     dialogTitle={<DialogTitle title="Deck Name Already Taken!" />}
                     onTouchOutside={() => {
                         this.setState({ dialogVisible: false });

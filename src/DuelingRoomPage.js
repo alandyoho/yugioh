@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native
 import { Button } from 'react-native-elements';
 import { hostDuel, returnAvailableDuels, joinDuel } from "../Firebase/FireMethods"
 
-class DuelingRoomPage extends Component {
+export default class DuelingRoomPage extends Component {
     constructor() {
         super()
         this.state = {
@@ -85,5 +85,3 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 })
-
-export default DuelingRoomPage
