@@ -1,16 +1,12 @@
 import React, { Component } from "react"
-import moment from "moment"
 import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, Image } from 'react-native';
 import { Button } from 'react-native-elements';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import Swipeable from 'react-native-swipeable';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { TextInput } from "react-native-gesture-handler";
 import { updateDeckInfo, retrieveDeckInfo, deleteDeck } from "../Firebase/FireMethods"
-import { updateSelectedDeck } from "./actions"
 
-class DeckSelectPage extends Component {
+export default class DeckSelectPage extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -48,6 +44,7 @@ class DeckSelectPage extends Component {
     onPressItem = (deck) => {
         const { navigate } = this.props.navigation
         this.props.updateSelectedDeck(deck)
+        this.props.dismissDeckSelectPage()
         navigate("DeckConstructorPage")
     }
 
@@ -95,13 +92,37 @@ class DeckSelectPage extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Text style={{ fontSize: 30, alignSelf: "center" }}>Deck List</Text>
-                <FlatList
-                    data={this.state.decks}
-                    renderItem={(item) => this.renderItem(item)}
-                    keyExtractor={(item, index) => index.toString()}
-                    ItemSeparatorComponent={this.FlatListItemSeparator}
-                />
+                <View style={{ flex: 3 / 4 }}>
+                    <Text style={{ fontSize: 30, alignSelf: "center" }}>Select Deck</Text>
+                    <FlatList
+                        data={this.state.decks}
+                        renderItem={(item) => this.renderItem(item)}
+                        keyExtractor={(item, index) => index.toString()}
+                        ItemSeparatorComponent={this.FlatListItemSeparator}
+                    />
+
+                </View>
+                <View style={{ flex: 1 / 4 }}>
+                    <Text style={{ fontSize: 15, alignSelf: "center" }}>—or—</Text>
+                    <Button
+                        title="Create New Deck"
+                        titleStyle={{
+                            color: 'white',
+                            fontWeight: '800',
+                            fontSize: 18
+                        }}
+                        buttonStyle={{
+                            backgroundColor: 'rgb(130, 69, 91)',
+                            marginTop: 10,
+                            borderRadius: 10,
+                            height: 50,
+                            alignSelf: "center"
+                        }}
+                        loading={false}
+                        onPress={() => this.setState({ visible: true })}
+                    />
+
+                </View>
                 <Dialog
                     visible={this.state.visible}
                     dialogTitle={<DialogTitle title="New Deck Name" />}
@@ -135,7 +156,6 @@ class DeckSelectPage extends Component {
                         </View>
                     </DialogContent>
                 </Dialog>
-
                 <Dialog
                     visible={this.state.dialogVisible}
                     dialogTitle={<DialogTitle title="Deck Name Already Taken!" />}
@@ -158,16 +178,6 @@ class DeckSelectPage extends Component {
                     }
                 >
                 </Dialog>
-
-
-
-
-
-                <View style={{ flexDirection: "row", justifyContent: "flex-start", right: 15, bottom: 15, position: "absolute" }}>
-                    <TouchableOpacity onPress={() => this.setState({ visible: true })}>
-                        <Image ref="plusButton" style={{ width: 80, height: 80, zIndex: 1 }} source={require('../assets/plus.png')} />
-                    </TouchableOpacity>
-                </View>
             </View>
         )
     }
@@ -211,14 +221,14 @@ const styles = StyleSheet.create({
 
 
 
-const mapStateToProps = (state) => {
-    const { user, cards, selectedDeck } = state
-    return { user, cards, selectedDeck }
-};
-const mapDispatchToProps = dispatch => (
-    bindActionCreators({
-        updateSelectedDeck
-    }, dispatch)
-);
+// const mapStateToProps = (state) => {
+//     const { user, cards, selectedDeck } = state
+//     return { user, cards, selectedDeck }
+// };
+// const mapDispatchToProps = dispatch => (
+//     bindActionCreators({
+//         updateSelectedDeck
+//     }, dispatch)
+// );
 
-export default connect(mapStateToProps, mapDispatchToProps)(DeckSelectPage);
+// export default connect(mapStateToProps, mapDispatchToProps)(DeckSelectPage);
