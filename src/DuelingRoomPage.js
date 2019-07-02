@@ -16,7 +16,12 @@ class DuelingRoomPage extends Component {
     render() {
         return (
             <View style={styles.container}>
-
+                <View style={{ flex: 1 / 2 }}>
+                    <Image resizeMode={"contain"} style={{ width: "100%", height: "100%" }} source={require("../assets/flippedField.png")} />
+                </View>
+                <View style={{ flex: 1 / 2 }}>
+                    <Image resizeMode={"contain"} style={{ width: "100%", height: "100%" }} source={require("../assets/field.png")} />
+                </View>
             </View>
         )
     }
@@ -36,8 +41,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFF',
-        justifyContent: 'center',
-        alignItems: 'center'
+        flexDirection: "column"
+        // justifyContent: 'center',
+        // alignItems: 'center'
     },
 });
 
