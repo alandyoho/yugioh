@@ -16,13 +16,13 @@ export default class DuelingRoomSelectPage extends Component {
     }
     hostDuel = () => {
         hostDuel(this.props.user.username)
-        this.props.navigation.navigate("DuelingRoomPage")
-        this.props.dismissDuelingRoomSelectPage()
+        // this.props.navigation.navigate("DuelingRoomPage")
+        this.props.fadeOutDuelingRoomSelectPage()
     }
     joinDuel = (obj) => {
         joinDuel(obj)
-        this.props.navigation.navigate("DuelingRoomPage")
-        this.props.dismissDuelingRoomSelectPage()
+        // this.props.navigation.navigate("DuelingRoomPage")
+        this.props.fadeOutDuelingRoomSelectPage()
     }
 
     renderItem = ({ item }) => {
@@ -89,5 +89,6 @@ const styles = StyleSheet.create({
         height: 75,
         alignItems: 'center',
         justifyContent: 'center',
+        width: "100%"
     },
 })

@@ -16,6 +16,7 @@ export default class DeckSelectPage extends Component {
             decks: null,
             currentlyOpenSwipeable: null
         }
+
     }
     async componentDidMount() {
         await this.refreshDeckInfo()

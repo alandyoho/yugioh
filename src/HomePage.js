@@ -1,12 +1,12 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Dimensions, Image, Text } from 'react-native';
+import { StyleSheet, View, Dimensions, Image, Text, Animated } from 'react-native';
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import PhotoReel from './PhotoReel';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-import { DuelingRoomSelectPage, DeckSelectPage } from "./HomePageComponents"
+import { DuelingRoomSelectPage, DeckSelectPage, DeckSelectPopup } from "./HomePageComponents"
 import { updateSelectedDeck } from "./actions"
 
 class HomePage extends Component {
@@ -14,8 +14,22 @@ class HomePage extends Component {
         super()
         this.state = {
             duelingRoomSelectPageVisible: false,
-            deckSelectPageVisible: false
+            deckSelectPageVisible: false,
+            duelingRoomSelectPageOpacity: new Animated.Value(1),
+            deckSelectPopupOpacity: new Animated.Value(0),
+            duelingRoomSelectPageZPosition: 3,
+            deckSelectPopupZPosition: 2
         }
+    }
+    fadeOutDuelingRoomSelectPage = () => {
+        Animated.timing(this.state.duelingRoomSelectPageOpacity, { toValue: 0, useNativeDriver: true, }).start();
+        Animated.timing(this.state.deckSelectPopupOpacity, { toValue: 1, useNativeDriver: true, }).start();
+        this.setState({ duelingRoomSelectPageZPosition: 2, deckSelectPopupZPosition: 3 })
+    }
+    resetState = () => {
+        Animated.timing(this.state.duelingRoomSelectPageOpacity, { toValue: 1, useNativeDriver: true, }).start();
+        Animated.timing(this.state.deckSelectPopupOpacity, { toValue: 0, useNativeDriver: true, }).start();
+        this.setState({ duelingRoomSelectPageZPosition: 3, deckSelectPopupZPosition: 2 })
     }
     render() {
         const { user, navigation, updateSelectedDeck } = this.props
@@ -85,10 +99,16 @@ class HomePage extends Component {
                     })}
                     onTouchOutside={() => {
                         this.setState({ duelingRoomSelectPageVisible: false });
+                        this.resetState()
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
-                        <DuelingRoomSelectPage user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} />
+                        <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.duelingRoomSelectPageZPosition, opacity: this.state.duelingRoomSelectPageOpacity }}>
+                            <DuelingRoomSelectPage user={user} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} fadeOutDuelingRoomSelectPage={this.fadeOutDuelingRoomSelectPage} />
+                        </Animated.View>
+                        <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity }}>
+                            <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} />
+                        </Animated.View>
                     </DialogContent>
                 </Dialog>
             </View>

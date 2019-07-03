@@ -6,3 +6,7 @@ export const updateSelectedDeck = deck => ({
     type: "UPDATE_SELECTED_DECK",
     deck
 })
+export const updateDeckList = decks => ({
+    type: "UPDATE_DECK_LIST",
+    decks
+})

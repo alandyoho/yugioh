@@ -14,7 +14,6 @@ import MultiSwitch from './rn-slider-switch';
 import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import NumericInput from 'react-native-numeric-input'
-
 class DeckConstructorPage extends Component {
     constructor(props) {
         super(props);

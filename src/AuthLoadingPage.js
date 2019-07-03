@@ -4,9 +4,10 @@ import {
     Image,
 } from 'react-native';
 import * as firebase from "firebase"
-import { createUser } from "./actions"
+import { createUser, updateDeckList } from "./actions"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { retrieveDeckInfo } from "../Firebase/FireMethods"
 
 class AuthLoadingScreen extends Component {
     constructor(props) {
@@ -22,10 +23,12 @@ class AuthLoadingScreen extends Component {
                 if (user) {
                     this.props.navigation.navigate("App")
                     this.props.createUser({ username: user.displayName, email: user.email })
+                    const { decks } = await retrieveDeckInfo(user.displayName)
+                    console.log("here are the decks", decks)
+                    this.props.updateDeckList(decks)
                 } else {
                     this.props.navigation.navigate("Auth")
                 }
-
             })
         }, 5000)
     }
@@ -48,7 +51,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
-        createUser
+        createUser, updateDeckList
     }, dispatch)
 );
 
