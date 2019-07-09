@@ -10,7 +10,7 @@ export default class DraggableCard extends Component {
             dropAreaValues: null,
             pan: new Animated.ValueXY(),
             opacity: new Animated.Value(1)
-        };
+        }
     }
 
     componentWillMount() {
@@ -30,16 +30,11 @@ export default class DraggableCard extends Component {
                 null, { dx: this.state.pan.x, dy: this.state.pan.y }
             ]),
             onPanResponderRelease: (e, gesture) => {
-                if (this.isDropArea(gesture)) {
-                    Animated.timing(this.state.opacity, {
-                        toValue: 0,
-                        duration: 1000
-                    }).start(() =>
-                        this.setState({
-                            showDraggable: false
-                        })
-                    );
-                }
+
+                Animated.spring(this.state.pan, {
+                    toValue: { x: 0, y: 0 },
+                    friction: 5
+                }).start();
             }
         });
     }
