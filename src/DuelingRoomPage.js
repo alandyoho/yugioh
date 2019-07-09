@@ -5,8 +5,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel } from "../Firebase/FireMethods"
+import { firestore } from "../Firebase/Fire"
 import { FlatList } from 'react-native-gesture-handler';
+import GameLogic from "./GameLogic"
+import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
+import CARDS from "./cards"
+import DraggableCards from "./DraggableCards";
 
 class DuelingRoomPage extends Component {
     constructor() {
@@ -14,63 +19,130 @@ class DuelingRoomPage extends Component {
         this.state = {
             selectedDeck: "",
             cards: [],
-            hand: []
+            hand: [],
+            guestBoard: {},
+            hostBoard: {},
+            waitingForOpponentPopupVisible: false,
+            opponent: ""
         }
     }
     async componentDidMount() {
+        this.setState({ waitingForOpponentPopupVisible: true })
+        const { hostedBy } = await retrieveDeckInfo(this.props.user.username)
+
+        this.listenForGameChanges(hostedBy)
+    }
+
+    listenForGameChanges = (hosted) => {
+        //figure out host's username
+        hosted == "" && (hosted = this.props.user.username)
+
+        firestore.collection("rooms").doc(hosted)
+            .onSnapshot(doc => {
+                if (doc.exists) {
+                    const { guestBoard, hostBoard, opponent } = doc.data()
+                    console.log("data", doc.data())
+                    this.setState({ guestBoard, hostBoard, opponent })
+                    if (this.state.opponent != "") {
+                        this.setState({ waitingForOpponentPopupVisible: false })
+                        this.drawCards()
+                    }
+                }
+            })
+    }
+    drawCards = async () => {
         const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
-        console.log("here are the cards", cards)
-        this.setState({ selectedDeck: this.props.selectedDeck, cards })
-        this.shuffleDeck()
-        for (let i = 0; i < 5; i++) {
-            this.drawCard()
-        }
-
+        //set the state with shuffled retrieved cards and selected deck
+        this.setState({ selectedDeck: this.props.selectedDeck, cards: GameLogic.shared.shuffleDeck(cards) })
+        //set the state with five cards 
+        this.setState({ hand: GameLogic.shared.initialDraw(this.state.cards) })
+    }
+    leaveDuel = () => {
+        leaveDuel(this.props.user.username)
+        this.props.navigation.navigate("HomePage")
     }
 
-    shuffleDeck = () => {
-        const { cards } = this.state
-        var m = cards.length, t, i;
-        while (m) {
-            i = Math.floor(Math.random() * m--);
-            t = cards[m];
-            cards[m] = cards[i];
-            cards[i] = t;
-        }
-        this.setState({ cards })
-        return cards;
-    }
-    drawCard = () => {
-        const { cards } = this.state
-        const drewCard = cards.shift()
-        this.setState({ cards, hand: [...this.state.hand, drewCard] })
-        return drewCard
-    }
     renderItem = ({ item }) => {
         return (
-            <Image source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{
-                width: 100
+            // <Image source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{
+            //     width: 100, height: 200
+            // }} />
+            <DraggableCards item={item} />
+        )
+    }
+    renderOpponentHand = () => {
+        return (
+            <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
+                width: 100, height: 200
             }} />
         )
     }
     render() {
         return (
             <View style={styles.container}>
-                <View style={{ flex: 1 / 2 }}>
+                <FlatList
+                    data={[1, 2, 3, 4, 5, 6]}
+                    renderItem={() => this.renderOpponentHand()}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal={true}
+                    scrollEnabled={false}
+                    style={{
+                        position: "absolute", top: -40, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }]
+                    }}
+
+                />
+                <View style={{ flex: 9 / 20 }}>
                     <Image resizeMode={"contain"} style={{ width: "100%", height: "100%" }} source={require("../assets/flippedField.png")} />
                 </View>
-                <View style={{ flex: 1 / 2 }}>
+                <View style={{ flex: 2 / 20, justifyContent: "center", alignItems: "center" }}>
+                    <Button
+                        title="Leave Duel"
+                        titleStyle={{
+                            color: 'white',
+                            fontWeight: '800',
+                            fontSize: 18
+                        }}
+                        buttonStyle={{
+                            backgroundColor: 'rgb(130, 69, 91)',
+                            borderRadius: 10,
+                            width: Dimensions.get("window").width - 64,
+                            height: 50,
+                        }}
+                        loading={false}
+                        onPress={this.leaveDuel}
+                    />
+                </View>
+                <View style={{ flex: 9 / 20 }}>
+
                     <Image resizeMode={"contain"} style={{ width: "100%", height: "100%" }} source={require("../assets/field.png")} />
                 </View>
-                <Animated.View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200 }}
+
+                <FlatList
+                    data={this.state.hand}
+                    renderItem={(item) => this.renderItem(item)}
+                    keyExtractor={(item, index) => index.toString()}
+                    horizontal={true}
+                    contentContainerStyle={{ justifyContent: "center", alignItems: "flex-end" }}
+                    style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%" }}
+                />
+
+
+                <Dialog
+                    visible={this.state.waitingForOpponentPopupVisible}
+                    width={0.85}
+                    height={0.40}
+                    dialogAnimation={new ScaleAnimation({
+                        initialValue: 0, // optional
+                        useNativeDriver: true, // optional
+                    })}
                 >
-                    <FlatList
-                        data={this.state.hand}
-                        renderItem={(item) => this.renderItem(item)}
-                        keyExtractor={(item, index) => index.toString()}
-                        horizontal={true}
-                    />
-                </Animated.View>
+                    <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '800' }}>Waiting for opponent...</Text>
+                            <Image source={require("../assets/yugi-loading.gif")} resizeMode="contain" />
+                        </View>
+                    </DialogContent>
+                </Dialog>
             </View>
         )
     }

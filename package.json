@@ -17,6 +17,7 @@
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-coverflow": "^0.1.7",
+    "react-native-draggable": "^1.0.15",
     "react-native-elements": "^1.1.0",
     "react-native-gifted-form": "^0.1.1",
     "react-native-keyboard-spacer": "^0.4.1",

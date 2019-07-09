@@ -6,6 +6,8 @@ import userReducer from './src/reducer';
 import { Platform } from 'react-native'
 import AuthLoadingScreen from "./src/AuthLoadingPage"
 import { createSwitchNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
+import { StatusBar } from 'react-native';
+import DraggableCards from "./src/DraggableCards"
 
 const AppStack = createStackNavigator({
   HomePage: {
@@ -21,9 +23,11 @@ const AppStack = createStackNavigator({
     }
   },
   DuelingRoomPage: {
-    screen: DuelingRoomPage, 
+    screen: DuelingRoomPage,
     navigationOptions: {
-      header: null
+      header: null,
+      gesturesEnabled: false,
+
     }
   }
 });
@@ -56,7 +60,10 @@ export default class App extends Component {
     ));
 
   }
+  componentDidMount() {
+    StatusBar.setHidden(true);
 
+  }
   render() {
     return (
       <Provider store={store}>

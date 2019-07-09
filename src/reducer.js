@@ -1,5 +1,5 @@
 
-const INITIAL_STATE = { user: {}, decks: [], selectedDeck: "" };
+const INITIAL_STATE = { user: {}, decks: [], selectedDeck: "", hostName: "" };
 
 export default reducer = (state = INITIAL_STATE, action) => {
     const newState = { ...state }
@@ -11,9 +11,10 @@ export default reducer = (state = INITIAL_STATE, action) => {
             newState.decks = action.decks
             return newState
         case "UPDATE_SELECTED_DECK":
-            console.log("updating the selected deck!", action.deck)
             newState.selectedDeck = action.deck
             return newState
+        case "UPDATE_HOST_NAME":
+            newState.hostName = action.hostName
         default:
             return newState
     }

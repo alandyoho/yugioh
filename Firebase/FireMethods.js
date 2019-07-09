@@ -4,7 +4,7 @@ import NumericInput from 'react-native-numeric-input'
 
 
 const updateUserInfo = (obj) => {
-    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username }, { merge: true })
+    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "" }, { merge: true })
     var authUser = auth.currentUser;
     authUser.updateProfile({
         displayName: obj.username
@@ -118,15 +118,45 @@ const retrieveCardsFromDeck = (obj) => {
 
 
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ host: obj, guest: "" })
+    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { hand: 0, st: [], m1: [], m2: [], }, guestBoard: { hand: 0, st: [], m1: [], m2: [], } })
+    firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
+
 const returnAvailableDuels = async (requestId) => {
     const snapshot = await firebase.firestore().collection('rooms').get()
     return snapshot.docs.map(doc => doc.id).filter(id => id != requestId)
 }
 const joinDuel = (obj) => {
-    firestore.collection("rooms").doc(obj.hostUsername).update({ guest: obj.username })
+    firestore.collection("rooms").doc(obj.hostUsername).set({ opponent: obj.username }, { merge: true })
+    firestore.collection("users").doc(obj.username).set({ hostedBy: obj.hostUsername }, { merge: true })
 }
 
+const leaveDuel = async (obj) => {
+    console.log("function triggered")
+    firestore.collection("users").doc(obj).set({ hostedBy: "", hosting: false }, { merge: true })
+    //find out if is primary host
+    const { opponent } = await firestore.collection("rooms").doc(obj).get().then(function (doc) {
+        if (doc.exists) {
+            return doc.data()
+        } else {
+            return { opponent: "doc doesn't exists" }
+        }
+    }
+    )
 
-export { updateUserInfo, updateDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel }
+    if (obj == opponent) {
+        console.log("not hosting the room")
+
+    } else {
+        console.log("hosting the room")
+        firestore.collection("rooms").doc(obj).delete()
+    }
+
+    //if so, delete room entry from firebase as well
+}
+
+const listenForBoardUpdates = (obj) => {
+    return firestore.collection("rooms").doc(obj).onSnapshot(function (doc) { return doc.data() })
+}
+
+export { updateUserInfo, updateDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel }

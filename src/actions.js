@@ -10,3 +10,8 @@ export const updateDeckList = decks => ({
     type: "UPDATE_DECK_LIST",
     decks
 })
+
+export const updateHostName = host => ({
+    type: "UPDATE_HOST_NAME",
+    host
+})
