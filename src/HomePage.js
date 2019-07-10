@@ -93,6 +93,7 @@ class HomePage extends Component {
                     visible={duelingRoomSelectPageVisible}
                     width={0.85}
                     height={0.40}
+
                     dialogAnimation={new ScaleAnimation({
                         initialValue: 0, // optional
                         useNativeDriver: true, // optional

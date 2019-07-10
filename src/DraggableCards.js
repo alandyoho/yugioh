@@ -15,11 +15,15 @@ export default class DraggableCard extends Component {
 
     componentWillMount() {
         this._val = { x: 0, y: 0 }
-        this.state.pan.addListener((value) => this._val = value);
+        this.state.pan.addListener((value) => {
+            this._val = value
+            console.log("current location", value)
+        });
 
         this.panResponder = PanResponder.create({
             onStartShouldSetPanResponder: (e, gesture) => true,
             onPanResponderGrant: (e, gesture) => {
+
                 this.state.pan.setOffset({
                     x: this._val.x,
                     y: this._val.y
@@ -37,6 +41,21 @@ export default class DraggableCard extends Component {
                 }).start();
             }
         });
+    }
+    closestSpot = (location) => {
+        const monsterZones = [{
+            "x": 30.66667175292969,
+            "y": -132,
+        }, {
+            "x": -12,
+            "y": -132,
+        }, {
+            "x": -65,
+            "y": -132,
+        },
+
+
+        ]
     }
 
     isDropArea(gesture) {
