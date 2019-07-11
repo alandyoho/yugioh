@@ -4,7 +4,7 @@ import NumericInput from 'react-native-numeric-input'
 
 
 const updateUserInfo = (obj) => {
-    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "" }, { merge: true })
+    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "", hosting: false }, { merge: true })
     var authUser = auth.currentUser;
     authUser.updateProfile({
         displayName: obj.username
@@ -66,8 +66,9 @@ const removeCardsFromDeck = async (obj) => {
     //else
     //decrement quantity property by 1
 }
-const addCardToBoard = async (obj) => {
 
+const addCardToBoard = async (obj) => {
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
 const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
@@ -88,7 +89,6 @@ const addCardsToDeck = async (obj) => {
         firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
             "cards": firebase.firestore.FieldValue.arrayUnion(filt[0])
         })
-
     } else {
         obj.card.quantity = 1
         return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
@@ -106,22 +106,8 @@ const retrieveCardsFromDeck = (obj) => {
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
 
-
-
-
-//user navigates to dueling room
-//user can either: 
-//(a) host a duel
-//create cloud function that creates a new document in rooms collection
-//document name is host username
-//document data is: {host: hostUsername, guest: guestUsername}
-//)(b) join a duel
-//create cloud function that returns all document id's in rooms collection 
-//create cloud function that updates "guest" property in document to username
-
-
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { hand: 0, st: [], m1: [], m2: [], }, guestBoard: { hand: 0, st: [], m1: [], m2: [], } })
+    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], }, guestBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], } })
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 
