@@ -13,7 +13,7 @@ export default class DeckSelectPopup extends Component {
             visible: false,
             dialogVisible: false,
             deckName: "",
-            decks: null,
+            decks: [],
             currentlyOpenSwipeable: null
         }
     }
@@ -58,13 +58,17 @@ export default class DeckSelectPopup extends Component {
         const { decks } = this.state
         return (
             <View style={styles.container}>
-                <Text style={{ fontSize: 30, alignSelf: "center" }}>Select Deck</Text>
-                <FlatList
-                    data={decks}
-                    renderItem={(item) => this.renderItem(item)}
-                    keyExtractor={(item, index) => index.toString()}
-                    ItemSeparatorComponent={this.FlatListItemSeparator}
-                />
+                {this.state.decks.length ?
+                    <React.Fragment>
+                        <Text style={{ fontSize: 30, alignSelf: "center" }}>Select Deck</Text>
+                        <FlatList
+                            data={decks}
+                            renderItem={(item) => this.renderItem(item)}
+                            keyExtractor={(item, index) => index.toString()}
+                            ItemSeparatorComponent={this.FlatListItemSeparator}
+                        />
+                    </React.Fragment>
+                    : <Text style={{ fontSize: 30, alignSelf: "center" }}>No Saved Decks!</Text>}
             </View>
         )
     }

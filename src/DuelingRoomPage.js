@@ -30,15 +30,22 @@ class DuelingRoomPage extends Component {
             cardOptionsPresented: {},
             handZIndex: 0,
             handOpacity: new Animated.Value(1),
-            boardsRetrieved: false
+            boardsRetrieved: false,
+            backgroundImageUrl: false
         }
     }
     async componentDidMount() {
+
+        const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png")]
+        const randomNum = this.getRandomInt()
+        this.setState({ backgroundImageUrl: backgroundImages[randomNum] })
+
+
         this.setState({ waitingForOpponentPopupVisible: true })
         const { hostedBy, hosting } = await retrieveDeckInfo(this.props.user.username)
         this.listenForGameChanges({ hostedBy: hostedBy, hosting: hosting })
     }
-    fadeOutHand = () => {
+    fadeOutHand = (type) => {
         Animated.timing(this.state.handOpacity, { toValue: 0, useNativeDriver: true, }).start();
         this.setState({ handZIndex: -1, cardPopupVisible: false })
     }
@@ -73,11 +80,13 @@ class DuelingRoomPage extends Component {
         const board = location[0]
         const cardZone = location[1]
         const cardZoneIndex = location[2]
+
         if ((cardZone == "st" && cardOptionsPresented.type.includes("Monster")) || (cardZone == "m1" && cardOptionsPresented.type.includes("Spell"))) {
             this.fadeInHand()
             return
         }
         let boardCopy = { ...this.state[board] }
+
         boardCopy[cardZone][cardZoneIndex] = { card: cardOptionsPresented, exists: true }
         this.setState({ [board]: boardCopy, hand: [...this.state.hand.filter(card => card.id != cardOptionsPresented.id)] })
         this.fadeInHand()
@@ -122,11 +131,18 @@ class DuelingRoomPage extends Component {
             }} />
         )
     }
+    getRandomInt = () => {
+        return Math.floor(Math.random() * Math.floor(7));
+    }
     render() {
+        const { backgroundImageUrl } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         return (
             <View style={styles.container}>
+                <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
+                    {backgroundImageUrl && <Image source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
+                </View>
                 <FlatList
                     data={[1, 2, 3, 4, 5, 6]}
                     renderItem={this.renderOpponentHand}
@@ -143,48 +159,48 @@ class DuelingRoomPage extends Component {
                     <View style={{ flex: 1, flexDirection: "row" }}>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} >
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
                         </TouchableOpacity>
                         {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} >
+                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
                                 {this.state.boardsRetrieved && this.state[opponentBoard].m1[cardIndex].exists && <Image source={{ uri: this.state[opponentBoard].m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                             </TouchableOpacity>
                         ))}
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} >
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
                     </View>
@@ -209,7 +225,7 @@ class DuelingRoomPage extends Component {
                         buttonStyle={{
                             backgroundColor: 'rgb(130, 69, 91)',
                             borderRadius: 10,
-                            width: Dimensions.get("window").width - 64,
+                            width: 310,
                             height: 50,
                         }}
                         loading={false}
@@ -221,48 +237,48 @@ class DuelingRoomPage extends Component {
                     <View style={{ flex: 1, flexDirection: "row" }}>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null }}>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} >
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
                         </TouchableOpacity>
                         {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} onPress={() => this.addCardToBoard([properBoard, "m1", cardIndex])}>
+                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} onPress={() => this.addCardToBoard([properBoard, "m1", cardIndex])}>
                                 {this.state.boardsRetrieved && this.state[properBoard].m1[cardIndex].exists && <Image source={{ uri: this.state[properBoard].m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                             </TouchableOpacity>
                         ))}
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }} >
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 5 }}>
+                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
                     </View>
@@ -276,7 +292,7 @@ class DuelingRoomPage extends Component {
                         keyExtractor={(item, index) => index.toString()}
                         horizontal={true}
                         contentContainerStyle={{ justifyContent: "center", alignItems: "flex-end" }}
-                        style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "45%" }}
+                        style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%" }}
                     />
                 </Animated.View>
                 <Dialog
@@ -321,13 +337,13 @@ class DuelingRoomPage extends Component {
                             <TouchableOpacity>
                                 <Text>Examine</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={this.fadeOutHand}>
+                            <TouchableOpacity onPress={() => this.fadeOutHand("Normal")}>
                                 <Text>Normal Summon</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={this.fadeOutHand}>
+                            <TouchableOpacity onPress={() => this.fadeOutHand("Special")}>
                                 <Text>Special Summon</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
                                 <Text>Set</Text>
                             </TouchableOpacity>
                         </View>

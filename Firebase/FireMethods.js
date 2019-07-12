@@ -130,16 +130,16 @@ const leaveDuel = async (obj) => {
         } else {
             return { opponent: "doc doesn't exists" }
         }
-    }
-    )
-
+    })
     if (obj == opponent) {
         console.log("not hosting the room")
-
     } else {
         console.log("hosting the room")
         firestore.collection("rooms").doc(obj).delete()
     }
+
+
+
 
     //if so, delete room entry from firebase as well
 }

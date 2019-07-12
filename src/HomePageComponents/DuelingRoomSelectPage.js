@@ -45,13 +45,17 @@ export default class DuelingRoomSelectPage extends Component {
         return (
             <View style={styles.container}>
                 <View style={{ flex: 3 / 4 }}>
-                    <Text style={{ fontSize: 30, alignSelf: "center" }}>Join Room</Text>
-                    <FlatList
-                        data={this.state.rooms}
-                        renderItem={(item) => this.renderItem(item)}
-                        keyExtractor={(item, index) => index.toString()}
-                        ItemSeparatorComponent={this.FlatListItemSeparator}
-                    />
+                    {this.state.rooms.length ?
+                        <React.Fragment>
+                            <Text style={{ fontSize: 30, alignSelf: "center" }}>Join Room</Text>
+                            <FlatList
+                                data={this.state.rooms}
+                                renderItem={(item) => this.renderItem(item)}
+                                keyExtractor={(item, index) => index.toString()}
+                                ItemSeparatorComponent={this.FlatListItemSeparator}
+                            />
+                        </React.Fragment>
+                        : <Text style={{ fontSize: 30, alignSelf: "center" }}>No Available Rooms</Text>}
                 </View>
                 <View style={{ flex: 1 / 4 }}>
                     <Text style={{ fontSize: 15, alignSelf: "center" }}>—or—</Text>
