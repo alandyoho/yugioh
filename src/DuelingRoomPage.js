@@ -27,7 +27,7 @@ class DuelingRoomPage extends Component {
             opponent: "",
             hosting: null,
             cardPopupVisible: false,
-            cardOptionsPresented: {},
+            cardOptionsPresented: false,
             handZIndex: 0,
             handOpacity: new Animated.Value(1),
             boardsRetrieved: false,
@@ -108,7 +108,7 @@ class DuelingRoomPage extends Component {
         this.props.navigation.navigate("HomePage")
     }
     presentCardOptions = (card) => {
-        this.setState({ cardPopupVisible: true, cardOptionsPresented: card })
+        this.setState({ cardOptionsPresented: card, cardPopupVisible: true })
     }
     summonMonster = () => {
         this.fadeInHand()
@@ -263,21 +263,11 @@ class DuelingRoomPage extends Component {
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                            {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                            {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                            {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                            {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                            {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
-                        </TouchableOpacity>
+                        {[1, 2, 3, 4, 5].map(cardIndex => (
+                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} onPress={() => this.addCardToBoard([properBoard, "st", cardIndex])}>
+                                {this.state.boardsRetrieved && this.state[properBoard].st[cardIndex].exists && <Image source={{ uri: this.state[properBoard].st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                            </TouchableOpacity>
+                        ))}
                         <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
                             {/* <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> */}
                         </TouchableOpacity>
@@ -334,18 +324,35 @@ class DuelingRoomPage extends Component {
 
                     <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
-                            <TouchableOpacity>
-                                <Text>Examine</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.fadeOutHand("Normal")}>
-                                <Text>Normal Summon</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.fadeOutHand("Special")}>
-                                <Text>Special Summon</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
-                                <Text>Set</Text>
-                            </TouchableOpacity>
+                            {this.state.cardOptionsPresented && this.state.cardOptionsPresented.type.includes("Monster") ?
+                                <React.Fragment>
+                                    <TouchableOpacity>
+                                        <Text>Examine</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => this.fadeOutHand("Normal")}>
+                                        <Text>Normal Summon</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => this.fadeOutHand("Special")}>
+                                        <Text>Special Summon</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
+                                        <Text>Set</Text>
+                                    </TouchableOpacity>
+                                </React.Fragment>
+                                :
+                                <React.Fragment>
+
+                                    <TouchableOpacity>
+                                        <Text>Examine</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => this.fadeOutHand("Activate")}>
+                                        <Text>Activate</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
+                                        <Text>Set</Text>
+                                    </TouchableOpacity>
+                                </React.Fragment>
+                            }
                         </View>
                     </DialogContent>
                 </Dialog>
