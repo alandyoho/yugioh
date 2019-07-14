@@ -70,6 +70,7 @@ const removeCardsFromDeck = async (obj) => {
 const addCardToBoard = async (obj) => {
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
+
 const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 

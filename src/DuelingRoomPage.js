@@ -12,6 +12,7 @@ import GameLogic from "./GameLogic"
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import CARDS from "./cards"
 import DraggableCards from "./DraggableCards";
+import { OpponentBoard, OpponentHand, RoomHostBoard, RoomHostHand, DuelingRoomDialogs } from "./DuelingRoomPageComponents"
 
 class DuelingRoomPage extends Component {
     constructor() {
@@ -52,6 +53,9 @@ class DuelingRoomPage extends Component {
         Animated.timing(this.state.handOpacity, { toValue: 1, useNativeDriver: true, }).start();
         this.setState({ handZIndex: 1 })
     }
+    dismissCardPopup = () => {
+        this.setState({ cardPopupVisible: false, cardOptionsPresented: false });
+    }
 
 
     listenForGameChanges = (obj) => {
@@ -75,6 +79,7 @@ class DuelingRoomPage extends Component {
                 }
             })
     }
+
     addCardToBoard = async (location) => {
 
         const { cardOptionsPresented } = this.state
@@ -122,7 +127,6 @@ class DuelingRoomPage extends Component {
     }
     summonMonster = () => {
         this.fadeInHand()
-        //find s
     }
     renderItem = ({ item }) => {
         return (
@@ -145,7 +149,7 @@ class DuelingRoomPage extends Component {
         return Math.floor(Math.random() * Math.floor(7));
     }
     render() {
-        const { backgroundImageUrl } = this.state
+        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         return (
@@ -153,59 +157,12 @@ class DuelingRoomPage extends Component {
                 <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
                     {backgroundImageUrl && <Image source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
                 </View>
-                <FlatList
-                    data={[1, 2, 3, 4, 5, 6]}
-                    renderItem={this.renderOpponentHand}
-                    keyExtractor={(item, index) => index.toString()}
-                    horizontal={true}
-                    scrollEnabled={false}
-                    style={{
-                        position: "absolute", top: -80, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }]
-                    }}
-                />
+                <OpponentHand renderOpponentHand={this.renderOpponentHand} />
                 <View style={{ flex: 2 / 20 }}>
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
-                        </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
-                                {this.state.boardsRetrieved && this.state[opponentBoard].m1[cardIndex].exists && <Image source={{ uri: this.state[opponentBoard].m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            </TouchableOpacity>
-                        ))}
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }}>
-                        </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} onPress={() => this.addCardToBoard([opponentBoard, "st", cardIndex])}>
-                                {this.state.boardsRetrieved && this.state[opponentBoard].st[cardIndex].exists && <Image source={{ uri: this.state[opponentBoard].st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            </TouchableOpacity>
-                        ))}
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
-                            <ImageBackground source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: "100%", height: "100%" }} >
-                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: "transparent" }}>
-                                    <Text style={{ color: "#FFF" }} >40</Text>
-                                </View>
-                            </ImageBackground>
-                        </TouchableOpacity>
-                    </View>
+                    <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} />
                 </View>
-
-
-
-
-
-
-
-
                 <View style={{ flex: 2 / 20, justifyContent: "center", alignItems: "center" }}>
                     <Button
                         title="Leave Duel"
@@ -224,126 +181,14 @@ class DuelingRoomPage extends Component {
                         loading={false}
                         onPress={this.leaveDuel}
                     />
-
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
-                        </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} disabled={this.state.boardsRetrieved && this.state[properBoard].m1[cardIndex].exists} onPress={() => this.addCardToBoard([properBoard, "m1", cardIndex])}>
-                                {this.state.boardsRetrieved && this.state[properBoard].m1[cardIndex].exists && <Image source={{ uri: this.state[properBoard].m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            </TouchableOpacity>
-                        ))}
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
-                        </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} disabled={this.state.boardsRetrieved && this.state[properBoard].st[cardIndex].exists} onPress={() => this.addCardToBoard([properBoard, "st", cardIndex])}>
-                                {this.state.boardsRetrieved && this.state[properBoard].st[cardIndex].exists && <Image source={{ uri: this.state[properBoard].st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            </TouchableOpacity>
-                        ))}
-
-
-                        <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2, justifyContent: "center", alignItems: "center" }} onPress={this.drawCard} >
-                            {this.state.cards.length && <ImageBackground source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: "100%", height: "100%" }} >
-                                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: "transparent" }}>
-
-                                    <Text style={{ color: "#FFF" }} >40</Text>
-                                </View>
-                            </ImageBackground>}
-                        </TouchableOpacity>
-                    </View>
+                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} />
                 </View>
                 <View style={{ flex: 4 / 20 }}>
                 </View>
-                <Animated.View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, opacity: this.state.handOpacity, zIndex: this.state.handZIndex }}>
-                    <FlatList
-                        data={this.state.hand}
-                        renderItem={(item) => this.renderItem(item)}
-                        keyExtractor={(item, index) => index.toString()}
-                        horizontal={true}
-                        style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200 }}
-                    />
-                </Animated.View>
-                <Dialog
-                    visible={this.state.waitingForOpponentPopupVisible}
-                    width={0.85}
-                    height={0.40}
-                    dialogAnimation={new ScaleAnimation({
-                        initialValue: 0, // optional
-                        useNativeDriver: true, // optional
-                    })}
-                >
-                    <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
-                            <Text style={{ fontSize: 20, fontWeight: '800' }}>Waiting for opponent...</Text>
-                            <Image source={require("../assets/yugi-loading.gif")} resizeMode="contain" />
-                        </View>
-                    </DialogContent>
-                </Dialog>
-
-                <Dialog
-                    visible={this.state.cardPopupVisible}
-                    width={0.40}
-                    height={0.10}
-                    dialogAnimation={new SlideAnimation({
-                        slideFrom: 'bottom',
-                    })}
-                    onTouchOutside={() => {
-
-                        this.setState({ cardPopupVisible: false, cardOptionsPresented: false });
-                    }}
-                    overlayOpacity={0}
-                    dialogStyle={{ position: 'absolute', bottom: 180 }}
-                >
-
-                    <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
-                            {this.state.cardOptionsPresented && this.state.cardOptionsPresented.type.includes("Monster") ?
-                                <React.Fragment>
-                                    <TouchableOpacity>
-                                        <Text>Examine</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => this.fadeOutHand("Normal")}>
-                                        <Text>Normal Summon</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => this.fadeOutHand("Special")}>
-                                        <Text>Special Summon</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
-                                        <Text>Set</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity>
-                                        <Text>Send to Graveyard</Text>
-                                    </TouchableOpacity>
-                                </React.Fragment>
-                                :
-                                <React.Fragment>
-                                    <TouchableOpacity>
-                                        <Text>Examine</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => this.fadeOutHand("Activate")}>
-                                        <Text>Activate</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => this.fadeOutHand("Set")}>
-                                        <Text>Set</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity>
-                                        <Text>Send to Graveyard</Text>
-                                    </TouchableOpacity>
-                                </React.Fragment>
-                            }
-                        </View>
-                    </DialogContent>
-                </Dialog>
+                <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} />
             </View>
         )
     }
