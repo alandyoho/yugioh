@@ -7,9 +7,8 @@ import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
 import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, addCardToBoard } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
-import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
-import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import CARDS from "./cards"
 import DraggableCards from "./DraggableCards";
 import { OpponentBoard, OpponentHand, RoomHostBoard, RoomHostHand, DuelingRoomDialogs } from "./DuelingRoomPageComponents"

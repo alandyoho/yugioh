@@ -1,9 +1,9 @@
 import React, { Component } from "react"
-import { View, Image, Text } from 'react-native';
+import { View, Image, Text, Dimensions } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, examinePopupVisible, selectedCardOnField }) => {
     return (
         <React.Fragment>
             <Dialog
@@ -76,6 +76,49 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     </View>
                 </DialogContent>
             </Dialog>
+
+            {/* 
+
+
+
+            <Dialog
+                    containerStyle={{ backgroundColor: "transparent" }}
+                    dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
+                    visible={examinePopupVisible}
+                    overlayOpacity={0}
+                    onTouchOutside={() => {
+                        dismissCardPopup()
+                    }}
+                    dialogAnimation={new ScaleAnimation({
+                        initialValue: 0, // optional
+                        useNativeDriver: true, // optional
+                    })}
+                    width={Dimensions.get("window").width * 0.9}
+                    height={Dimensions.get("window").height * 0.9}
+                >
+                    <DialogContent>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+
+                            <TouchableOpacity onPress={() => dismissCardPopup()}>
+                                {selectedCardOnField && <Image
+                                    source={{ uri: selectedCardOnField["card_images"][0]["image_url"] }}
+                                    resizeMode="contain"
+                                    style={{
+                                        height: Dimensions.get("window").height * 0.70,
+                                        width: Dimensions.get("window").width * 0.70
+                                    }}
+                                />}
+                            </TouchableOpacity>
+
+                        </View>
+                    </DialogContent>
+                </Dialog> */}
+
+
+
+
+
+
         </React.Fragment>
     )
 
