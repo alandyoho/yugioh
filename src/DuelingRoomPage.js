@@ -31,7 +31,8 @@ class DuelingRoomPage extends Component {
             handZIndex: 10,
             handOpacity: new Animated.Value(1),
             boardsRetrieved: false,
-            backgroundImageUrl: false
+            backgroundImageUrl: false,
+            requestType: "",
         }
     }
     async componentDidMount() {
@@ -46,19 +47,19 @@ class DuelingRoomPage extends Component {
     }
     fadeOutHand = (type) => {
         Animated.timing(this.state.handOpacity, { toValue: 0, useNativeDriver: true, }).start();
-        this.setState({ handZIndex: -1, cardPopupVisible: false })
+        this.setState({ handZIndex: -1, cardPopupVisible: false, requestType: type })
     }
     fadeInHand = () => {
         Animated.timing(this.state.handOpacity, { toValue: 1, useNativeDriver: true, }).start();
         this.setState({ handZIndex: 1 })
     }
-    dismissCardPopup = () => {
-        this.setState({ cardPopupVisible: false, cardOptionsPresented: false });
+    dismissCardPopup = (type) => {
+        this.setState({ requestType: type, cardPopupVisible: false, cardOptionsPresented: false });
+        return true
     }
 
 
     listenForGameChanges = (obj) => {
-        console.log("hosted username", obj.hostedBy)
         if (obj.hostedBy == "") {
             obj.hostedBy = this.props.user.username
         }
@@ -81,26 +82,44 @@ class DuelingRoomPage extends Component {
 
     addCardToBoard = async (location) => {
 
-        const { cardOptionsPresented } = this.state
+        const { cardOptionsPresented, requestType } = this.state
         if (cardOptionsPresented == false) {
             return
+        }
+        let cardDetails;
+        if (requestType === "Set-ST") {
+            cardDetails = { ...cardOptionsPresented, set: true }
+        } else if (requestType === "Normal" || requestType === "Special") {
+            cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Set-Monster") {
+            cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Send-To-Graveyard") {
+            cardDetails = { ...cardOptionsPresented }
+        } else {
+            cardDetails = { ...cardOptionsPresented }
         }
         const board = location[0]
         const cardZone = location[1]
         const cardZoneIndex = location[2]
 
-        if ((cardZone == "st" && cardOptionsPresented.type.includes("Monster")) || (cardZone == "m1" && cardOptionsPresented.type.includes("Spell"))) {
+        if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
             this.fadeInHand()
             return
         }
         let boardCopy = { ...this.state[board] }
+        if (cardZone == "graveyard") {
+            boardCopy[cardZone].push(cardDetails)
+        } else {
+            boardCopy[cardZone][cardZoneIndex] = { card: cardDetails, exists: true }
+        }
+        const filteredHand = [...this.state.hand]
+        filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
 
-        boardCopy[cardZone][cardZoneIndex] = { card: cardOptionsPresented, exists: true }
-        this.setState({ [board]: boardCopy, hand: [...this.state.hand.filter(card => card.id != cardOptionsPresented.id)], cardOptionsPresented: false })
+        this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
         this.fadeInHand()
-        console.log("hosting? ", this.state.hosting)
         await addCardToBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
     }
+
     initialDraw = async () => {
         const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         //set the state with shuffled retrieved cards and selected deck
@@ -109,7 +128,6 @@ class DuelingRoomPage extends Component {
         //set the state with five cards 
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.cards)
         this.setState({ hand: drawnCards, cards: shallowCards })
-        console.log("state after draw", this.state.hand)
     }
     drawCard = () => {
         if (this.state.cards.length) {
@@ -127,6 +145,7 @@ class DuelingRoomPage extends Component {
     summonMonster = () => {
         this.fadeInHand()
     }
+
     renderItem = ({ item }) => {
         return (
             <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => this.presentCardOptions(item)}>
@@ -187,7 +206,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} />
             </View>
         )
     }

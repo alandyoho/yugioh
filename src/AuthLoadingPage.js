@@ -24,7 +24,6 @@ class AuthLoadingScreen extends Component {
                     this.props.navigation.navigate("App")
                     this.props.createUser({ username: user.displayName, email: user.email })
                     const { decks } = await retrieveDeckInfo(user.displayName)
-                    console.log("here are the decks", decks)
                     this.props.updateDeckList(decks)
                 } else {
                     this.props.navigation.navigate("Auth")

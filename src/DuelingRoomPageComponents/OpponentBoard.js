@@ -16,6 +16,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
+                    {boardsRetrieved == true && opponentBoard.graveyard.length > 0 && <Image source={{ uri: opponentBoard.graveyard[opponentBoard.graveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>
 
@@ -24,7 +25,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
                     <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} >
-                        {boardsRetrieved && opponentBoard.st[cardIndex].exists && <Image source={{ uri: opponentBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                        {boardsRetrieved == true && opponentBoard.st[cardIndex].exists && (opponentBoard.st[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> : <Image source={{ uri: opponentBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >

@@ -68,6 +68,7 @@ const removeCardsFromDeck = async (obj) => {
 }
 
 const addCardToBoard = async (obj) => {
+    console.log("should contain graveyard cards", obj.zone)
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
 
@@ -91,6 +92,7 @@ const addCardsToDeck = async (obj) => {
             "cards": firebase.firestore.FieldValue.arrayUnion(filt[0])
         })
     } else {
+        obj.card.set = false
         obj.card.quantity = 1
         return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
             "cards": firebase.firestore.FieldValue.arrayUnion(obj.card)
@@ -106,7 +108,7 @@ const retrieveCardsFromDeck = (obj) => {
 }
 
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], }, guestBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], } })
+    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], graveyard: [] }, guestBoard: { hand: 0, st: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m1: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], m2: [{ card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }, { card: { exists: false } }], graveyard: [] } })
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 

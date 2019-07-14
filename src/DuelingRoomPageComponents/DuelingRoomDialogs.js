@@ -2,8 +2,9 @@ import React, { Component } from "react"
 import { View, Image, Text, Dimensions } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
+import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, examinePopupVisible, selectedCardOnField }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, examinePopupVisible, selectedCardOnField, board, addCardToBoard }) => {
     return (
         <React.Fragment>
             <Dialog
@@ -31,7 +32,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     slideFrom: 'bottom',
                 })}
                 onTouchOutside={() => {
-                    dismissCardPopup()
+                    dismissCardPopup("")
                 }}
                 overlayOpacity={0}
                 dialogStyle={{ position: 'absolute', bottom: 180 }}
@@ -50,10 +51,10 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 <TouchableOpacity onPress={() => fadeOutHand("Special")}>
                                     <Text>Special Summon</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => fadeOutHand("Set")}>
+                                <TouchableOpacity onPress={() => fadeOutHand("Set-Monster")}>
                                     <Text>Set</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => dismissCardPopup("Send-To-Graveyard") && addCardToBoard([board, "graveyard", 1])}>
                                     <Text>Send to Graveyard</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
@@ -65,10 +66,10 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 <TouchableOpacity onPress={() => fadeOutHand("Activate")}>
                                     <Text>Activate</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => fadeOutHand("Set")}>
+                                <TouchableOpacity onPress={() => fadeOutHand("Set-ST")}>
                                     <Text>Set</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => dismissCardPopup("Send-To-Graveyard") && addCardToBoard([board, "graveyard", 1])}>
                                     <Text>Send to Graveyard</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
