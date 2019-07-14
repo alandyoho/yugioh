@@ -12,7 +12,10 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
                     <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} >
-                        {boardsRetrieved && opponentBoard.m1[cardIndex].exists && <Image source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+
+                        {boardsRetrieved == true && opponentBoard.m1[cardIndex].exists && (opponentBoard.m1[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <Image source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
+
+
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >

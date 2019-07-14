@@ -92,7 +92,7 @@ class DuelingRoomPage extends Component {
         } else if (requestType === "Normal" || requestType === "Special") {
             cardDetails = { ...cardOptionsPresented }
         } else if (requestType === "Set-Monster") {
-            cardDetails = { ...cardOptionsPresented }
+            cardDetails = { ...cardOptionsPresented, set: true }
         } else if (requestType === "Send-To-Graveyard") {
             cardDetails = { ...cardOptionsPresented }
         } else {
