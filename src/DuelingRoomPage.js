@@ -209,8 +209,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         flexDirection: "column",
         justifyContent: "center",
-        // justifyContent: 'center',
-        // alignItems: 'center'
     },
 });
 

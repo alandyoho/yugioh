@@ -102,8 +102,6 @@ const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
 const retrieveCardsFromDeck = (obj) => {
-    console.log("retrieving the cards...")
-    console.log("username", obj.username, "deck", obj.deck)
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
 
@@ -122,7 +120,6 @@ const joinDuel = (obj) => {
 }
 
 const leaveDuel = async (obj) => {
-    console.log("function triggered")
     firestore.collection("users").doc(obj).set({ hostedBy: "", hosting: false }, { merge: true })
     //find out if is primary host
     const { opponent } = await firestore.collection("rooms").doc(obj).get().then(function (doc) {

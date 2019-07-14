@@ -1,17 +1,27 @@
+
 class GameLogic {
     constructor() {
 
     }
     shuffleDeck = (cards) => {
         // const shallowCards = [...cards]
-        var m = cards.length, t, i;
+        const expandedCards = []
+        for (let i = 0; i < cards.length; i++) {
+            const cardQuantity = cards[i].quantity
+            for (let a = 0; a < cardQuantity; a++) {
+                console.log("card,", cards[i])
+                expandedCards.push(cards[i])
+            }
+        }
+        var m = expandedCards.length, t, i;
         while (m) {
             i = Math.floor(Math.random() * m--);
-            t = cards[m];
-            cards[m] = cards[i];
-            cards[i] = t;
+            t = expandedCards[m];
+            expandedCards[m] = expandedCards[i];
+            expandedCards[i] = t;
         }
-        return cards;
+        console.log("expanded Cards", expandedCards)
+        return expandedCards;
     }
     drawCard = (cards) => {
         const shallowCards = [...cards]
