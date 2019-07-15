@@ -35,7 +35,8 @@ class DuelingRoomPage extends Component {
             requestType: "",
             cardOnFieldPressedPopupVisible: false,
             cardInfo: "",
-            cardType: { type: "" }
+            cardType: { type: "" },
+            examinePopupVisible: false
         }
     }
     async componentDidMount() {
@@ -59,6 +60,9 @@ class DuelingRoomPage extends Component {
     dismissCardPopup = (type) => {
         this.setState({ requestType: type, cardPopupVisible: false, cardOptionsPresented: false, cardOnFieldPressedPopupVisible: false });
         return true
+    }
+    toggleExaminePopup = () => {
+        this.setState({ examinePopupVisible: !this.state.examinePopupVisible })
     }
 
 
@@ -162,9 +166,10 @@ class DuelingRoomPage extends Component {
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, set: false } }
             this.setState({ [board]: boardCopy, cardInfo: "" })
             await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        } else if (requestType == "Examine") {
+            console.log("examine triggered")
+            this.toggleExaminePopup()
         }
-
-
         this.setState({ cardOnFieldPressedPopupVisible: false })
         //request types
         //send to graveyard
@@ -222,7 +227,7 @@ class DuelingRoomPage extends Component {
     }
 
     render() {
-        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented } = this.state
+        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         return (
@@ -261,7 +266,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} />
             </View>
         )
     }
