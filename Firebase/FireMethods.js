@@ -117,8 +117,8 @@ const returnAvailableDuels = async (requestId) => {
     return snapshot.docs.map(doc => doc.id).filter(id => id != requestId)
 }
 const joinDuel = (obj) => {
-    firestore.collection("rooms").doc(obj.hostUsername).set({ opponent: obj.username }, { merge: true })
-    firestore.collection("users").doc(obj.username).set({ hostedBy: obj.hostUsername }, { merge: true })
+    firestore.collection("rooms").doc(obj.hostUsername).update({ opponent: obj.username })
+    firestore.collection("users").doc(obj.username).update({ hostedBy: obj.hostUsername })
 }
 
 const leaveDuel = async (obj) => {

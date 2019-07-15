@@ -15,12 +15,12 @@ export default class DuelingRoomSelectPage extends Component {
         this.setState({ rooms })
     }
     hostDuel = () => {
-        hostDuel(this.props.user.username)
-        this.props.fadeOutDuelingRoomSelectPage()
+        // hostDuel(this.props.user.username)
+        this.props.fadeOutDuelingRoomSelectPage("Host")
     }
     joinDuel = (obj) => {
-        joinDuel(obj)
-        this.props.fadeOutDuelingRoomSelectPage()
+        // joinDuel(obj)
+        this.props.fadeOutDuelingRoomSelectPage(obj)
     }
 
     renderItem = ({ item }) => {

@@ -27,7 +27,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
             <Dialog
                 visible={cardPopupVisible}
                 width={0.40}
-                height={0.10}
+                height={0.20}
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
                 })}

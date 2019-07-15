@@ -61,7 +61,11 @@ class DuelingRoomPage extends Component {
 
     listenForGameChanges = (obj) => {
         if (obj.hostedBy == "") {
+            console.log("hostedBy", obj.hostedBy)
+            console.log("hosting username", this.props.user.username)
             obj.hostedBy = this.props.user.username
+        } else {
+            console.log("hostedBy", obj.hostedBy)
         }
         this.setState({ hosting: obj.hosting, hostedBy: obj.hostedBy })
         firestore.collection("rooms").doc(obj.hostedBy)
@@ -70,6 +74,7 @@ class DuelingRoomPage extends Component {
                     const { guestBoard, hostBoard, opponent } = doc.data()
 
                     this.setState({ guestBoard, hostBoard, opponent })
+                    console.log("guest board", guestBoard)
                     this.setState({ boardsRetrieved: true })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
