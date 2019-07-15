@@ -67,10 +67,13 @@ const removeCardsFromDeck = async (obj) => {
     //decrement quantity property by 1
 }
 
-const addCardToBoard = async (obj) => {
+const alterBoard = async (obj) => {
     console.log("should contain graveyard cards", obj.zone)
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
+// const manageCardOnBoard = async (obj) => {
+//     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.cardInfo[0]}.${obj.cardInfo[1]}`]: obj.zone })
+// }
 
 const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
@@ -148,4 +151,4 @@ const listenForBoardUpdates = (obj) => {
     return firestore.collection("rooms").doc(obj).onSnapshot(function (doc) { return doc.data() })
 }
 
-export { updateUserInfo, updateDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, addCardToBoard }
+export { updateUserInfo, updateDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard }

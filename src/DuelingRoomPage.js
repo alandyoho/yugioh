@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, addCardToBoard } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
@@ -33,6 +33,8 @@ class DuelingRoomPage extends Component {
             boardsRetrieved: false,
             backgroundImageUrl: false,
             requestType: "",
+            cardOnFieldPressedPopupVisible: false,
+            cardInfo: ""
         }
     }
     async componentDidMount() {
@@ -54,7 +56,7 @@ class DuelingRoomPage extends Component {
         this.setState({ handZIndex: 1 })
     }
     dismissCardPopup = (type) => {
-        this.setState({ requestType: type, cardPopupVisible: false, cardOptionsPresented: false });
+        this.setState({ requestType: type, cardPopupVisible: false, cardOptionsPresented: false, cardOnFieldPressedPopupVisible: false });
         return true
     }
 
@@ -122,8 +124,35 @@ class DuelingRoomPage extends Component {
 
         this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
         this.fadeInHand()
-        await addCardToBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        await alterBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
     }
+    presentCardOnBoardOptions = (cardInfo) => {
+        this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo })
+    }
+    manageCardOnBoard = async (requestType) => {
+        const { cardInfo } = this.state
+        const board = cardInfo[0]
+        const cardZone = cardInfo[1]
+        const cardZoneIndex = cardInfo[2]
+
+        let boardCopy = { ...this.state[board] }
+        let cardDetails = boardCopy[cardZone][cardZoneIndex]
+        console.log("card being pressed on", cardDetails)
+        if (requestType == "Return-To-Hand") {
+            boardCopy[cardZone][cardZoneIndex] = { card: {}, exists: false }
+            const modifiedHand = [...this.state.hand, cardDetails["card"]]
+
+            this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
+            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy, requestType })
+        }
+        this.setState({ cardOnFieldPressedPopupVisible: false })
+        //request types
+        //send to graveyard
+        //change position
+        //return to hand
+        //change ownership
+    }
+
 
     initialDraw = async () => {
         const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
@@ -171,6 +200,7 @@ class DuelingRoomPage extends Component {
     getRandomInt = () => {
         return Math.floor(Math.random() * Math.floor(7));
     }
+
     render() {
         const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
@@ -206,12 +236,12 @@ class DuelingRoomPage extends Component {
                     />
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} />
+                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} />
                 </View>
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} />
             </View>
         )
     }

@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, examinePopupVisible, selectedCardOnField, board, addCardToBoard }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard }) => {
     return (
         <React.Fragment>
             <Dialog
@@ -77,6 +77,46 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     </View>
                 </DialogContent>
             </Dialog>
+
+
+
+
+            <Dialog
+                visible={cardOnFieldPressedPopupVisible}
+                width={0.40}
+                height={0.20}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={() => {
+                    dismissCardPopup("")
+                }}
+                overlayOpacity={0}
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        <React.Fragment>
+                            <TouchableOpacity onPress={() => manageCardOnBoard("Change-Position")}>
+                                <Text>Change Position</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
+                                <Text>Send to Graveyard</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
+                                <Text>Return to Hand</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => manageCardOnBoard("Change-Ownership")}>
+                                <Text>Change Ownership</Text>
+                            </TouchableOpacity>
+                        </React.Fragment>
+
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
 
             {/* 
 
