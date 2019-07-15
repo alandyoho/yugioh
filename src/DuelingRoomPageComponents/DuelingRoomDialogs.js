@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType }) => {
     return (
         <React.Fragment>
             <Dialog
@@ -97,20 +97,36 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
 
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
-                        <React.Fragment>
-                            <TouchableOpacity onPress={() => manageCardOnBoard("Change-Position")}>
-                                <Text>Change Position</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
-                                <Text>Send to Graveyard</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
-                                <Text>Return to Hand</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => manageCardOnBoard("Change-Ownership")}>
-                                <Text>Change Ownership</Text>
-                            </TouchableOpacity>
-                        </React.Fragment>
+                        {cardType.type.includes("Monster") ?
+                            <React.Fragment>
+
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Change-Position")}>
+                                    <Text>Change Position</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
+                                    <Text>Send to Graveyard</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
+                                    <Text>Return to Hand</Text>
+                                </TouchableOpacity>
+                                {cardType.set && <TouchableOpacity onPress={() => manageCardOnBoard("Flip-Summon")}>
+                                    <Text>Flip Summon</Text>
+                                </TouchableOpacity>}
+                            </React.Fragment>
+
+                            :
+                            <React.Fragment>
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
+                                    <Text>Send to Graveyard</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
+                                    <Text>Return to Hand</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Activate-Facedown")}>
+                                    <Text>Activate</Text>
+                                </TouchableOpacity>
+                            </React.Fragment>
+                        }
 
                     </View>
                 </DialogContent>

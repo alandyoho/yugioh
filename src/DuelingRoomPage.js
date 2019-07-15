@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
@@ -34,7 +34,8 @@ class DuelingRoomPage extends Component {
             backgroundImageUrl: false,
             requestType: "",
             cardOnFieldPressedPopupVisible: false,
-            cardInfo: ""
+            cardInfo: "",
+            cardType: { type: "" }
         }
     }
     async componentDidMount() {
@@ -117,7 +118,7 @@ class DuelingRoomPage extends Component {
         if (cardZone == "graveyard") {
             boardCopy[cardZone].push(cardDetails)
         } else {
-            boardCopy[cardZone][cardZoneIndex] = { card: cardDetails, exists: true }
+            boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defenseMode: false } }
         }
         const filteredHand = [...this.state.hand]
         filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
@@ -127,7 +128,10 @@ class DuelingRoomPage extends Component {
         await alterBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
     }
     presentCardOnBoardOptions = (cardInfo) => {
-        this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo })
+        const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
+
+
+        this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
     manageCardOnBoard = async (requestType) => {
         const { cardInfo } = this.state
@@ -136,15 +140,31 @@ class DuelingRoomPage extends Component {
         const cardZoneIndex = cardInfo[2]
 
         let boardCopy = { ...this.state[board] }
-        let cardDetails = boardCopy[cardZone][cardZoneIndex]
-        console.log("card being pressed on", cardDetails)
+        let cardDetails = boardCopy[cardZone][cardZoneIndex]["card"]
+        // console.log("card being pressed on", cardDetails)
         if (requestType == "Return-To-Hand") {
-            boardCopy[cardZone][cardZoneIndex] = { card: {}, exists: false }
-            const modifiedHand = [...this.state.hand, cardDetails["card"]]
-
+            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defenseMode: false } }
+            const modifiedHand = [...this.state.hand, cardDetails]
             this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
-            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy, requestType })
+            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        } else if (requestType == "Change-Position") {
+            const curPosition = !boardCopy[cardZone][cardZoneIndex]["card"].defensePosition
+            boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: curPosition } }
+            this.setState({ [board]: boardCopy, cardInfo: "" })
+            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        } else if (requestType == "Send-To-Graveyard") {
+            boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
+            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defenseMode: false } }
+            this.setState({ [board]: boardCopy, cardInfo: "" })
+            // await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        } else if (requestType == "Flip-Summon" || requestType == "Activate-Facedown") {
+            boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, set: false } }
+            this.setState({ [board]: boardCopy, cardInfo: "" })
+            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
         }
+
+
         this.setState({ cardOnFieldPressedPopupVisible: false })
         //request types
         //send to graveyard
@@ -241,7 +261,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} />
             </View>
         )
     }
