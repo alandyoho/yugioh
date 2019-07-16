@@ -1,12 +1,14 @@
 import React, { Component } from "react"
-import { View, Image, Text, Dimensions } from 'react-native';
+import { View, Image, Text, Dimensions, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard, renderItem }) => {
+    console.log("graveyard", graveyard)
     return (
         <React.Fragment>
+
             <Dialog
                 visible={waitingForOpponentPopupVisible}
                 width={0.85}
@@ -42,9 +44,6 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
                         {cardOptionsPresented && cardOptionsPresented.type.includes("Monster") ?
                             <React.Fragment>
-                                <TouchableOpacity onPress={() => fadeOutHand("Examine")}>
-                                    <Text>Examine</Text>
-                                </TouchableOpacity>
                                 <TouchableOpacity onPress={() => fadeOutHand("Normal")}>
                                     <Text>Normal Summon</Text>
                                 </TouchableOpacity>
@@ -54,20 +53,23 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 <TouchableOpacity onPress={() => fadeOutHand("Set-Monster")}>
                                     <Text>Set</Text>
                                 </TouchableOpacity>
+                                <TouchableOpacity onPress={() => fadeOutHand("Examine")}>
+                                    <Text>Examine</Text>
+                                </TouchableOpacity>
                                 <TouchableOpacity onPress={() => dismissCardPopup("Send-To-Graveyard") && addCardToBoard([board, "graveyard", 1])}>
                                     <Text>Send to Graveyard</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
                             :
                             <React.Fragment>
-                                <TouchableOpacity onPress={() => fadeOutHand("Examine")}>
-                                    <Text>Examine</Text>
-                                </TouchableOpacity>
                                 <TouchableOpacity onPress={() => fadeOutHand("Activate")}>
                                     <Text>Activate</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => fadeOutHand("Set-ST")}>
                                     <Text>Set</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => fadeOutHand("Examine")}>
+                                    <Text>Examine</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => dismissCardPopup("Send-To-Graveyard") && addCardToBoard([board, "graveyard", 1])}>
                                     <Text>Send to Graveyard</Text>
@@ -99,21 +101,21 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
                         {cardType.type.includes("Monster") ?
                             <React.Fragment>
+                                {cardType.set && <TouchableOpacity onPress={() => manageCardOnBoard("Flip-Summon")}>
+                                    <Text>Flip Summon</Text>
+                                </TouchableOpacity>}
                                 <TouchableOpacity onPress={() => manageCardOnBoard("Examine")}>
                                     <Text>Examine</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardOnBoard("Change-Position")}>
+                                {!cardType.set && <TouchableOpacity onPress={() => manageCardOnBoard("Change-Position")}>
                                     <Text>Change Position</Text>
+                                </TouchableOpacity>}
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
+                                    <Text>Return to Hand</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
                                     <Text>Send to Graveyard</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
-                                    <Text>Return to Hand</Text>
-                                </TouchableOpacity>
-                                {cardType.set && <TouchableOpacity onPress={() => manageCardOnBoard("Flip-Summon")}>
-                                    <Text>Flip Summon</Text>
-                                </TouchableOpacity>}
                             </React.Fragment>
 
                             :
@@ -121,15 +123,15 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 <TouchableOpacity onPress={() => manageCardOnBoard("Examine")}>
                                     <Text>Examine</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
-                                    <Text>Send to Graveyard</Text>
-                                </TouchableOpacity>
                                 <TouchableOpacity onPress={() => manageCardOnBoard("Return-To-Hand")}>
                                     <Text>Return to Hand</Text>
                                 </TouchableOpacity>
                                 {cardType.set && <TouchableOpacity onPress={() => manageCardOnBoard("Activate-Facedown")}>
                                     <Text>Activate</Text>
                                 </TouchableOpacity>}
+                                <TouchableOpacity onPress={() => manageCardOnBoard("Send-To-Graveyard")}>
+                                    <Text>Send to Graveyard</Text>
+                                </TouchableOpacity>
                             </React.Fragment>
                         }
 
@@ -147,17 +149,6 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 onTouchOutside={() => {
                     toggleExaminePopup()
                 }}
-
-                // footer={
-                //     <DialogFooter>
-                //         <DialogButton
-                //             style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
-                //             textStyle={{ color: "white" }}
-                //             text="Add To Deck"
-                //             onPress={() => this.addCard(this.state.selectedCard)}
-                //         />
-                //     </DialogFooter>
-                // }
                 dialogAnimation={new ScaleAnimation({
                     initialValue: 0, // optional
                     useNativeDriver: true, // optional
@@ -184,6 +175,31 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
 
 
 
+
+            <Dialog
+                visible={graveyardPopupVisible}
+                overlayOpacity={0}
+                onTouchOutside={toggleGraveyardPopup}
+                dialogAnimation={new ScaleAnimation({
+                    initialValue: 0, // optional
+                    useNativeDriver: true, // optional
+                })}
+                width={1.0}
+                height={Dimensions.get("window").width}
+                containerStyle={{ width: Dimensions.get("window").width }}
+                dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width }}
+            // containerStyle={{}}
+            >
+                <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "transparent" }}>
+
+                    <FlatList
+                        data={graveyard}
+                        renderItem={(item) => renderItem(item)}
+                        keyExtractor={(item, index) => index.toString()}
+                        horizontal={true}
+                    />
+                </DialogContent>
+            </Dialog>
 
 
         </React.Fragment>

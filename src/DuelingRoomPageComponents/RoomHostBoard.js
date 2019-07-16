@@ -2,8 +2,8 @@ import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-nati
 import React from "react"
 // import console = require('console');
 
-const RoomHostBoard = ({ boardsRetrieved, properBoard, cards, drawCard, addCardToBoard, board, presentCardOnBoardOptions }) => {
-    console.log("asdfasdf", typeof properBoard)
+const RoomHostBoard = ({ boardsRetrieved, properBoard, cards, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup }) => {
+    // console.log("asdfasdf", typeof properBoard)
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>
@@ -17,7 +17,7 @@ const RoomHostBoard = ({ boardsRetrieved, properBoard, cards, drawCard, addCardT
                         {boardsRetrieved == true && properBoard.m1[cardIndex]['card'].exists && (properBoard.m1[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : (properBoard.m1[cardIndex]['card'].defensePosition ? <Image source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <Image source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />))}
                     </TouchableOpacity>
                 ))}
-                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={() => addCardToBoard([board, "graveyard", 1])}>
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={toggleGraveyardPopup}>
                     {boardsRetrieved == true && properBoard.graveyard.length > 0 && <Image source={{ uri: properBoard.graveyard[properBoard.graveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>

@@ -36,7 +36,8 @@ class DuelingRoomPage extends Component {
             cardOnFieldPressedPopupVisible: false,
             cardInfo: "",
             cardType: { type: "" },
-            examinePopupVisible: false
+            examinePopupVisible: false,
+            graveyardPopupVisible: false
         }
     }
     async componentDidMount() {
@@ -188,6 +189,9 @@ class DuelingRoomPage extends Component {
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.cards)
         this.setState({ hand: drawnCards, cards: shallowCards })
     }
+    toggleGraveyardPopup = () => {
+        this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
+    }
     drawCard = () => {
         if (this.state.cards.length) {
             const { drewCard, shallowCards } = GameLogic.shared.drawCard(this.state.cards)
@@ -215,6 +219,16 @@ class DuelingRoomPage extends Component {
             // <DraggableCards item={item} />
         )
     }
+    renderGraveyardCards = ({ item }) => {
+        return (
+            <TouchableOpacity style={{ width: 200, height: 400, flexDirection: "row", justifyContent: "center", alignItems: "center" }} onPress={() => this.presentCardOptions(item)}>
+                {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
+                    width: 200, height: 400
+                }} />}
+            </TouchableOpacity>
+            // <DraggableCards item={item} />
+        )
+    }
     renderOpponentHand = () => {
         return (
             <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
@@ -227,7 +241,7 @@ class DuelingRoomPage extends Component {
     }
 
     render() {
-        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible } = this.state
+        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         return (
@@ -261,12 +275,12 @@ class DuelingRoomPage extends Component {
                     />
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} />
+                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} />
                 </View>
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} renderItem={this.renderGraveyardCards} />
             </View>
         )
     }
