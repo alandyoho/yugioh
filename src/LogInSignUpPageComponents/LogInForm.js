@@ -18,7 +18,7 @@ export default class LogInForm extends Component {
     signIn = async (email, password) => {
         try {
             const sign = await auth.signInWithEmailAndPassword(email, password);
-            console.log("sign", sign)
+
             return "successfully signed in"
         } catch (err) {
             return false

@@ -9,7 +9,7 @@ admin.initializeApp({
 
 exports.searchResults = functions.https.onRequest(async (request, response) => {
     const cardType = request.body.data.type
-    console.log("card type pre-parse", cardType)
+
     const cardParser = (cardType) => {
         if (cardType == 'Open') {
             return `type=effect%20monster`

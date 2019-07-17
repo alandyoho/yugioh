@@ -87,7 +87,7 @@ const addCardsToDeck = async (obj) => {
     //if exists, increase quantity property by one 
     //else add card to deck model and set quantity property to 1
     const { cards } = await retrieveCardsFromDeck(obj)
-    console.log("asdf", cards)
+
     const filt = cards.filter(card => card.id == obj.card.id)
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 
@@ -142,9 +142,9 @@ const leaveDuel = async (obj) => {
         }
     })
     if (obj == opponent) {
-        console.log("not hosting the room")
+
     } else {
-        console.log("hosting the room")
+
         firestore.collection("rooms").doc(obj).delete()
     }
 

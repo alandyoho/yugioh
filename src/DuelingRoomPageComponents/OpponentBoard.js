@@ -3,7 +3,7 @@ import React, { Component } from "react"
 
 
 const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
-    console.log("type of board being used", typeof opponentBoard)
+    // console.log("type of board being used", typeof opponentBoard)
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>

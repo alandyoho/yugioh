@@ -29,10 +29,10 @@ export default class DeckSelectPopup extends Component {
     onPressItem = (deck) => {
         this.props.resetState()
         if (this.props.type == "Host") {
-            console.log("type of request", this.props.type)
+
             hostDuel(this.props.user.username)
         } else {
-            console.log("type of request", this.props.type)
+
             joinDuel(this.props.type)
         }
         this.props.updateSelectedDeck(deck)

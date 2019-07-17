@@ -65,7 +65,7 @@ class DeckConstructorPage extends Component {
 
     }
     expandCard = async (cardInfo) => {
-        console.log("card info", cardInfo)
+
         this.setState({ selectedCard: cardInfo, popUpVisible: true })
 
     }
