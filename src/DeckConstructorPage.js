@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, Slider, Alert, Dimensions, TextInput, TouchableOpacity } from 'react-native';
+// import { StyleSheet, Text, View, Image, Slider, Alert, Dimensions, TextInput, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Alert, View, Image, Dimensions, StyleSheet, Text, Animated, TextInput, TouchableWithoutFeedback, Keyboard, LayoutAnimation } from "react-native"
+
 import CoverFlow from 'react-native-coverflow';
 import { SearchBar } from 'react-native-elements';
 import { functions } from "../Firebase/Fire"
@@ -26,12 +28,121 @@ class DeckConstructorPage extends Component {
             visible: false,
             cardType: "Open",
             popUpVisible: false,
-            selectedCard: ""
+            selectedCard: "",
+            expanded: false,
+            deckListView: {
+                flex: 9 / 20,
+                alignItems: "center",
+                backgroundColor: "#FFF",
+                justifyContent: "center"
+                // flex: 9 / 20,
+                // alignItems: "center",
+                // justifyContent: 'center',
+                // // backgroundColor: "green",
+                // width: "100%"
+            },
+            searchResultsView: {
+                flex: 11 / 20,
+                backgroundColor: "#FFF"
+                // flex: 11 / 20,
+                // backgroundColor: "#FFF",
+                // flexDirection: "column",
+                // justifyContent: "flex-end",
+                // alignItems: "center",
+                // // backgroundColor: 'red',
+                // width: "100%"
+            },
+            cardWidth: Dimensions.get("window").width * 0.40
         }
     }
     componentDidMount = async () => {
         await this.refreshCards()
+        console.log("cards", this.state.deckCards)
     }
+
+    expandDeckCardsListView = () => {
+        LayoutAnimation.configureNext({
+            duration: 1500,
+            create: {
+                type: LayoutAnimation.Types.spring,
+                property: LayoutAnimation.Properties.scaleXY,
+                springDamping: 0.7,
+            },
+            update: {
+                type: LayoutAnimation.Types.spring,
+                springDamping: 0.7,
+            },
+        });
+        this.setState({
+            deckListView: {
+                flex: 1,
+                alignItems: "center",
+                backgroundColor: "#FFF"
+            },
+            searchResultsView: {
+                flex: 0,
+            },
+            expanded: true
+        })
+    }
+    resetViewsToDefault = () => {
+        LayoutAnimation.configureNext({
+            duration: 1500,
+            create: {
+                type: LayoutAnimation.Types.spring,
+                property: LayoutAnimation.Properties.scaleXY,
+                springDamping: 0.7,
+            },
+            update: {
+                type: LayoutAnimation.Types.spring,
+                springDamping: 0.7,
+            },
+        });
+        this.setState({
+            deckListView: {
+                flex: 9 / 20,
+                alignItems: "center",
+                backgroundColor: "#FFF"
+            },
+            searchResultsView: {
+                flex: 11 / 20,
+                backgroundColor: "#FFF"
+            },
+            expanded: false,
+            cardWidth: Dimensions.get("window").width * 0.40
+        })
+        // Keyboard.dismiss()
+    }
+    expandSearchCardsListView = () => {
+        LayoutAnimation.configureNext({
+            duration: 1500,
+            create: {
+                type: LayoutAnimation.Types.spring,
+                property: LayoutAnimation.Properties.scaleXY,
+                springDamping: 0.7,
+            },
+            update: {
+                type: LayoutAnimation.Types.spring,
+                springDamping: 0.7,
+            },
+        });
+        this.setState({
+            deckListView: {
+                flex: 0,
+                alignItems: "center",
+                backgroundColor: "#FFF"
+            },
+            searchResultsView: {
+                flex: 1,
+                backgroundColor: "#FFF"
+            },
+            expanded: false,
+            cardWidth: Dimensions.get("window").width * 0.80
+
+        })
+        // Keyboard.dismiss()
+    }
+
     refreshCards = async () => {
         const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         this.setState({ selectedDeck: this.props.selectedDeck, deckCards: cards })
@@ -82,7 +193,6 @@ class DeckConstructorPage extends Component {
         const keys = Object.keys(this.state.cards ? this.state.cards : CARDS);
         for (let i = 0; i < keys.length; i += 1) {
             const card = keys[i];
-
             res.push(
                 <TouchableOpacity onPress={() => this.state.cards && this.expandCard(this.state.cards[card])} key={card}>
                     <Image
@@ -91,11 +201,12 @@ class DeckConstructorPage extends Component {
 
                         resizeMode="contain"
                         style={{
-                            height: "70%",
-                            width: Dimensions.get("window").width * 0.40
+                            height: "90%",
+                            width: this.state.cardWidth
                         }}
                     />
-                </TouchableOpacity>);
+                </TouchableOpacity>
+            );
         }
         return res;
     }
@@ -133,6 +244,7 @@ class DeckConstructorPage extends Component {
         const onClose = () => this.setState({ currentlyOpenSwipeable: null })
 
         return (
+
             <Swipeable
                 style={{ height: 60 }}
                 rightButtons={[
@@ -179,122 +291,97 @@ class DeckConstructorPage extends Component {
     render() {
         const { search } = this.state;
         return (
-            <View style={{ flex: 1 }}>
-                <View style={{ flex: 1, static: true }}>
-                    <CoverFlow
-                        style={styles.container}
-                        onChange={this.onChange}
-                        onPress={this.onPress}
-                        spacing={100}
-                        wingSpan={80}
-                        rotation={50}
-                        midRotation={50}
-                        scaleDown={0.8}
-                        scaleFurther={0.75}
-                        perspective={800}
-                        initialSelection={5}
-                    >
-                        {this.getCards()}
-                    </CoverFlow>
-                </View>
-                <View style={{ position: "absolute", bottom: 0, right: 0, left: 0, top: this.state.keyboardUp ? Dimensions.get("window").height * 0.38 : Dimensions.get("window").height * 0.55 }}>
-                    <Text style={{ fontSize: 30, alignSelf: "center", fontWeight: "800" }}>{this.state.selectedDeck}</Text>
-                    <FlatList
-                        data={this.state.deckCards}
-                        ItemSeparatorComponent={this.FlatListItemSeparator}
-                        contentContainerStyle={{ justifyContent: 'center' }}
-                        renderItem={(item) => this.renderItem(item)}
-                        keyExtractor={(item, index) => index.toString()}
-                    />
-                </View>
-                <View style={{ height: 20, width: Dimensions.get("window").width * 0.33, justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30 }}>
-                    <TouchableOpacity onPress={() => this._panel.show()}>
-                        <Text style={{ color: "white" }}>Advanced Search</Text>
-                    </TouchableOpacity>
-                </View>
-                <SlidingUpPanel
-                    height={Dimensions.get("window").height * 0.50}
-                    ref={c => this._panel = c}
-                    backdropOpacity={0.25}
-                    backgroundColor={"#00000"}
-                    containerStyle={{ zIndex: this.state.keyboardUp ? -10 : 10 }}
-                    draggableRange={{ top: Dimensions.get("window").height * 0.50, bottom: 0 }}
-                >
-                    <View style={styles.panelStyles}>
-                        <MultiSwitch
-                            currentStatus={'Open'}
-                            disableScroll={value => {
-
-                            }}
-                            isParentScrollEnabled={false}
-                            onStatusChanged={text => {
-                                this.setState({ cardType: text })
-                            }} />
+            <TouchableWithoutFeedback accessible={false}>
+                <View style={styles.container}>
+                    <View style={{ ...this.state.searchResultsView }}>
+                        <CoverFlow
+                            style={{ flex: 1 }}
+                            onChange={this.onChange}
+                            onPress={this.onPress}
+                            spacing={100}
+                            wingSpan={80}
+                            rotation={50}
+                            midRotation={50}
+                            scaleDown={0.8}
+                            scaleFurther={0.75}
+                            perspective={800}
+                            initialSelection={5}
+                        >
+                            {this.getCards()}
+                        </CoverFlow>
+                        <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
+                            <Image source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                        </TouchableOpacity>
+                        <View style={{ ...styles.deckSearchContainer, marginBottom: 15, marginTop: 15 }}>
+                            <TextInput placeholderTextColor={"#6F8FA9"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} />
+                            <Image source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
+                        </View>
+                        <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
+                            <Image source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                        </TouchableOpacity>
                     </View>
-                </SlidingUpPanel>
-                <SearchBar
-                    inputContainerStyle={{ backgroundColor: "white" }}
-                    inputStyle={{ backgroundColor: "white" }}
-                    lightTheme={true}
-                    style={{ left: 0, right: 0, height: 45, backgroundColor: "white" }}
-                    placeholder={"Search..."}
-                    value={search}
-                    onFocus={() => this.setState({ keyboardUp: true })}
-                    onSubmitEditing={this.onSubmit}
-                    onChangeText={(search) => this.setState({ search })}
-                    returnKeyType={"search"}
-                    onEndEditing={() => this.setState({ keyboardUp: false })}
 
-                />
-                <KeyboardSpacer />
-                <Dialog
-                    containerStyle={{ backgroundColor: "transparent" }}
-                    dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
-                    visible={this.state.popUpVisible}
-                    overlayOpacity={0}
-                    onTouchOutside={() => {
-                        this.setState({ popUpVisible: false });
-                    }}
-
-                    footer={
-                        <DialogFooter>
-                            <DialogButton
-                                style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
-                                textStyle={{ color: "white" }}
-                                text="Add To Deck"
-                                onPress={() => this.addCard(this.state.selectedCard)}
-                            />
-                        </DialogFooter>
-                    }
-                    dialogAnimation={new ScaleAnimation({
-                        initialValue: 0, // optional
-                        useNativeDriver: true, // optional
-                    })}
-                    width={Dimensions.get("window").width * 0.9}
-                    height={Dimensions.get("window").height * 0.9}
-                >
-                    <DialogContent>
-                        <View style={{ justifyContent: "center", alignItems: "center" }}>
-
-                            <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
-                                {this.state.selectedCard && <Image
-                                    source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
-                                    resizeMode="contain"
-                                    style={{
-                                        height: Dimensions.get("window").height * 0.70,
-                                        width: Dimensions.get("window").width * 0.70
-                                    }}
-                                />}
-                            </TouchableOpacity>
+                    <View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                        <View style={{ flex: 1 / 9, height: 35, width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                            <Text style={{ fontSize: 30, fontWeight: "800" }}>{this.state.selectedDeck}</Text>
 
                         </View>
-                    </DialogContent>
-                </Dialog>
+                        <View style={{ flex: 8 / 9, flexDirection: "row" }}>
+                            <FlatList
+                                data={this.state.deckCards}
+                                ItemSeparatorComponent={this.FlatListItemSeparator}
+                                contentContainerStyle={{ justifyContent: 'center' }}
+                                renderItem={(item) => this.renderItem(item)}
+                                keyExtractor={(item, index) => index.toString()}
+                            />
+                        </View>
+                    </View>
+                    <Dialog
+                        containerStyle={{ backgroundColor: "transparent" }}
+                        dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
+                        visible={this.state.popUpVisible}
+                        overlayOpacity={0}
+                        onTouchOutside={() => {
+                            this.setState({ popUpVisible: false });
+                        }}
 
+                        footer={
+                            <DialogFooter>
+                                <DialogButton
+                                    style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
+                                    textStyle={{ color: "white" }}
+                                    text="Add To Deck"
+                                    onPress={() => this.addCard(this.state.selectedCard)}
+                                />
+                            </DialogFooter>
+                        }
+                        dialogAnimation={new ScaleAnimation({
+                            initialValue: 0, // optional
+                            useNativeDriver: true, // optional
+                        })}
+                        width={Dimensions.get("window").width * 0.9}
+                        height={Dimensions.get("window").height * 0.9}
+                    >
+                        <DialogContent>
+                            <View style={{ justifyContent: "center", alignItems: "center" }}>
 
+                                <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
+                                    {this.state.selectedCard && <Image
+                                        source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
+                                        resizeMode="contain"
+                                        style={{
+                                            height: Dimensions.get("window").height * 0.70,
+                                            width: Dimensions.get("window").width * 0.70
+                                        }}
+                                    />}
+                                </TouchableOpacity>
 
+                            </View>
+                        </DialogContent>
+                    </Dialog>
+                </View>
 
-            </View>
+            </TouchableWithoutFeedback>
         );
     }
 }
@@ -313,6 +400,26 @@ const mapDispatchToProps = dispatch => (
 export default connect(mapStateToProps, mapDispatchToProps)(DeckConstructorPage);
 
 const styles = StyleSheet.create({
+    deckSearchTextInput: {
+        alignItems: "center",
+        left: 6,
+        // fontFamily: "Merriweather-Bold",
+        color: "#6F8FA9"
+    },
+    deckSearchContainer: {
+        shadowColor: 'black',
+        backgroundColor: "#FFF",
+        shadowOffset: { height: 5, width: 5 },
+        shadowOpacity: 0.4,
+        shadowRadius: 5,
+        borderRadius: 5,
+        width: "83%",
+        height: 41,
+        alignSelf: "center",
+        // top: 94,
+        justifyContent: "center",
+        // zIndex: 10,
+    },
 
     item: {
         width: 64 * 2.5,
@@ -340,7 +447,6 @@ const styles = StyleSheet.create({
     listItem: {
         height: 75,
         flexDirection: "row",
-        // alignItems: 'center',
         justifyContent: 'flex-start',
 
     },
@@ -365,4 +471,10 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 25,
         padding: 20
     },
+    searchIcon: {
+        position: "absolute",
+        height: 13,
+        width: 13,
+        right: 10,
+    }
 });
