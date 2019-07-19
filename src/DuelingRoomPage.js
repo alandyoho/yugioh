@@ -51,18 +51,11 @@ class DuelingRoomPage extends Component {
         const { hostedBy, hosting } = await retrieveDeckInfo(this.props.user.username)
         this.listenForGameChanges({ hostedBy: hostedBy, hosting: hosting })
     }
-    fadeOutHand = (type) => {
-        Animated.timing(this.state.handOpacity, { toValue: 0, useNativeDriver: true, }).start();
-        this.setState({ handZIndex: -1, cardPopupVisible: false, requestType: type })
-    }
     fadeInHand = () => {
         Animated.timing(this.state.handOpacity, { toValue: 1, useNativeDriver: true, }).start();
         this.setState({ handZIndex: 1 })
     }
-    dismissCardPopup = (type) => {
-        this.setState({ requestType: type, cardPopupVisible: false, cardOptionsPresented: false, cardOnFieldPressedPopupVisible: false });
-        return true
-    }
+
     toggleExaminePopup = () => {
         this.setState({ examinePopupVisible: !this.state.examinePopupVisible })
     }
@@ -83,7 +76,7 @@ class DuelingRoomPage extends Component {
                     const { guestBoard, hostBoard, opponent } = doc.data()
 
                     this.setState({ guestBoard, hostBoard, opponent })
-                    console.log("guest board", guestBoard)
+                    // console.log("guest board", guestBoard)
                     this.setState({ boardsRetrieved: true })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
@@ -93,43 +86,6 @@ class DuelingRoomPage extends Component {
                 }
             })
     }
-
-    addCardToBoard = async (location) => {
-        const { cardOptionsPresented, requestType } = this.state
-
-        let cardDetails;
-        if (requestType === "Set-ST") {
-            cardDetails = { ...cardOptionsPresented, set: true }
-        } else if (requestType === "Normal" || requestType === "Special") {
-            cardDetails = { ...cardOptionsPresented }
-        } else if (requestType === "Set-Monster") {
-            cardDetails = { ...cardOptionsPresented, set: true }
-        } else if (requestType === "Send-To-Graveyard") {
-            cardDetails = { ...cardOptionsPresented }
-        } else {
-            cardDetails = { ...cardOptionsPresented }
-        }
-        const board = location[0]
-        const cardZone = location[1]
-        const cardZoneIndex = location[2]
-
-        if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
-            this.fadeInHand()
-            return
-        }
-        let boardCopy = { ...this.state[board] }
-        if (cardZone == "graveyard") {
-            boardCopy[cardZone].push(cardDetails)
-        } else {
-            boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defenseMode: false } }
-        }
-        const filteredHand = [...this.state.hand]
-        filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
-
-        this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
-        this.fadeInHand()
-        await alterBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
-    }
     presentCardOnBoardOptions = (cardInfo) => {
         const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
 
@@ -137,11 +93,13 @@ class DuelingRoomPage extends Component {
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
     toggleCardInGraveyardOptions = (cardType) => {
-        this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed, cardType })
+        if (!cardType) {
+            this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed })
+        } else {
+            this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed, cardType })
+        }
     }
-    toggleCardInGraveyardOptions1 = () => {
-        this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed })
-    }
+
     toggleGraveyardPopup = () => {
         this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
     }
@@ -158,7 +116,8 @@ class DuelingRoomPage extends Component {
         let cardDetails = boardCopy[cardZone][cardZoneIndex]["card"]
         // console.log("card being pressed on", cardDetails)
         if (requestType == "Return-To-Hand") {
-            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defenseMode: false } }
+            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
+            cardDetails.defensePosition = false
             const modifiedHand = [...this.state.hand, cardDetails]
             this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
             await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
@@ -169,7 +128,7 @@ class DuelingRoomPage extends Component {
             await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
         } else if (requestType == "Send-To-Graveyard") {
             boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
-            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defenseMode: false } }
+            boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
             this.setState({ [board]: boardCopy, cardInfo: "" })
             // await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
             await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
@@ -190,23 +149,32 @@ class DuelingRoomPage extends Component {
     }
     manageCardInGraveyard = async (requestType) => {
 
-        console.log("request type", requestType)
+        // console.log("request type", requestType)
         console.log("corresponding card", this.state.cardType)
 
-        this.toggleGraveyardPopup()
-        this.toggleCardInGraveyardOptions1()
+        this.toggleCardInGraveyardOptions()
         const cardDetails = this.state.cardType
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
+
+
         let boardCopy = { ...this.state[board] }
         let graveyard = boardCopy["graveyard"]
 
         if (requestType == "Return-To-Hand") {
+            this.toggleGraveyardPopup()
             boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
             const modifiedHand = [...this.state.hand, cardDetails]
             this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
             await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
-        } else if (requestType == "Special") {
+        } else if (requestType == "Special-GY") {
+            this.toggleGraveyardPopup()
+            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            this.setState({ requestType: "Special-GY", cardOptionsPresented: cardDetails })
 
+        } else if (requestType == "Examine") {
+            this.setState({ cardType: cardDetails })
+            this.setState({ examinePopupVisible: true })
         }
         //add card info to hand in state    
         //remove from graveyard array in state
@@ -243,11 +211,75 @@ class DuelingRoomPage extends Component {
         leaveDuel(this.props.user.username)
         this.props.navigation.navigate("HomePage")
     }
+
+    //hand to field (1)
     presentCardOptions = (card) => {
         this.setState({ cardOptionsPresented: card, cardPopupVisible: true })
     }
-    summonMonster = () => {
+    //hand to field (1) cancel
+    dismissCardPopup = () => {
+        this.setState({ cardPopupVisible: false, cardOnFieldPressedPopupVisible: false });
+    }
+    //hand to field (2)
+    fadeOutHand = (type) => {
+        if (type == "Examine") {
+            const cardDetails = { ...this.state.cardOptionsPresented }
+            this.setState({ cardType: cardDetails })
+            this.setState({ examinePopupVisible: true, cardPopupVisible: false })
+        } else {
+            Animated.timing(this.state.handOpacity, { toValue: 0, useNativeDriver: true, }).start();
+            this.setState({ handZIndex: -1, cardPopupVisible: false, requestType: type })
+        }
+    }
+    //hand to field (3)
+    addCardToBoard = async (location, requestType) => {
+        console.log("request Typ", this.state.requestType)
+
+
+
+        this.setState({ cardPopupVisible: false, cardOnFieldPressedPopupVisible: false });
+        if (!requestType) {
+            requestType = this.state.requestType
+        }
+        const { cardOptionsPresented } = this.state
+        if (cardOptionsPresented == false || requestType == "") {
+            return this.fadeInHand()
+        }
+        let cardDetails;
+        if (requestType === "Set-ST" || requestType === "Set-Monster") {
+            cardDetails = { ...cardOptionsPresented, set: true }
+        } else if (requestType === "Normal" || requestType === "Special" || requestType === "Activate") {
+            cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Send-To-Graveyard") {
+            cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Examine") {
+            cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Special-GY") {
+            cardDetails = { ...cardOptionsPresented }
+        }
+        const board = location[0]
+        const cardZone = location[1]
+        const cardZoneIndex = location[2]
+
+        if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
+            return this.fadeInHand()
+        }
+        let boardCopy = { ...this.state[board] }
+        if (cardZone == "graveyard") {
+            boardCopy[cardZone].push(cardDetails)
+        } else {
+            boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: false } }
+        }
+        if (requestType !== "Special-GY") {
+            const filteredHand = [...this.state.hand]
+            filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
+            this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
+        } else {
+            this.setState({ [board]: boardCopy, cardOptionsPresented: false })
+        }
+
         this.fadeInHand()
+        await alterBoard({ location, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
     }
 
     renderItem = ({ item }) => {
@@ -320,7 +352,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} toggleCardInGraveyardOptions1={this.toggleCardInGraveyardOptions1} manageCardInGraveyard={this.manageCardInGraveyard} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} />
             </View>
         )
     }
