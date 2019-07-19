@@ -3,9 +3,7 @@ import React, { Component } from 'react';
 import { TouchableOpacity, Alert, View, Image, Dimensions, StyleSheet, Text, Animated, TextInput, TouchableWithoutFeedback, Keyboard, LayoutAnimation } from "react-native"
 
 import CoverFlow from 'react-native-coverflow';
-import { SearchBar } from 'react-native-elements';
 import { functions } from "../Firebase/Fire"
-import KeyboardSpacer from 'react-native-keyboard-spacer';
 import { FlatList } from 'react-native-gesture-handler';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -23,7 +21,6 @@ class DeckConstructorPage extends Component {
             search: "",
             cards: null,
             deckCards: [],
-            keyboardUp: false,
             selectedDeck: "",
             visible: false,
             cardType: "Open",
@@ -35,22 +32,10 @@ class DeckConstructorPage extends Component {
                 alignItems: "center",
                 backgroundColor: "#FFF",
                 justifyContent: "center"
-                // flex: 9 / 20,
-                // alignItems: "center",
-                // justifyContent: 'center',
-                // // backgroundColor: "green",
-                // width: "100%"
             },
             searchResultsView: {
                 flex: 11 / 20,
                 backgroundColor: "#FFF"
-                // flex: 11 / 20,
-                // backgroundColor: "#FFF",
-                // flexDirection: "column",
-                // justifyContent: "flex-end",
-                // alignItems: "center",
-                // // backgroundColor: 'red',
-                // width: "100%"
             },
             cardWidth: Dimensions.get("window").width * 0.40
         }
@@ -73,17 +58,31 @@ class DeckConstructorPage extends Component {
                 springDamping: 0.7,
             },
         });
-        this.setState({
-            deckListView: {
-                flex: 1,
-                alignItems: "center",
-                backgroundColor: "#FFF"
-            },
-            searchResultsView: {
-                flex: 0,
-            },
-            expanded: true
-        })
+        if (this.state.deckListView.flex === 9 / 20) {
+            this.setState({
+                deckListView: {
+                    flex: 1,
+                    alignItems: "center",
+                    backgroundColor: "#FFF"
+                },
+                searchResultsView: {
+                    flex: 0,
+                },
+                expanded: true
+            })
+        } else if (this.state.deckListView.flex === 0) {
+            this.setState({
+                deckListView: {
+                    flex: 9 / 20,
+                    alignItems: "center",
+                    backgroundColor: "#FFF"
+                },
+                searchResultsView: {
+                    flex: 11 / 20,
+                },
+                expanded: true
+            })
+        }
     }
     resetViewsToDefault = () => {
         LayoutAnimation.configureNext({
@@ -126,20 +125,35 @@ class DeckConstructorPage extends Component {
                 springDamping: 0.7,
             },
         });
-        this.setState({
-            deckListView: {
-                flex: 0,
-                alignItems: "center",
-                backgroundColor: "#FFF"
-            },
-            searchResultsView: {
-                flex: 1,
-                backgroundColor: "#FFF"
-            },
-            expanded: false,
-            cardWidth: Dimensions.get("window").width * 0.80
-
-        })
+        if (this.state.searchResultsView.flex === 0) {
+            this.setState({
+                deckListView: {
+                    flex: 9 / 20,
+                    alignItems: "center",
+                    backgroundColor: "#FFF"
+                },
+                searchResultsView: {
+                    flex: 11 / 20,
+                    backgroundColor: "#FFF"
+                },
+                expanded: false,
+                cardWidth: Dimensions.get("window").width * 0.80
+            })
+        } else if (this.state.searchResultsView.flex === 11 / 20) {
+            this.setState({
+                deckListView: {
+                    flex: 0,
+                    alignItems: "center",
+                    backgroundColor: "#FFF"
+                },
+                searchResultsView: {
+                    flex: 1,
+                    backgroundColor: "#FFF"
+                },
+                expanded: false,
+                cardWidth: Dimensions.get("window").width * 0.80
+            })
+        }
         // Keyboard.dismiss()
     }
 
@@ -211,7 +225,6 @@ class DeckConstructorPage extends Component {
         return res;
     }
     onSubmit = async () => {
-        this.setState({ keyboardUp: false })
         if (this.state.search !== "") {
             await this.search(this.state.search)
         }
@@ -259,12 +272,13 @@ class DeckConstructorPage extends Component {
                 onRightButtonsCloseRelease={onClose}
             >
                 <View style={[styles.listItem, { backgroundColor: 'white' }]}>
-                    <TouchableOpacity >
-                        <Text style={{
-                            fontSize: 20, alignSelf: "flex-start",
-                            fontWeight: '800'
+                    <Text
+                        style={{
+                            fontSize: 20,
+                            alignSelf: "flex-start",
+                            fontWeight: '800',
+
                         }}>{item.name}</Text>
-                    </TouchableOpacity>
                     <View style={{ position: "absolute", right: 10 }}>
                         <NumericInput
                             initValue={item.quantity}
