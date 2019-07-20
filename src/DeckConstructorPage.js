@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 // import { StyleSheet, Text, View, Image, Slider, Alert, Dimensions, TextInput, TouchableOpacity } from 'react-native';
-import { TouchableOpacity, Alert, View, Image, Dimensions, StyleSheet, Text, Animated, TextInput, TouchableWithoutFeedback, Keyboard, LayoutAnimation } from "react-native"
+import { TouchableOpacity, Alert, View, Image, Dimensions, StyleSheet, Text, Animated, TextInput, TouchableWithoutFeedback, Keyboard, LayoutAnimation, DeviceEventEmitter, ActivityIndicator } from "react-native"
 
 import CoverFlow from 'react-native-coverflow';
 import { functions } from "../Firebase/Fire"
@@ -37,7 +37,8 @@ class DeckConstructorPage extends Component {
                 flex: 11 / 20,
                 backgroundColor: "#FFF"
             },
-            cardWidth: Dimensions.get("window").width * 0.40
+            cardWidth: Dimensions.get("window").width * 0.40,
+            loading: false
         }
     }
     componentDidMount = async () => {
@@ -45,7 +46,9 @@ class DeckConstructorPage extends Component {
         console.log("cards", this.state.deckCards)
     }
 
+
     expandDeckCardsListView = () => {
+        Keyboard.dismiss()
         LayoutAnimation.configureNext({
             duration: 1500,
             create: {
@@ -68,7 +71,7 @@ class DeckConstructorPage extends Component {
                 searchResultsView: {
                     flex: 0,
                 },
-                expanded: true
+                expanded: false
             })
         } else if (this.state.deckListView.flex === 0) {
             this.setState({
@@ -80,7 +83,7 @@ class DeckConstructorPage extends Component {
                 searchResultsView: {
                     flex: 11 / 20,
                 },
-                expanded: true
+                expanded: false
             })
         }
     }
@@ -110,9 +113,10 @@ class DeckConstructorPage extends Component {
             expanded: false,
             cardWidth: Dimensions.get("window").width * 0.40
         })
-        // Keyboard.dismiss()
     }
     expandSearchCardsListView = () => {
+        Keyboard.dismiss()
+
         LayoutAnimation.configureNext({
             duration: 1500,
             create: {
@@ -150,11 +154,10 @@ class DeckConstructorPage extends Component {
                     flex: 1,
                     backgroundColor: "#FFF"
                 },
-                expanded: false,
+                expanded: true,
                 cardWidth: Dimensions.get("window").width * 0.80
             })
         }
-        // Keyboard.dismiss()
     }
 
     refreshCards = async () => {
@@ -173,26 +176,17 @@ class DeckConstructorPage extends Component {
         );
     }
     search = async (cardName) => {
+        this.setState({ loading: true })
         try {
             const { data } = await functions.httpsCallable("searchResults")({ name: cardName, type: this.state.cardType })
             this.setState({ cards: data })
         } catch (err) {
             console.error(err)
         }
-    }
-
-    onChange = (item) => {
-        // console.log(`'Current Item', ${item}`);
-    }
-
-    onPress = async (item) => {
-        Alert.alert(`Pressed on current item ${item}`);
-
+        this.setState({ loading: false })
     }
     expandCard = async (cardInfo) => {
-
         this.setState({ selectedCard: cardInfo, popUpVisible: true })
-
     }
     addCard = async (cardInfo) => {
         console.log("card info", cardInfo)
@@ -208,7 +202,7 @@ class DeckConstructorPage extends Component {
         for (let i = 0; i < keys.length; i += 1) {
             const card = keys[i];
             res.push(
-                <TouchableOpacity onPress={() => this.state.cards && this.expandCard(this.state.cards[card])} key={card}>
+                <TouchableOpacity disabled={!this.state.cards} onPress={() => this.state.cards && this.expandCard(this.state.cards[card])} key={card}>
                     <Image
                         key={card}
                         source={this.state.cards ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
@@ -259,7 +253,7 @@ class DeckConstructorPage extends Component {
         return (
 
             <Swipeable
-                style={{ height: 60 }}
+                style={{ height: 60, flex: 1 }}
                 rightButtons={[
                     <TouchableOpacity onPress={async () => await this.deleteCard(item.name)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
                         <Text style={{
@@ -271,33 +265,28 @@ class DeckConstructorPage extends Component {
                 onRightButtonsOpenRelease={onOpen}
                 onRightButtonsCloseRelease={onClose}
             >
-                <View style={[styles.listItem, { backgroundColor: 'white' }]}>
+                <View style={[styles.listItem]}>
                     <Text
-                        style={{
-                            fontSize: 20,
-                            alignSelf: "flex-start",
-                            fontWeight: '800',
-
-                        }}>{item.name}</Text>
-                    <View style={{ position: "absolute", right: 10 }}>
-                        <NumericInput
-                            initValue={item.quantity}
-                            onChange={value => this.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
-                            onLimitReached={(isMax, msg) => console.log(isMax, msg)}
-                            minValue={1}
-                            maxValue={3}
-                            totalWidth={120}
-                            totalHeight={25}
-                            iconSize={25}
-                            step={1}
-                            // containerStyle={{ backgroundColor: "black" }}
-                            valueType='real'
-                            rounded
-                            textColor='#B0228C'
-                            iconStyle={{ color: 'white' }}
-                            rightButtonBackgroundColor="rgb(130, 69, 91)"
-                            leftButtonBackgroundColor="rgb(130, 69, 91)" />
-                    </View>
+                        style={{ fontSize: 20, fontWeight: '800', }}>{item.name}</Text>
+                    <NumericInput
+                        containerStyle={{ position: "absolute", right: 10 }}
+                        initValue={item.quantity}
+                        onChange={value => this.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
+                        onLimitReached={(isMax, msg) => console.log(isMax, msg)}
+                        minValue={1}
+                        maxValue={3}
+                        totalWidth={120}
+                        totalHeight={25}
+                        iconSize={25}
+                        step={1}
+                        editable={false}
+                        // containerStyle={{ backgroundColor: "black" }}
+                        valueType='real'
+                        rounded
+                        textColor='#B0228C'
+                        iconStyle={{ color: 'white' }}
+                        rightButtonBackgroundColor="rgb(130, 69, 91)"
+                        leftButtonBackgroundColor="rgb(130, 69, 91)" />
                 </View>
             </Swipeable>
         )
@@ -308,10 +297,9 @@ class DeckConstructorPage extends Component {
             <TouchableWithoutFeedback accessible={false}>
                 <View style={styles.container}>
                     <View style={{ ...this.state.searchResultsView }}>
-                        <CoverFlow
+                        {!this.state.loading ? <CoverFlow
                             style={{ flex: 1 }}
-                            onChange={this.onChange}
-                            onPress={this.onPress}
+                            onChange={() => true}
                             spacing={100}
                             wingSpan={80}
                             rotation={50}
@@ -322,12 +310,20 @@ class DeckConstructorPage extends Component {
                             initialSelection={5}
                         >
                             {this.getCards()}
-                        </CoverFlow>
+                        </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
                         <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
                             <Image source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
-                        <View style={{ ...styles.deckSearchContainer, marginBottom: 15, marginTop: 15 }}>
-                            <TextInput placeholderTextColor={"#6F8FA9"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} />
+                        <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
+                            <TouchableOpacity onPress={() => {
+                                Keyboard.dismiss()
+                                this._panel.show()
+                            }}>
+                                <Text style={{ color: "white" }}>Advanced Search</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
+                            <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} />
                             <Image source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                         </View>
                         <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
@@ -336,11 +332,12 @@ class DeckConstructorPage extends Component {
                     </View>
 
                     <View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <View style={{ flex: 1 / 9, height: 35, width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                        {/* <View style={{ flex: 1 / 9, height: 35, width: "100%", flexDirection: "row", justifyContent: "center" }}>
                             <Text style={{ fontSize: 30, fontWeight: "800" }}>{this.state.selectedDeck}</Text>
 
-                        </View>
-                        <View style={{ flex: 8 / 9, flexDirection: "row" }}>
+                        </View> */}
+                        <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
+                            <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
                             <FlatList
                                 data={this.state.deckCards}
                                 ItemSeparatorComponent={this.FlatListItemSeparator}
@@ -379,7 +376,7 @@ class DeckConstructorPage extends Component {
                         <DialogContent>
                             <View style={{ justifyContent: "center", alignItems: "center" }}>
 
-                                <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
+                                {!this.state.expanded ? <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
                                     {this.state.selectedCard && <Image
                                         source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
                                         resizeMode="contain"
@@ -388,12 +385,44 @@ class DeckConstructorPage extends Component {
                                             width: Dimensions.get("window").width * 0.70
                                         }}
                                     />}
-                                </TouchableOpacity>
+                                </TouchableOpacity> :
+                                    <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })} style={{
+                                        height: Dimensions.get("window").height * 0.70,
+                                        width: Dimensions.get("window").width * 0.70
+                                    }}></TouchableOpacity>
+                                }
 
                             </View>
                         </DialogContent>
                     </Dialog>
+
+                    <SlidingUpPanel
+                        height={Dimensions.get("window").height * 0.50}
+                        ref={c => this._panel = c}
+                        backdropOpacity={0.25}
+                        backgroundColor={"#00000"}
+                        containerStyle={{ zIndex: 10 }}
+                        draggableRange={{ top: Dimensions.get("window").height * 0.50, bottom: 0 }}
+                    >
+                        <View style={styles.panelStyles}>
+                            <MultiSwitch
+                                currentStatus={'Open'}
+                                disableScroll={value => false}
+                                isParentScrollEnabled={false}
+                                onStatusChanged={text => {
+                                    this.setState({ cardType: text })
+                                    this.onSubmit()
+                                }} />
+                        </View>
+                    </SlidingUpPanel>
+
                 </View>
+
+
+
+
+
+
 
             </TouchableWithoutFeedback>
         );
@@ -462,6 +491,8 @@ const styles = StyleSheet.create({
         height: 75,
         flexDirection: "row",
         justifyContent: 'flex-start',
+        alignItems: "center",
+        flex: 1
 
     },
     leftSwipeItem: {
