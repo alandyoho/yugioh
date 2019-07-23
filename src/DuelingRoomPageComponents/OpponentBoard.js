@@ -2,7 +2,7 @@ import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageB
 import React, { Component } from "react"
 
 
-const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
+const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyardPopup }) => {
     // console.log("type of board being used", typeof opponentBoard)
     return (
         <React.Fragment>
@@ -16,7 +16,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard }) => {
                         {boardsRetrieved == true && opponentBoard.m1[cardIndex]['card'].exists && (opponentBoard.m1[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : (opponentBoard.m1[cardIndex]['card'].defensePosition ? <Image source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <Image source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />))}
                     </TouchableOpacity>
                 ))}
-                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} onPress={() => toggleOpponentGraveyardPopup("request")}>
                     {boardsRetrieved == true && opponentBoard.graveyard.length > 0 && <Image source={{ uri: opponentBoard.graveyard[opponentBoard.graveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>

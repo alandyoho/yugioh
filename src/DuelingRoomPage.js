@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
@@ -38,7 +38,9 @@ class DuelingRoomPage extends Component {
             cardType: { type: "" },
             examinePopupVisible: false,
             graveyardPopupVisible: false,
-            cardInGraveyardPressed: false
+            cardInGraveyardPressed: false,
+            requestingAccessToGraveyardPopupVisible: false,
+            requestApproved: false
         }
     }
     async componentDidMount() {
@@ -83,6 +85,22 @@ class DuelingRoomPage extends Component {
                         this.setState({ waitingForOpponentPopupVisible: false })
                         this.initialDraw()
                     }
+
+                    //find opponent's board
+                    const board = this.state.hosting ? "hostBoard" : "guestBoard"
+
+                    // const board = obj.hostedBy === this.props.user.username ? "hostBoard" : "guestBoard"
+                    //check if opponent is requesting access to Graveyard
+                    if (this.state[board].requestingAccessToGraveyard.popupVisible) {
+                        //if so, present popup 
+                        this.setState({ requestingAccessToGraveyardPopupVisible: true })
+                    } else {
+                        this.setState({ requestingAccessToGraveyardPopupVisible: false })
+                    }
+
+                    if (this.state[board].requestingAccessToGraveyard.approved) {
+                        this.toggleOpponentGraveyardPopup("reveal")
+                    }
                 }
             })
     }
@@ -100,8 +118,16 @@ class DuelingRoomPage extends Component {
         }
     }
 
-    toggleGraveyardPopup = () => {
+    toggleGraveyardPopup = async () => {
+        const board1 = this.state.hosting ? "hostBoard" : "guestBoard"
+        const board2 = this.state.hosting ? "guestBoard" : "hostBoard"
+        const hostUsername = this.state.hostedBy
+        const obj = { hostUsername, board1, board2 }
+        await dismissRequestAccessToGraveyard(obj)
+        this.setState({ requestApproved: false })
+
         this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
+        // this.toggleOpponentGraveyardPopup("dismiss")
     }
 
 
@@ -175,6 +201,25 @@ class DuelingRoomPage extends Component {
         } else if (requestType == "Examine") {
             this.setState({ cardType: cardDetails })
             this.setState({ examinePopupVisible: true })
+        } else if (requestType == "Set-ST-GY") {
+            //update state's graveyard to remove card
+            this.toggleGraveyardPopup()
+            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            //update the card's set property to true
+            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            //update the cardOptionsPresented to the card
+            this.setState({ requestType: "Set-ST-GY", cardOptionsPresented: cardDetails })
+            this.fadeOutHand("Set-ST-GY")
+
+        } else if (requestType == "Activate-GY") {
+            //update state's graveyard to remove card
+            this.toggleGraveyardPopup()
+            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            //update the card's set property to true
+            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            //update the cardOptionsPresented to the card
+            this.setState({ requestType: "Activate-GY", cardOptionsPresented: cardDetails })
+            this.fadeOutHand("Activate-GY")
         }
         //add card info to hand in state    
         //remove from graveyard array in state
@@ -256,6 +301,10 @@ class DuelingRoomPage extends Component {
             cardDetails = { ...cardOptionsPresented }
         } else if (requestType === "Special-GY") {
             cardDetails = { ...cardOptionsPresented }
+        } else if (requestType === "Set-ST-GY") {
+            cardDetails = { ...cardOptionsPresented, set: true }
+        } else if (requestType === "Activate-GY") {
+            cardDetails = { ...cardOptionsPresented, set: false }
         }
         const board = location[0]
         const cardZone = location[1]
@@ -270,7 +319,7 @@ class DuelingRoomPage extends Component {
         } else {
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: false } }
         }
-        if (requestType !== "Special-GY") {
+        if (!requestType.includes("GY")) {
             const filteredHand = [...this.state.hand]
             filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
             this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
@@ -312,6 +361,37 @@ class DuelingRoomPage extends Component {
     getRandomInt = () => {
         return Math.floor(Math.random() * Math.floor(7));
     }
+    // requestAccessToGraveyard = async () => {
+    //     console.log("requesting access (1)")
+    //     const board = this.state.hosting ? "guestBoard" : "hostBoard"
+    //     const hostUsername = this.state.hostedBy
+    //     const obj = { hostUsername, board }
+    //     await requestAccessToGraveyard(obj)
+    // }
+    toggleOpponentGraveyardPopup = async (typeOfRequest) => {
+        if (typeOfRequest == "request") {
+            const board = this.state.hosting ? "guestBoard" : "hostBoard"
+            const hostUsername = this.state.hostedBy
+            const obj = { hostUsername, board }
+            await requestAccessToGraveyard(obj)
+        } else if (typeOfRequest == "dismiss") {
+            const board1 = this.state.hosting ? "hostBoard" : "guestBoard"
+            const board2 = this.state.hosting ? "guestBoard" : "hostBoard"
+            const hostUsername = this.state.hostedBy
+            const obj = { hostUsername, board1, board2 }
+            // this.setState({ requestingAccessToGraveyardPopupVisible: false })
+            await dismissRequestAccessToGraveyard(obj)
+            this.setState({ requestApproved: false, graveyardPopupVisible: false })
+        } else if (typeOfRequest == "approve") {
+            const board1 = this.state.hosting ? "hostBoard" : "guestBoard"
+            const board2 = this.state.hosting ? "guestBoard" : "hostBoard"
+            const hostUsername = this.state.hostedBy
+            const obj = { hostUsername, board1, board2 }
+            await approveAccessToGraveyard(obj)
+        } else if (typeOfRequest == "reveal") {
+            this.setState({ requestApproved: true, graveyardPopupVisible: true })
+        }
+    }
 
     render() {
         const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed } = this.state
@@ -326,7 +406,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 2 / 20 }}>
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
-                    <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} />
+                    <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
                 </View>
                 <View style={{ flex: 2 / 20, justifyContent: "center", alignItems: "center" }}>
                     <Button
@@ -352,7 +432,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
             </View>
         )
     }

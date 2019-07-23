@@ -4,8 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions }) => {
-    // const gyLength = () => graveyard && graveyard.length && graveyard.length % 3 === 0 ? 3 : (graveyard.length % 2 === 0 ? 2 : 1)
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard }) => {
     const size = Dimensions.get('window').width / 3;
     return (
         <React.Fragment>
@@ -206,10 +205,10 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 <TouchableOpacity onPress={() => manageCardInGraveyard("Return-To-Hand")}>
                                     <Text>Return to Hand</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardInGraveyard("Activate-Facedown")}>
+                                <TouchableOpacity onPress={() => manageCardInGraveyard("Activate-GY")}>
                                     <Text>Activate</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardOnBoard("Set-ST")}>
+                                <TouchableOpacity onPress={() => manageCardInGraveyard("Set-ST-GY")}>
                                     <Text>Set</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
@@ -240,7 +239,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
             >
                 <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "white", height: Dimensions.get("window").height * 0.80 }}>
                     <FlatList
-                        data={graveyard}
+                        data={opponentGraveyard.length ? opponentGraveyard : graveyard}
                         style={{ flex: 1 }}
                         renderItem={({ item }) => (
                             <View style={{
@@ -264,6 +263,44 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
 
                 </DialogContent>
             </Dialog>
+
+
+
+
+            <Dialog
+                visible={requestingAccessToGraveyardPopupVisible}
+                width={0.40}
+                height={0.20}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={() => toggleOpponentGraveyardPopup("dismiss")}
+                overlayOpacity={0}
+                footer={
+                    <DialogFooter>
+                        <DialogButton
+                            style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
+                            textStyle={{ color: "white" }}
+                            text="Approve"
+                            onPress={() => toggleOpponentGraveyardPopup("approve")}
+                        />
+                    </DialogFooter>
+                }
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        <Text>Opponent would like to see your graveyard...</Text>
+
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
+
+
+
 
 
         </React.Fragment>
