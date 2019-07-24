@@ -18,7 +18,8 @@ class DuelingRoomPage extends Component {
         super()
         this.state = {
             selectedDeck: "",
-            cards: [],
+            mainDeck: [],
+            extraDeck: [],
             hand: [],
             guestBoard: {},
             hostBoard: {},
@@ -40,7 +41,9 @@ class DuelingRoomPage extends Component {
             graveyardPopupVisible: false,
             cardInGraveyardPressed: false,
             requestingAccessToGraveyardPopupVisible: false,
-            requestApproved: false
+            requestApproved: false,
+            extraDeckPopupVisible: false,
+            cardInExtraDeckPressed: false
         }
     }
     async componentDidMount() {
@@ -65,11 +68,9 @@ class DuelingRoomPage extends Component {
 
     listenForGameChanges = (obj) => {
         if (obj.hostedBy == "") {
-            console.log("hostedBy", obj.hostedBy)
-            console.log("hosting username", this.props.user.username)
+
             obj.hostedBy = this.props.user.username
         } else {
-            console.log("hostedBy", obj.hostedBy)
         }
         this.setState({ hosting: obj.hosting, hostedBy: obj.hostedBy })
         firestore.collection("rooms").doc(obj.hostedBy)
@@ -78,7 +79,6 @@ class DuelingRoomPage extends Component {
                     const { guestBoard, hostBoard, opponent } = doc.data()
 
                     this.setState({ guestBoard, hostBoard, opponent })
-                    // console.log("guest board", guestBoard)
                     this.setState({ boardsRetrieved: true })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
@@ -106,15 +106,21 @@ class DuelingRoomPage extends Component {
     }
     presentCardOnBoardOptions = (cardInfo) => {
         const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
-
-
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
+
     toggleCardInGraveyardOptions = (cardType) => {
         if (!cardType) {
             this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed })
         } else {
             this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed, cardType })
+        }
+    }
+    toggleCardInExtraDeckOptions = (cardType) => {
+        if (!cardType) {
+            this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed })
+        } else {
+            this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed, cardType })
         }
     }
 
@@ -128,6 +134,9 @@ class DuelingRoomPage extends Component {
 
         this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
         // this.toggleOpponentGraveyardPopup("dismiss")
+    }
+    toggleExtraDeckPopup = async () => {
+        this.setState({ extraDeckPopupVisible: !this.state.extraDeckPopupVisible })
     }
 
 
@@ -144,9 +153,16 @@ class DuelingRoomPage extends Component {
         if (requestType == "Return-To-Hand") {
             boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
             cardDetails.defensePosition = false
-            const modifiedHand = [...this.state.hand, cardDetails]
-            this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
-            await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            if (extraDeckTypes.includes(cardDetails.type)) {
+                const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
+                this.setState({ [board]: boardCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
+                await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            } else {
+                const modifiedHand = [...this.state.hand, cardDetails]
+                this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
+                await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            }
         } else if (requestType == "Change-Position") {
             const curPosition = !boardCopy[cardZone][cardZoneIndex]["card"].defensePosition
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: curPosition } }
@@ -163,7 +179,6 @@ class DuelingRoomPage extends Component {
             this.setState({ [board]: boardCopy, cardInfo: "" })
             await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
         } else if (requestType == "Examine") {
-            console.log("examine triggered")
             this.toggleExaminePopup()
         }
         this.setState({ cardOnFieldPressedPopupVisible: false })
@@ -176,7 +191,6 @@ class DuelingRoomPage extends Component {
     manageCardInGraveyard = async (requestType) => {
 
         // console.log("request type", requestType)
-        console.log("corresponding card", this.state.cardType)
 
         this.toggleCardInGraveyardOptions()
         const cardDetails = this.state.cardType
@@ -187,11 +201,21 @@ class DuelingRoomPage extends Component {
         let graveyard = boardCopy["graveyard"]
 
         if (requestType == "Return-To-Hand") {
+
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            if (extraDeckTypes.includes(cardDetails.type)) {
+                const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
+                boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+                this.setState({ [board]: boardCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
+                await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            } else {
+                boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+                const modifiedHand = [...this.state.hand, cardDetails]
+                this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
+                await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            }
             this.toggleGraveyardPopup()
-            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
-            const modifiedHand = [...this.state.hand, cardDetails]
-            this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
-            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+
         } else if (requestType == "Special-GY") {
             this.toggleGraveyardPopup()
             boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
@@ -221,35 +245,48 @@ class DuelingRoomPage extends Component {
             this.setState({ requestType: "Activate-GY", cardOptionsPresented: cardDetails })
             this.fadeOutHand("Activate-GY")
         }
-        //add card info to hand in state    
-        //remove from graveyard array in state
-        //else if special summon
-        //
+    }
+    manageCardInExtraDeck = (requestType) => {
+        console.log("corresponding card", this.state.cardType)
+        this.toggleCardInExtraDeckOptions()
+        const cardDetails = this.state.cardType
+        const board = this.state.hosting ? "hostBoard" : "guestBoard"
+        // let boardCopy = { ...this.state[board] }
+        if (requestType == "Special-ED") {
+            let filteredExtraDeck = [...this.state.extraDeck]
+            console.log("deck length before", filteredExtraDeck.length)
+            filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
+            console.log("deck length after", filteredExtraDeck.length)
+            this.toggleExtraDeckPopup()
 
-        // else if (requestType == "Examine") {
-        //     console.log("examine triggered")
-        //     this.toggleExaminePopup()
-        // } else if (requestType == "Special") {
-        //     console.log("examine triggered")
-        //     this.toggleExaminePopup()
-        // }
+            // const filteredHand = [...this.state.hand]
+            // filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
+
+
+
+            this.setState({ requestType: "Special-ED", cardOptionsPresented: cardDetails, extraDeck: filteredExtraDeck })
+        } else if (requestType == "Examine-ED") {
+            this.setState({ cardType: cardDetails })
+            this.setState({ examinePopupVisible: true })
+        }
+
     }
 
 
     initialDraw = async () => {
-        const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
+        const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         //set the state with shuffled retrieved cards and selected deck
-        this.setState({ selectedDeck: this.props.selectedDeck, cards: GameLogic.shared.shuffleDeck(cards) })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.shuffleDeck(mainDeck), extraDeck: GameLogic.shared.shuffleDeck(extraDeck) })
 
         //set the state with five cards 
-        const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.cards)
-        this.setState({ hand: drawnCards, cards: shallowCards })
+        const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.mainDeck)
+        this.setState({ hand: drawnCards, mainDeck: shallowCards })
     }
 
     drawCard = () => {
-        if (this.state.cards.length) {
-            const { drewCard, shallowCards } = GameLogic.shared.drawCard(this.state.cards)
-            this.setState({ hand: [...this.state.hand, drewCard], cards: shallowCards })
+        if (this.state.mainDeck.length) {
+            const { drewCard, shallowCards } = GameLogic.shared.drawCard(this.state.mainDeck)
+            this.setState({ hand: [...this.state.hand, drewCard], mainDeck: shallowCards })
         }
     }
     leaveDuel = () => {
@@ -305,6 +342,8 @@ class DuelingRoomPage extends Component {
             cardDetails = { ...cardOptionsPresented, set: true }
         } else if (requestType === "Activate-GY") {
             cardDetails = { ...cardOptionsPresented, set: false }
+        } else if (requestType === "Special-ED") {
+            cardDetails = { ...cardOptionsPresented, set: false }
         }
         const board = location[0]
         const cardZone = location[1]
@@ -319,7 +358,7 @@ class DuelingRoomPage extends Component {
         } else {
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: false } }
         }
-        if (!requestType.includes("GY")) {
+        if (!requestType.includes("GY") && !requestType.includes("ED")) {
             const filteredHand = [...this.state.hand]
             filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
             this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
@@ -394,9 +433,10 @@ class DuelingRoomPage extends Component {
     }
 
     render() {
-        const { backgroundImageUrl, boardsRetrieved, cards, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed } = this.state
+        const { backgroundImageUrl, boardsRetrieved, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
+        // const { extraDeck } = this.state[properBoard]
         return (
             <View style={styles.container}>
                 <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
@@ -427,12 +467,12 @@ class DuelingRoomPage extends Component {
                     />
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                    <RoomHostBoard boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} cards={cards} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} />
+                    <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} />
                 </View>
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} />
             </View>
         )
     }

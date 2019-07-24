@@ -4,7 +4,7 @@ import NumericInput from 'react-native-numeric-input'
 
 
 const updateUserInfo = (obj) => {
-    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "", hosting: false }, { merge: true })
+    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "", hosting: false, decks: [] }, { merge: true })
     var authUser = auth.currentUser;
     authUser.updateProfile({
         displayName: obj.username
@@ -14,14 +14,14 @@ const updateUserInfo = (obj) => {
         // An error happened.
     });
 }
-const updateDeckInfo = async (obj) => {
+const updateMainDeckInfo = async (obj) => {
     const { decks } = await retrieveDeckInfo(obj.username)
     if (decks && decks.includes(obj.deck)) {
         // console.log("deck already exists")
         return false
     }
     firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).set({
-        "cards": []
+        "mainDeck": [], "extraDeck": []
     })
     return firestore.collection("users").doc(obj.username).update({
         "decks": firebase.firestore.FieldValue.arrayUnion(obj.deck)
@@ -39,27 +39,52 @@ const deleteDeck = async (obj) => {
 }
 
 const deleteCard = async (obj) => {
-    const { cards } = await retrieveCardsFromDeck(obj)
-    const filteredCard = cards.filter(card => card.name != obj.card)
-    firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).set({
-        "cards": filteredCard
-    })
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+    const { mainDeck, extraDeck } = await retrieveCardsFromDeck(obj)
+
+    if (extraDeckTypes.includes(obj.card.type)) {
+        const filteredCard = extraDeck.filter(card => card.id != obj.card.id)
+        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).set({
+            "extraDeck": filteredCard
+        }, { merge: true })
+    } else {
+        const filteredCard = mainDeck.filter(card => card.id != obj.card.id)
+        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).set({
+            "mainDeck": filteredCard
+        }, { merge: true })
+    }
 }
 const removeCardsFromDeck = async (obj) => {
     //check quantity property.
-    const { cards } = await retrieveCardsFromDeck(obj)
-    console.log("cards from deck", cards)
-    const filt = cards.filter(card => card.id == obj.card.id)
-    if (filt.length && obj.val == 0) {
-        await deleteCard(obj)
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+    const { mainDeck, extraDeck } = await retrieveCardsFromDeck(obj)
+    if (extraDeckTypes.includes(obj.card.type)) {
+        const filt = extraDeck.filter(card => card.id == obj.card.id)
+        if (filt.length && obj.val == 0) {
+            await deleteCard(obj)
+        } else {
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "extraDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])
+            })
+            filt[0].quantity = obj.val
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "extraDeck": firebase.firestore.FieldValue.arrayUnion(filt[0])
+            })
+        }
     } else {
-        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
-            "cards": firebase.firestore.FieldValue.arrayRemove(filt[0])
-        })
-        filt[0].quantity = obj.val
-        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
-            "cards": firebase.firestore.FieldValue.arrayUnion(filt[0])
-        })
+        // console.log("cards from deck", cards)
+        const filt = mainDeck.filter(card => card.id == obj.card.id)
+        if (filt.length && obj.val == 0) {
+            await deleteCard(obj)
+        } else {
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "mainDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])
+            })
+            filt[0].quantity = obj.val
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "mainDeck": firebase.firestore.FieldValue.arrayUnion(filt[0])
+            })
+        }
     }
     //if quantity property === 1
     //delete card from deck
@@ -99,28 +124,59 @@ const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 
     //else add card to deck model and set quantity property to 1
-    const { cards } = await retrieveCardsFromDeck(obj)
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
 
-    const filt = cards.filter(card => card.id == obj.card.id)
-    //check if card exists in "deck" model
-    //if exists, increase quantity property by one 
-    if (filt.length && filt[0].quantity <= 3) {
-        if (filt[0].quantity === 3) return "max quantity reached"
-        // const quant = filt[0].quantity
-        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
-            "cards": firebase.firestore.FieldValue.arrayRemove(filt[0])
-        })
-        filt[0].quantity = obj.val
-        firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
-            "cards": firebase.firestore.FieldValue.arrayUnion(filt[0])
-        })
+    if (extraDeckTypes.includes(obj.card.type)) {
+        const { extraDeck } = await retrieveCardsFromDeck(obj)
+        const filt = extraDeck.filter(card => card.id == obj.card.id)
+        //check if card exists in "deck" model
+        //if exists, increase quantity property by one 
+        if (filt.length && filt[0].quantity <= 3) {
+            if (filt[0].quantity === 3) return "max quantity reached"
+            // const quant = filt[0].quantity
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "extraDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])
+            })
+            filt[0].quantity = obj.val
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "extraDeck": firebase.firestore.FieldValue.arrayUnion(filt[0])
+            })
+        } else {
+            obj.card.set = false
+            obj.card.quantity = 1
+            return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "extraDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
+            })
+        }
+
     } else {
-        obj.card.set = false
-        obj.card.quantity = 1
-        return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
-            "cards": firebase.firestore.FieldValue.arrayUnion(obj.card)
-        })
+        const { mainDeck } = await retrieveCardsFromDeck(obj)
+
+        const filt = mainDeck.filter(card => card.id == obj.card.id)
+        //check if card exists in "deck" model
+        //if exists, increase quantity property by one 
+        if (filt.length && filt[0].quantity <= 3) {
+            if (filt[0].quantity === 3) return "max quantity reached"
+            // const quant = filt[0].quantity
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "mainDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])
+            })
+            filt[0].quantity = obj.val
+            firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "mainDeck": firebase.firestore.FieldValue.arrayUnion(filt[0])
+            })
+        } else {
+            obj.card.set = false
+            obj.card.quantity = 1
+            return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
+                "mainDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
+            })
+        }
     }
+
+
+
+
 }
 
 const retrieveDeckInfo = (username) => {
@@ -131,7 +187,7 @@ const retrieveCardsFromDeck = (obj) => {
 }
 
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: 0, st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [] }, guestBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: 0, st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [] } })
+    firestore.collection("rooms").doc(obj).set({ opponent: "", hostBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: 0, st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [] }, guestBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: 0, st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [] } })
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 
@@ -171,4 +227,4 @@ const listenForBoardUpdates = (obj) => {
     return firestore.collection("rooms").doc(obj).onSnapshot(function (doc) { return doc.data() })
 }
 
-export { updateUserInfo, updateDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard }
+export { updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard }

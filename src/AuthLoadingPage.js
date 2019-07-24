@@ -20,11 +20,16 @@ class AuthLoadingScreen extends Component {
     authSubscription = async () => {
         await setTimeout(async () => {
             await firebase.auth().onAuthStateChanged(async (user) => {
-                if (user) {
+                if (user && user.displayName) {
                     this.props.navigation.navigate("App")
                     this.props.createUser({ username: user.displayName, email: user.email })
-                    const { decks } = await retrieveDeckInfo(user.displayName)
-                    this.props.updateDeckList(decks)
+                    console.log("displayname", user)
+                    try {
+                        const { decks } = await retrieveDeckInfo(user.displayName)
+                        this.props.updateDeckList(decks)
+                    } catch (err) {
+                        console.error(err)
+                    }
                 } else {
                     this.props.navigation.navigate("Auth")
                 }

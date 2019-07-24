@@ -12,7 +12,7 @@ exports.searchResults = functions.https.onRequest(async (request, response) => {
 
     const cardParser = (cardType) => {
         if (cardType == 'Open') {
-            return `type=effect%20monster`
+            return ``
         } else if (cardType == 'In Progress') {
             return `type=spell%20card`
         } else if (cardType == "Complete") {
@@ -35,7 +35,8 @@ exports.searchResults = functions.https.onRequest(async (request, response) => {
         console.log("2", dataAsArr)
         response.send({ data: dataAsArr })
     } catch (err) {
-        console.error(err)
+        response.send({ data: false })
+        // console.error(err)
     }
 });
 

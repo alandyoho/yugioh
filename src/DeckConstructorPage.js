@@ -19,8 +19,10 @@ class DeckConstructorPage extends Component {
         super(props);
         this.state = {
             search: "",
-            cards: null,
-            deckCards: [],
+            cards: {},
+            mainDeck: [],
+            extraDeck: [],
+            extraDeckCardsVisible: false,
             selectedDeck: "",
             visible: false,
             cardType: "Open",
@@ -43,7 +45,7 @@ class DeckConstructorPage extends Component {
     }
     componentDidMount = async () => {
         await this.refreshCards()
-        console.log("cards", this.state.deckCards)
+        // console.log("cards", this.state.mainDeck)
     }
 
 
@@ -161,8 +163,8 @@ class DeckConstructorPage extends Component {
     }
 
     refreshCards = async () => {
-        const { cards } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
-        this.setState({ selectedDeck: this.props.selectedDeck, deckCards: cards })
+        const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck, extraDeck })
     }
     FlatListItemSeparator = () => {
         return (
@@ -179,7 +181,7 @@ class DeckConstructorPage extends Component {
         this.setState({ loading: true })
         try {
             const { data } = await functions.httpsCallable("searchResults")({ name: cardName, type: this.state.cardType })
-            this.setState({ cards: data })
+            data && this.setState({ cards: data })
         } catch (err) {
             console.error(err)
         }
@@ -198,14 +200,17 @@ class DeckConstructorPage extends Component {
 
     getCards() {
         const res = [];
-        const keys = Object.keys(this.state.cards ? this.state.cards : CARDS);
-        for (let i = 0; i < keys.length; i += 1) {
+        const exists = Object.keys(this.state.cards).length
+        const keys = exists ? Object.keys(this.state.cards) : Object.keys(CARDS)
+        console.log("keys:", keys)
+        for (let i = 0; i < keys.length; i++) {
             const card = keys[i];
+            console.log("here's the card", card)
             res.push(
-                <TouchableOpacity disabled={!this.state.cards} onPress={() => this.state.cards && this.expandCard(this.state.cards[card])} key={card}>
+                <TouchableOpacity disabled={!exists} onPress={() => exists && this.expandCard(this.state.cards[card])} key={card}>
                     <Image
                         key={card}
-                        source={this.state.cards ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
+                        source={exists ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
 
                         resizeMode="contain"
                         style={{
@@ -214,7 +219,7 @@ class DeckConstructorPage extends Component {
                         }}
                     />
                 </TouchableOpacity>
-            );
+            )
         }
         return res;
     }
@@ -224,20 +229,18 @@ class DeckConstructorPage extends Component {
         }
     }
     deleteCard = async (card) => {
-        await deleteCard({ username: this.props.user.username, deck: this.state.selectedDeck, card: card })
+        await deleteCard({ username: this.props.user.username, deck: this.state.selectedDeck, card })
         await this.refreshCards()
     }
-    refreshCardInfo = async () => {
-        const { cards } = await retrieveDeckInfo(this.props.user.username)
-        this.setState({ decks })
-    }
     updateCardQuantity = async (obj) => {
-        console.log("what we have to work with", obj)
         if (obj.value > obj.card.quantity) {
             await addCardsToDeck({ ...obj, val: obj.value })
         } else if (obj.value < obj.card.quantity) {
             await removeCardsFromDeck({ ...obj, val: obj.value })
         }
+    }
+    switchDisplayedDeck = () => {
+        this.setState({ extraDeckCardsVisible: !this.state.extraDeckCardsVisible })
     }
 
     renderItem = ({ item }) => {
@@ -255,7 +258,7 @@ class DeckConstructorPage extends Component {
             <Swipeable
                 style={{ height: 60, flex: 1 }}
                 rightButtons={[
-                    <TouchableOpacity onPress={async () => await this.deleteCard(item.name)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
+                    <TouchableOpacity onPress={async () => await this.deleteCard(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
                         <Text style={{
                             fontWeight: '800',
                             fontSize: 18
@@ -280,7 +283,6 @@ class DeckConstructorPage extends Component {
                         iconSize={25}
                         step={1}
                         editable={false}
-                        // containerStyle={{ backgroundColor: "black" }}
                         valueType='real'
                         rounded
                         textColor='#B0228C'
@@ -307,7 +309,7 @@ class DeckConstructorPage extends Component {
                             scaleDown={0.8}
                             scaleFurther={0.75}
                             perspective={800}
-                            initialSelection={5}
+                            initialSelection={0}
                         >
                             {this.getCards()}
                         </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
@@ -332,14 +334,16 @@ class DeckConstructorPage extends Component {
                     </View>
 
                     <View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        {/* <View style={{ flex: 1 / 9, height: 35, width: "100%", flexDirection: "row", justifyContent: "center" }}>
-                            <Text style={{ fontSize: 30, fontWeight: "800" }}>{this.state.selectedDeck}</Text>
-
-                        </View> */}
                         <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
+                            <TouchableOpacity style={{ position: "absolute", left: 5, top: 0, height: 41, width: 41, flexDirection: "row" }} onPress={() => this.switchDisplayedDeck()}>
+                                <Image source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                                <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
+                            </TouchableOpacity>
+
+
                             <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
                             <FlatList
-                                data={this.state.deckCards}
+                                data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
                                 ItemSeparatorComponent={this.FlatListItemSeparator}
                                 contentContainerStyle={{ justifyContent: 'center' }}
                                 renderItem={(item) => this.renderItem(item)}

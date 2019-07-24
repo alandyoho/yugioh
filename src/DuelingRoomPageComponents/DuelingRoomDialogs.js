@@ -4,15 +4,46 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck }) => {
     const size = Dimensions.get('window').width / 3;
     return (
         <React.Fragment>
+
+
+            <Dialog
+                visible={cardInExtraDeckPressed}
+                width={0.40}
+                height={0.20}
+                children={[]}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={toggleCardInExtraDeckOptions}
+                overlayOpacity={0}
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        <React.Fragment>
+                            <TouchableOpacity onPress={() => manageCardInExtraDeck("Examine")}>
+                                <Text>Examine</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => manageCardInExtraDeck("Special-ED")}>
+                                <Text>Special Summon</Text>
+                            </TouchableOpacity>
+                        </React.Fragment>
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
 
             <Dialog
                 visible={waitingForOpponentPopupVisible}
                 width={0.85}
                 height={0.40}
+                children={[]}
                 dialogAnimation={new ScaleAnimation({
                     initialValue: 0, // optional
                     useNativeDriver: true, // optional
@@ -33,6 +64,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
                 })}
+                children={[]}
                 onTouchOutside={dismissCardPopup}
                 overlayOpacity={0}
                 dialogStyle={{ position: 'absolute', bottom: 180 }}
@@ -85,6 +117,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 visible={cardOnFieldPressedPopupVisible}
                 width={0.40}
                 height={0.20}
+                children={[]}
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
                 })}
@@ -143,6 +176,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
                 visible={examinePopupVisible}
                 overlayOpacity={0}
+                children={[]}
                 onTouchOutside={toggleExaminePopup}
                 dialogAnimation={new ScaleAnimation({
                     initialValue: 0, // optional
@@ -174,6 +208,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 visible={cardInGraveyardPressed}
                 width={0.40}
                 height={0.20}
+                children={[]}
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
                 })}
@@ -217,9 +252,45 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                     </View>
                 </DialogContent>
             </Dialog>
+            <Dialog
+                visible={extraDeckPopupVisible}
+                overlayOpacity={0}
+                children={[]}
+                onTouchOutside={toggleExtraDeckPopup}
+                dialogAnimation={new ScaleAnimation({
+                    initialValue: 0, // optional
+                    useNativeDriver: true, // optional
+                })}
+                width={1.0}
+                height={0.80}
+                dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width, height: Dimensions.get("window").height * 0.80 }}
+            >
+                <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "white", height: Dimensions.get("window").height * 0.80 }}>
+                    <FlatList
+                        data={extraDeck}
+                        style={{ flex: 1 }}
+                        renderItem={({ item }) => (
+                            <View style={{
+                                width: size,
+                                height: size,
+                                marginTop: 30,
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}>
+                                <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInExtraDeckOptions(item)}>
+                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                        width: 100, height: 200
+                                    }} />}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        keyExtractor={item => item.id}
+                        numColumns={3} />
 
 
-
+                </DialogContent>
+            </Dialog>
 
 
 
@@ -228,6 +299,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
             <Dialog
                 visible={graveyardPopupVisible}
                 overlayOpacity={0}
+                children={[]}
                 onTouchOutside={toggleGraveyardPopup}
                 dialogAnimation={new ScaleAnimation({
                     initialValue: 0, // optional
@@ -274,12 +346,15 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
                 })}
+                containerStyle={{ backgroundColor: "transparent" }}
                 onTouchOutside={() => toggleOpponentGraveyardPopup("dismiss")}
                 overlayOpacity={0}
+                children={[]}
                 footer={
                     <DialogFooter>
                         <DialogButton
                             style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
+
                             textStyle={{ color: "white" }}
                             text="Approve"
                             onPress={() => toggleOpponentGraveyardPopup("approve")}
