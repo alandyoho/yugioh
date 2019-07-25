@@ -340,7 +340,7 @@ class DuelingRoomPage extends Component {
         } else if (requestType === "Examine") {
             cardDetails = { ...cardOptionsPresented }
         } else if (requestType === "Special-GY") {
-            cardDetails = { ...cardOptionsPresented }
+            cardDetails = { ...cardOptionsPresented, set: false }
         } else if (requestType === "Set-ST-GY") {
             cardDetails = { ...cardOptionsPresented, set: true }
         } else if (requestType === "Activate-GY") {
@@ -353,6 +353,8 @@ class DuelingRoomPage extends Component {
         const cardZoneIndex = location[2]
 
         if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
+            console.log("nope!")
+            this.setState({ cardOptionsPresented: false, requestType: "" })
             return this.fadeInHand()
         }
         let boardCopy = { ...this.state[board] }
