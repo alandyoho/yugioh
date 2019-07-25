@@ -2,8 +2,7 @@ import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-nati
 import React from "react"
 // import console = require('console');
 
-const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck }) => {
-    // console.log("asdfasdf", typeof properBoard)
+const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck, toggleMainDeckOptions }) => {
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>
@@ -37,7 +36,7 @@ const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard,
                 ))}
 
 
-                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2, justifyContent: "center", alignItems: "center" }} onPress={drawCard} >
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2, justifyContent: "center", alignItems: "center" }} onPress={toggleMainDeckOptions} >
                     {mainDeck.length > 0 && <ImageBackground source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ width: "100%", height: "100%" }} >
                         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: "transparent" }}>
 

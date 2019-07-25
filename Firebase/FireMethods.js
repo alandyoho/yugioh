@@ -176,10 +176,6 @@ const addCardsToDeck = async (obj) => {
             })
         }
     }
-
-
-
-
 }
 
 const retrieveDeckInfo = (username) => {
@@ -221,31 +217,6 @@ const leaveDuel = async (obj) => {
         console.log("request is being made by room guest")
     }
     firestore.collection("users").doc(username).set({ hostedBy: "", hosting: false }, { merge: true })
-
-    // //find out if is primary host
-    // const { opponent } = await firestore.collection("rooms").doc(obj).get().then(function (doc) {
-    //     if (doc.exists) {
-    //         //then the person making the request is the room host
-    //         // console.log("doc exists")
-    //         return doc.data()
-    //     } else {
-    //         //then the person making the request is the room guest
-    //         // console.log("doc doesn't exist")
-    //         return { opponent: "doc doesn't exists" }
-    //     }
-    // })
-    // console.log("opponent", opponent)
-    // if (opponent == "doc doesn't exist") {
-    //     firestore.collection("rooms").doc(obj).set({ hostedBy: "", hosting: false }, { merge: true })
-    // } else {
-
-    //     firestore.collection("rooms").doc(obj).delete()
-    // }
-
-
-
-
-    //if so, delete room entry from firebase as well
 }
 
 const listenForBoardUpdates = (obj) => {

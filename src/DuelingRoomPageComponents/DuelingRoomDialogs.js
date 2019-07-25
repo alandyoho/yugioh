@@ -5,10 +5,39 @@ import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAn
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal }) => {
-    const size = Dimensions.get('window').width / 3;
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard }) => {
+    const size = Dimensions.get('window').width / 3
     return (
         <React.Fragment>
+            <Dialog
+                visible={mainDeckOptionsVisible}
+                width={0.40}
+                height={0.20}
+                children={[]}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={toggleMainDeckOptions}
+                overlayOpacity={0}
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        <React.Fragment>
+                            <TouchableOpacity onPress={drawCard}>
+                                <Text>Draw</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => true}>
+                                <Text>View</Text>
+                            </TouchableOpacity>
+                        </React.Fragment>
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
+
+
             <Dialog
                 visible={calculatorVisible}
                 width={0.50}
