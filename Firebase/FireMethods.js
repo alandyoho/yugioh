@@ -196,7 +196,7 @@ const hostDuel = (obj) => {
 
 const returnAvailableDuels = async (requestId) => {
     const snapshot = await firebase.firestore().collection('rooms').get()
-    const docsWithRequestIdFiltered = snapshot.docs.filter(doc => doc.id != requestId).map(d => d.data()).filter(c => { console.log("filtering out full rooms", c); return c.opponent === "" }).map(d => d.host)
+    const docsWithRequestIdFiltered = snapshot.docs.filter(doc => doc.id != requestId).map(d => d.data()).filter(c => c.opponent === "").map(d => d.host)
     // filter(d => d.data().opponent === "")
     console.log(docsWithRequestIdFiltered)
     return docsWithRequestIdFiltered
@@ -217,7 +217,6 @@ const leaveDuel = async (obj) => {
         }
     })
     if (obj == opponent) {
-
     } else {
 
         firestore.collection("rooms").doc(obj).delete()
