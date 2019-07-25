@@ -225,8 +225,8 @@ class DuelingRoomPage extends Component {
 
         } else if (requestType == "Special-GY") {
             this.toggleGraveyardPopup()
-            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
-            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            // boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            // await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
             this.setState({ requestType: "Special-GY", cardOptionsPresented: cardDetails })
 
         } else if (requestType == "Examine") {
@@ -360,6 +360,11 @@ class DuelingRoomPage extends Component {
             boardCopy[cardZone].push(cardDetails)
         } else {
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: false } }
+        }
+        if (requestType === "Special-GY") {
+            let graveyard = boardCopy["graveyard"]
+            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
         }
         if (!requestType.includes("GY") && !requestType.includes("ED")) {
             const filteredHand = [...this.state.hand]
