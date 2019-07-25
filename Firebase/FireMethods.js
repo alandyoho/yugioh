@@ -2,6 +2,9 @@ import { firestore, firebaseApp, auth, functions } from "./Fire"
 import firebase from 'firebase';
 import NumericInput from 'react-native-numeric-input'
 
+const updateLifePointsField = (val) => {
+
+}
 
 const updateUserInfo = (obj) => {
     firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "", hosting: false, decks: [] }, { merge: true })
@@ -227,4 +230,4 @@ const listenForBoardUpdates = (obj) => {
     return firestore.collection("rooms").doc(obj).onSnapshot(function (doc) { return doc.data() })
 }
 
-export { updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard }
+export { updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField }

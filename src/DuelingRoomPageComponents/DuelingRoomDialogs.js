@@ -3,11 +3,32 @@ import { View, Image, Text, Dimensions, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
+import LifePointsCalculator from "../LifePointsCalculator"
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal }) => {
     const size = Dimensions.get('window').width / 3;
     return (
         <React.Fragment>
+            <Dialog
+                visible={calculatorVisible}
+                width={0.50}
+                height={0.50}
+                children={[]}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={toggleLifePointsCalculator}
+                overlayOpacity={0}
+                dialogStyle={{ backgroundColor: "transparent" }}
+            >
+
+                <DialogContent style={{ flex: 1 }}>
+                    <LifePointsCalculator hostLifePoints={hostLifePoints} guestLifePoints={guestLifePoints} hostLifePointsSelected={hostLifePointsSelected} returnNewLifePointVal={returnNewLifePointVal} toggleLifePointsCalculator={toggleLifePointsCalculator} />
+                </DialogContent>
+            </Dialog>
+
+
+
 
 
             <Dialog
@@ -26,7 +47,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
                         <React.Fragment>
-                            <TouchableOpacity onPress={() => manageCardInExtraDeck("Examine")}>
+                            <TouchableOpacity onPress={() => manageCardInExtraDeck("Examine-ED")}>
                                 <Text>Examine</Text>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => manageCardInExtraDeck("Special-ED")}>

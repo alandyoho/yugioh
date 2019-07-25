@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePointsField } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
@@ -43,7 +43,11 @@ class DuelingRoomPage extends Component {
             requestingAccessToGraveyardPopupVisible: false,
             requestApproved: false,
             extraDeckPopupVisible: false,
-            cardInExtraDeckPressed: false
+            cardInExtraDeckPressed: false,
+            hostLifePoints: 8000,
+            guestLifePoints: 8000,
+            hostLifePointsSelected: false,
+            calculatorVisible: false
         }
     }
     async componentDidMount() {
@@ -65,6 +69,9 @@ class DuelingRoomPage extends Component {
         this.setState({ examinePopupVisible: !this.state.examinePopupVisible })
     }
 
+    alterLifePoints = (type) => {
+        this.setState({ hostLifePointsSelected: type == "host" ? true : false, calculatorVisible: true })
+    }
 
     listenForGameChanges = (obj) => {
         if (obj.hostedBy == "") {
@@ -258,18 +265,14 @@ class DuelingRoomPage extends Component {
             filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
             console.log("deck length after", filteredExtraDeck.length)
             this.toggleExtraDeckPopup()
-
-            // const filteredHand = [...this.state.hand]
-            // filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
-
-
-
             this.setState({ requestType: "Special-ED", cardOptionsPresented: cardDetails, extraDeck: filteredExtraDeck })
         } else if (requestType == "Examine-ED") {
-            this.setState({ cardType: cardDetails })
-            this.setState({ examinePopupVisible: true })
-        }
 
+
+
+            this.setState({ cardType: cardDetails })
+            this.setState({ examinePopupVisible: true, cardPopupVisible: false })
+        }
     }
 
 
@@ -397,6 +400,12 @@ class DuelingRoomPage extends Component {
             }} />
         )
     }
+    toggleLifePointsCalculator = () => {
+        this.setState({ calculatorVisible: !this.state.calculatorVisible })
+    }
+    returnNewLifePointVal = (val) => {
+        this.setState({ [val.proper]: val.calculation })
+    }
     getRandomInt = () => {
         return Math.floor(Math.random() * Math.floor(7));
     }
@@ -448,23 +457,33 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
                     <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
                 </View>
-                <View style={{ flex: 2 / 20, justifyContent: "center", alignItems: "center" }}>
+                <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
+
+                    <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                        <Text>{this.state.hosting ? this.state.hostedBy : this.state.opponent}</Text>
+                        <TouchableOpacity onPress={() => this.alterLifePoints("host")}><Text>{this.state.hostLifePoints}</Text></TouchableOpacity>
+                    </View>
                     <Button
                         title="Leave Duel"
                         titleStyle={{
                             color: 'white',
                             fontWeight: '800',
-                            fontSize: 18,
+                            fontSize: 15,
                         }}
                         buttonStyle={{
                             backgroundColor: 'rgb(130, 69, 91)',
                             borderRadius: 10,
-                            width: 310,
+                            width: 200,
                             height: 50,
                         }}
                         loading={false}
                         onPress={this.leaveDuel}
                     />
+                    <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                        <Text>{this.state.hosting ? this.state.opponent : this.state.hostedBy}</Text>
+                        <TouchableOpacity onPress={() => this.alterLifePoints("guest")}><Text>{this.state.guestLifePoints}</Text></TouchableOpacity>
+                    </View>
+
                 </View>
                 <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
                     <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} />
@@ -472,7 +491,7 @@ class DuelingRoomPage extends Component {
                 <View style={{ flex: 4 / 20 }}>
                 </View>
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} hostLifePoints={this.state.hostLifePoints} guestLifePoints={this.state.guestLifePoints} hostLifePointsSelected={this.state.hostLifePointsSelected} calculatorVisible={this.state.calculatorVisible} toggleLifePointsCalculator={this.toggleLifePointsCalculator} returnNewLifePointVal={this.returnNewLifePointVal} />
             </View>
         )
     }
