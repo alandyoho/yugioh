@@ -293,7 +293,7 @@ class DuelingRoomPage extends Component {
         }
     }
     leaveDuel = () => {
-        leaveDuel(this.props.user.username)
+        leaveDuel([this.props.user.username, this.state.hostedBy])
         this.props.navigation.navigate("HomePage")
     }
 

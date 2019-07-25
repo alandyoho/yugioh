@@ -207,20 +207,40 @@ const joinDuel = (obj) => {
 }
 
 const leaveDuel = async (obj) => {
-    firestore.collection("users").doc(obj).set({ hostedBy: "", hosting: false }, { merge: true })
-    //find out if is primary host
-    const { opponent } = await firestore.collection("rooms").doc(obj).get().then(function (doc) {
-        if (doc.exists) {
-            return doc.data()
-        } else {
-            return { opponent: "doc doesn't exists" }
-        }
-    })
-    if (obj == opponent) {
+    const username = obj[0]
+    const hostedBy = obj[1]
+    if (username == hostedBy) {
+        //request is being made by room host
+        //delete room from database
+        firestore.collection("rooms").doc(hostedBy).delete()
+        console.log("request is being made by room host")
     } else {
-
-        firestore.collection("rooms").doc(obj).delete()
+        //request is being made by room guest
+        //delete opponent property on room
+        firestore.collection("rooms").doc(hostedBy).set({ opponent: "" }, { merge: true })
+        console.log("request is being made by room guest")
     }
+    firestore.collection("users").doc(username).set({ hostedBy: "", hosting: false }, { merge: true })
+
+    // //find out if is primary host
+    // const { opponent } = await firestore.collection("rooms").doc(obj).get().then(function (doc) {
+    //     if (doc.exists) {
+    //         //then the person making the request is the room host
+    //         // console.log("doc exists")
+    //         return doc.data()
+    //     } else {
+    //         //then the person making the request is the room guest
+    //         // console.log("doc doesn't exist")
+    //         return { opponent: "doc doesn't exists" }
+    //     }
+    // })
+    // console.log("opponent", opponent)
+    // if (opponent == "doc doesn't exist") {
+    //     firestore.collection("rooms").doc(obj).set({ hostedBy: "", hosting: false }, { merge: true })
+    // } else {
+
+    //     firestore.collection("rooms").doc(obj).delete()
+    // }
 
 
 
