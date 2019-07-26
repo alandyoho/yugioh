@@ -5,10 +5,99 @@ import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAn
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed }) => {
     const size = Dimensions.get('window').width / 3
     return (
         <React.Fragment>
+            <Dialog
+                visible={deckPopupVisible}
+                overlayOpacity={0}
+                children={[]}
+                onTouchOutside={toggleDeckPopup}
+                dialogAnimation={new ScaleAnimation({
+                    initialValue: 0, // optional
+                    useNativeDriver: true, // optional
+                })}
+                width={1.0}
+                height={0.80}
+                dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width, height: Dimensions.get("window").height * 0.80 }}
+            >
+                <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "white", height: Dimensions.get("window").height * 0.80 }}>
+                    <FlatList
+                        data={deck}
+                        style={{ flex: 1 }}
+                        renderItem={({ item }) => (
+                            <View style={{
+                                width: size,
+                                height: size,
+                                marginTop: 30,
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}>
+                                <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInDeckOptions(item)}>
+                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                        width: 100, height: 200
+                                    }} />}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        keyExtractor={item => item.id}
+                        numColumns={3} />
+
+
+                </DialogContent>
+            </Dialog>
+
+
+
+            <Dialog
+                visible={cardInDeckPressed}
+                width={0.40}
+                height={0.20}
+                children={[]}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={toggleCardInDeckOptions}
+                overlayOpacity={0}
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        <React.Fragment>
+                            <TouchableOpacity onPress={() => manageCardInDeck("Examine-D")}>
+                                <Text>Examine</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => manageCardInDeck("Add-To-Hand-D")}>
+                                <Text>Add to Hand</Text>
+                            </TouchableOpacity>
+                            {cardType.type && cardType.type.includes("Monster") && <TouchableOpacity onPress={() => manageCardInDeck("Special-D")}>
+                                <Text>Special Summon</Text>
+                            </TouchableOpacity>}
+                            <TouchableOpacity onPress={() => manageCardInDeck("Send-To-Graveyard-D")}>
+                                <Text>Send to Graveyard</Text>
+                            </TouchableOpacity>
+                        </React.Fragment>
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <Dialog
                 visible={mainDeckOptionsVisible}
                 width={0.40}
@@ -27,7 +116,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                             <TouchableOpacity onPress={drawCard}>
                                 <Text>Draw</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={() => true}>
+                            <TouchableOpacity onPress={toggleDeckPopup}>
                                 <Text>View</Text>
                             </TouchableOpacity>
                         </React.Fragment>
