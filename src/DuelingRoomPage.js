@@ -27,6 +27,7 @@ class DuelingRoomPage extends Component {
             guestBoard: {},
             hostBoard: {},
             hostedBy: "",
+            host: "",
             waitingForOpponentPopupVisible: false,
             opponent: "",
             hosting: null,
@@ -59,10 +60,7 @@ class DuelingRoomPage extends Component {
     async componentDidMount() {
         const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png")]
         const randomNum = this.getRandomInt()
-        this.setState({ backgroundImageUrl: backgroundImages[randomNum] })
-
-
-        this.setState({ waitingForOpponentPopupVisible: true })
+        this.setState({ backgroundImageUrl: backgroundImages[randomNum], waitingForOpponentPopupVisible: true })
         const { hostedBy, hosting } = await retrieveDeckInfo(this.props.user.username)
         this.listenForGameChanges({ hostedBy: hostedBy, hosting: hosting })
     }
@@ -89,10 +87,9 @@ class DuelingRoomPage extends Component {
         firestore.collection("rooms").doc(obj.hostedBy)
             .onSnapshot(doc => {
                 if (doc.exists) {
-                    const { guestBoard, hostBoard, opponent } = doc.data()
+                    const { guestBoard, hostBoard, opponent, host } = doc.data()
 
-                    this.setState({ guestBoard, hostBoard, opponent })
-                    this.setState({ boardsRetrieved: true })
+                    this.setState({ guestBoard, hostBoard, opponent, host, boardsRetrieved: true })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
                         this.setState({ waitingForOpponentPopupVisible: false })
@@ -182,8 +179,12 @@ class DuelingRoomPage extends Component {
                 this.setState({ [board]: boardCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
                 await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
             } else {
-                const modifiedHand = [...this.state.hand, cardDetails]
-                this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
+                const modifiedHand = [...boardCopy.hand, cardDetails]
+                boardCopy.hand = modifiedHand
+
+
+                this.setState({ [board]: boardCopy, cardInfo: "" })
+                await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
                 await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
             }
         } else if (requestType == "Change-Position") {
@@ -233,8 +234,16 @@ class DuelingRoomPage extends Component {
                 await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
             } else {
                 boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
-                const modifiedHand = [...this.state.hand, cardDetails]
-                this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
+
+
+                const modifiedHand = [...boardCopy.hand, cardDetails]
+                boardCopy.hand = modifiedHand
+                this.setState({ [board]: boardCopy, cardInfo: "" })
+                await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
+
+
+                // const modifiedHand = [...this.state.hand, cardDetails]
+                // this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
                 await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
             }
             this.toggleGraveyardPopup()
@@ -280,8 +289,11 @@ class DuelingRoomPage extends Component {
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
             this.toggleCardInDeckOptions()
             this.toggleDeckPopup()
-            const modifiedHand = [...this.state.hand, cardDetails]
-            this.setState({ hand: modifiedHand, cardType: { type: "" }, mainDeck: filteredDeck })
+
+            const modifiedHand = [...boardCopy.hand, cardDetails]
+            boardCopy.hand = modifiedHand
+            this.setState({ [board]: boardCopy, cardType: { type: "" }, mainDeck: filteredDeck })
+            await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
         } else if (requestType == "Special-D") {
             let filteredDeck = [...this.state.mainDeck]
             // console.log("deck length before", filteredExtraDeck.length)
@@ -328,11 +340,25 @@ class DuelingRoomPage extends Component {
     initialDraw = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         //set the state with shuffled retrieved cards and selected deck
+
+        //after retrieving appropriate deck from firestore, update proper board's hand property 
+
         this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.initialShuffleDeck(extraDeck) })
 
         //set the state with five cards 
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.mainDeck)
-        this.setState({ hand: drawnCards, mainDeck: shallowCards })
+
+
+
+        const board = this.state.hosting ? "hostBoard" : "guestBoard"
+        const handCopy = [...this.state[board].hand, ...drawnCards]
+
+        await alterBoard({ hostUsername: this.state.hostedBy, location: [board, "hand"], zone: handCopy })
+
+        // console.log("here's the hand from the server", this.state[board].hand)
+        this.setState({ mainDeck: shallowCards })
+
+        // this.setState({ hand: drawnCards, mainDeck: shallowCards })
     }
     shuffleDeck = async () => {
         const mainDeck = [...this.state.mainDeck]
@@ -340,10 +366,15 @@ class DuelingRoomPage extends Component {
         this.toggleMainDeckOptions()
     }
 
-    drawCard = () => {
+    drawCard = async () => {
         if (this.state.mainDeck.length) {
             const { drewCard, shallowCards } = GameLogic.shared.drawCard(this.state.mainDeck)
-            this.setState({ hand: [...this.state.hand, drewCard], mainDeck: shallowCards })
+            const board = this.state.hosting ? "hostBoard" : "guestBoard"
+            const boardCopy = this.state[board]
+            const modifiedHand = [...boardCopy.hand, drewCard]
+            boardCopy.hand = modifiedHand
+            this.setState({ [board]: boardCopy, cardType: { type: "" }, mainDeck: shallowCards })
+            await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
         }
         this.toggleMainDeckOptions()
     }
@@ -425,9 +456,11 @@ class DuelingRoomPage extends Component {
             await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
         }
         if (!requestType.includes("-GY") && !requestType.includes("-ED") && !requestType.includes("-D")) {
-            const filteredHand = [...this.state.hand]
+            const filteredHand = [...boardCopy.hand]
             filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
-            this.setState({ [board]: boardCopy, hand: filteredHand, cardOptionsPresented: false })
+            boardCopy.hand = filteredHand
+            await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: filteredHand })
+            this.setState({ [board]: boardCopy, cardOptionsPresented: false })
         } else {
             this.setState({ [board]: boardCopy, cardOptionsPresented: false })
         }
@@ -508,18 +541,20 @@ class DuelingRoomPage extends Component {
     }
 
     render() {
-        const { backgroundImageUrl, boardsRetrieved, hand, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
+        const { backgroundImageUrl, boardsRetrieved, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         const deck = this.state.mainDeck
-        // const { extraDeck } = this.state[properBoard]
+
+        const hand = this.state[properBoard].hand
+        const opponentHand = this.state[opponentBoard].hand
         return (
             <SideMenu menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={styles.container}>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
                         {backgroundImageUrl && <Image source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
                     </View>
-                    <OpponentHand renderOpponentHand={this.renderOpponentHand} />
+                    <OpponentHand renderOpponentHand={this.renderOpponentHand} opponentHand={opponentHand} />
                     <View style={{ flex: 2 / 20 }}>
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>

@@ -3,15 +3,16 @@ import React, { Component } from "react"
 import { FlatList } from 'react-native-gesture-handler';
 
 
-const OpponentHand = ({ renderOpponentHand }) => {
+const OpponentHand = ({ renderOpponentHand, opponentHand }) => {
+    var opponentHandLength = opponentHand && Array(opponentHand.length).fill("")
+    console.log("opponentHand", opponentHand)
     return (
-
         <FlatList
-            data={[1, 2, 3, 4, 5, 6]}
+            data={opponentHandLength}
             renderItem={renderOpponentHand}
             keyExtractor={(item, index) => index.toString()}
             horizontal={true}
-            scrollEnabled={false}
+            scrollEnabled={true}
             style={{
                 position: "absolute", top: -80, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }]
             }}
