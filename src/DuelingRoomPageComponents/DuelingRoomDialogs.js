@@ -5,7 +5,7 @@ import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAn
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed, shuffleDeck }) => {
     const size = Dimensions.get('window').width / 3
     return (
         <React.Fragment>
@@ -118,6 +118,9 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                             </TouchableOpacity>
                             <TouchableOpacity onPress={toggleDeckPopup}>
                                 <Text>View</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={shuffleDeck}>
+                                <Text>Shuffle</Text>
                             </TouchableOpacity>
                         </React.Fragment>
                     </View>

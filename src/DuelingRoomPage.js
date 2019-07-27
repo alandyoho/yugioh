@@ -326,11 +326,16 @@ class DuelingRoomPage extends Component {
     initialDraw = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         //set the state with shuffled retrieved cards and selected deck
-        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.shuffleDeck(mainDeck), extraDeck: GameLogic.shared.shuffleDeck(extraDeck) })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.initialShuffleDeck(extraDeck) })
 
         //set the state with five cards 
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.mainDeck)
         this.setState({ hand: drawnCards, mainDeck: shallowCards })
+    }
+    shuffleDeck = async () => {
+        const mainDeck = [...this.state.mainDeck]
+        this.setState({ mainDeck: GameLogic.shared.shuffleDeck(mainDeck) })
+        this.toggleMainDeckOptions()
     }
 
     drawCard = () => {
@@ -403,7 +408,8 @@ class DuelingRoomPage extends Component {
         if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
             console.log("nope!")
             this.setState({ cardOptionsPresented: false, requestType: "" })
-            return this.fadeInHand()
+            //logic that restricts card placement
+            // return this.fadeInHand()
         }
         let boardCopy = { ...this.state[board] }
         if (cardZone == "graveyard") {
@@ -554,7 +560,7 @@ class DuelingRoomPage extends Component {
 
 
                 <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} hostLifePoints={this.state.hostLifePoints} guestLifePoints={this.state.guestLifePoints} hostLifePointsSelected={this.state.hostLifePointsSelected} calculatorVisible={this.state.calculatorVisible} toggleLifePointsCalculator={this.toggleLifePointsCalculator} returnNewLifePointVal={this.returnNewLifePointVal} toggleMainDeckOptions={this.toggleMainDeckOptions} mainDeckOptionsVisible={this.state.mainDeckOptionsVisible} drawCard={this.drawCard} deck={deck} deckPopupVisible={this.state.deckPopupVisible} toggleDeckPopup={this.toggleDeckPopup} toggleCardInDeckOptions={this.toggleCardInDeckOptions} manageCardInDeck={this.manageCardInDeck} cardInDeckPressed={this.state.cardInDeckPressed} />
+                <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} hostLifePoints={this.state.hostLifePoints} guestLifePoints={this.state.guestLifePoints} hostLifePointsSelected={this.state.hostLifePointsSelected} calculatorVisible={this.state.calculatorVisible} toggleLifePointsCalculator={this.toggleLifePointsCalculator} returnNewLifePointVal={this.returnNewLifePointVal} toggleMainDeckOptions={this.toggleMainDeckOptions} mainDeckOptionsVisible={this.state.mainDeckOptionsVisible} drawCard={this.drawCard} deck={deck} deckPopupVisible={this.state.deckPopupVisible} toggleDeckPopup={this.toggleDeckPopup} toggleCardInDeckOptions={this.toggleCardInDeckOptions} manageCardInDeck={this.manageCardInDeck} cardInDeckPressed={this.state.cardInDeckPressed} shuffleDeck={this.shuffleDeck} />
             </View>
         )
     }
