@@ -26,9 +26,16 @@ class LogInSignUpPage extends Component {
         this.setState({ logInRequested: false })
         this._panel.show()
     }
+    dismissPopup = () => {
+        this._panel.hide()
+    }
+    navigateToHomePage = () => {
+        this.dismissPopup()
+        this.props.navigation.navigate("HomePage")
+    }
     render() {
         const { navigate } = this.props.navigation
-        const { visible, logInRequested } = this.state
+        const { logInRequested } = this.state
         const { createUser } = this.props
         return (
             <View style={styles.container}>
@@ -71,7 +78,6 @@ class LogInSignUpPage extends Component {
                     onPress={this.signUpRequested}
                 />
                 <SlidingUpPanel
-                    visible={visible}
                     height={Dimensions.get("window").height * 0.85}
                     ref={c => this._panel = c}
                     backdropOpacity={0.25}
@@ -79,7 +85,7 @@ class LogInSignUpPage extends Component {
                     draggableRange={{ top: Dimensions.get("window").height * 0.85, bottom: 0 }}
                 >
                     <View style={styles.panelStyles}>
-                        {logInRequested ? <LogInForm createUser={createUser} dismissPopup={() => this._panel.hide()} navigateToHomePage={() => navigate("HomePage")} /> : <SignUpForm createUser={createUser} navigateToHomePage={() => navigate("HomePage")} dismissPopup={() => this._panel.hide()} />}
+                        {logInRequested ? <LogInForm createUser={createUser} dismissPopup={this.dismissPopup} navigateToHomePage={this.navigateToHomePage} /> : <SignUpForm createUser={createUser} navigateToHomePage={this.navigateToHomePage} dismissPopup={this.dismissPopup} />}
                     </View>
                 </SlidingUpPanel>
             </View>
