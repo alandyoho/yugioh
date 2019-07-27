@@ -73,9 +73,9 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                             <TouchableOpacity onPress={() => manageCardInDeck("Add-To-Hand-D")}>
                                 <Text>Add to Hand</Text>
                             </TouchableOpacity>
-                            {cardType.type && cardType.type.includes("Monster") && <TouchableOpacity onPress={() => manageCardInDeck("Special-D")}>
+                            {/* {cardType.type && cardType.type.includes("Monster") && <TouchableOpacity onPress={() => manageCardInDeck("Special-D")}>
                                 <Text>Special Summon</Text>
-                            </TouchableOpacity>}
+                            </TouchableOpacity>} */}
                             <TouchableOpacity onPress={() => manageCardInDeck("Send-To-Graveyard-D")}>
                                 <Text>Send to Graveyard</Text>
                             </TouchableOpacity>

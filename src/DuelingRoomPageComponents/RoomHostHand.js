@@ -6,13 +6,13 @@ import { FlatList } from 'react-native-gesture-handler';
 const RoomHostHand = ({ renderItem, hand, handOpacity, handZIndex }) => {
     return (
 
-        <Animated.View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200, opacity: handOpacity, zIndex: handZIndex }}>
+        <Animated.View style={{ position: "absolute", bottom: -30, left: 0, right: 0, height: 170, opacity: handOpacity, zIndex: handZIndex, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }}>
             <FlatList
                 data={hand}
                 renderItem={(item) => renderItem(item)}
                 keyExtractor={(item, index) => index.toString()}
                 horizontal={true}
-                style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 200 }}
+                style={{ flex: 1, height: 200 }}
             />
         </Animated.View>
 
