@@ -539,6 +539,12 @@ class DuelingRoomPage extends Component {
             boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
             await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
         }
+        if (requestType === "Special-BZ") {
+            let banishedZone = boardCopy["banishedZone"]
+            boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+            await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+        }
+
         if (!requestType.includes("-GY") && !requestType.includes("-ED") && !requestType.includes("-D") && !requestType.includes("-BZ")) {
             const filteredHand = [...boardCopy.hand]
             filteredHand.splice(filteredHand.findIndex(e => e.id === cardDetails.id), 1);
