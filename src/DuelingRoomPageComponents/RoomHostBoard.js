@@ -2,10 +2,17 @@ import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-nati
 import React from "react"
 // import console = require('console');
 
-const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck, toggleMainDeckOptions }) => {
+const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck, toggleMainDeckOptions, toggleBanishedZonePopup }) => {
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>
+                {[1, 2, 3, 4, 5, 6].map(cardIndex => (
+                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderWidth: 2, borderColor: "transparent" }} >
+                    </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={toggleBanishedZonePopup}>
+                    {boardsRetrieved == true && properBoard.banishedZone.length > 0 && <Image source={{ uri: properBoard.banishedZone[properBoard.banishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                </TouchableOpacity>
             </View>
 
             <View style={{ flex: 1, flexDirection: "row" }}>

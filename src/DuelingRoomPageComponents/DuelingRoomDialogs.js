@@ -5,10 +5,125 @@ import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAn
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
 
-const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed, shuffleDeck }) => {
+const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed, shuffleDeck, banishedZone, banishedZonePopupVisible, toggleBanishedZonePopup, toggleCardInBanishedZoneOptions, cardInBanishedZonePressed, manageCardInBanishedZone }) => {
     const size = Dimensions.get('window').width / 3
     return (
         <React.Fragment>
+
+
+
+            <Dialog
+                visible={cardInBanishedZonePressed}
+                width={0.40}
+                height={0.20}
+                children={[]}
+                dialogAnimation={new SlideAnimation({
+                    slideFrom: 'bottom',
+                })}
+                onTouchOutside={toggleCardInBanishedZoneOptions}
+                overlayOpacity={0}
+                dialogStyle={{ position: 'absolute', bottom: 250 }}
+            >
+
+                <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
+                        {cardType.type && cardType.type.includes("Monster") ?
+                            <React.Fragment>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Examine-BZ")}>
+                                    <Text>Examine</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Return-To-Hand-BZ")}>
+                                    <Text>Return to Hand</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Special-BZ")}>
+                                    <Text>Special Summon</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Send-To-Graveyard-BZ")}>
+                                    <Text>Send to Graveyard</Text>
+                                </TouchableOpacity>
+                            </React.Fragment>
+
+                            :
+                            <React.Fragment>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Examine-BZ")}>
+                                    <Text>Examine</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Return-To-Hand-BZ")}>
+                                    <Text>Return to Hand</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Activate-BZ")}>
+                                    <Text>Activate</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Set-ST-BZ")}>
+                                    <Text>Set</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInBanishedZone("Send-To-Graveyard-BZ")}>
+                                    <Text>Send to Graveyard</Text>
+                                </TouchableOpacity>
+                            </React.Fragment>
+                        }
+
+                    </View>
+                </DialogContent>
+            </Dialog>
+
+
+            <Dialog
+                visible={banishedZonePopupVisible}
+                overlayOpacity={0}
+                children={[]}
+                onTouchOutside={toggleBanishedZonePopup}
+                dialogAnimation={new ScaleAnimation({
+                    initialValue: 0, // optional
+                    useNativeDriver: true, // optional
+                })}
+                width={1.0}
+                height={0.80}
+                dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width, height: Dimensions.get("window").height * 0.80 }}
+            >
+                <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "white", height: Dimensions.get("window").height * 0.80 }}>
+                    <FlatList
+                        data={banishedZone}
+                        style={{ flex: 1 }}
+                        renderItem={({ item }) => (
+                            <View style={{
+                                width: size,
+                                height: size,
+                                marginTop: 30,
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}>
+                                <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInBanishedZoneOptions(item)}>
+                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                        width: 100, height: 200
+                                    }} />}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        keyExtractor={item => item.id}
+                        numColumns={3} />
+
+
+                </DialogContent>
+            </Dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <Dialog
                 visible={deckPopupVisible}
                 overlayOpacity={0}
@@ -200,7 +315,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
             </Dialog>
 
             <Dialog
-                visible={cardPopupVisible}
+                visible={cardInHandPressedPopupVisible}
                 width={0.40}
                 height={0.20}
                 dialogAnimation={new SlideAnimation({
@@ -371,6 +486,9 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardPopupVisible, 
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => manageCardInGraveyard("Special-GY")}>
                                     <Text>Special Summon</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInGraveyard("Banish-GY")}>
+                                    <Text>Banish</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
 

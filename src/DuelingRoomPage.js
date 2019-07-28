@@ -23,37 +23,38 @@ class DuelingRoomPage extends Component {
             selectedDeck: "",
             mainDeck: [],
             extraDeck: [],
-            hand: [],
             guestBoard: {},
             hostBoard: {},
             hostedBy: "",
             host: "",
             waitingForOpponentPopupVisible: false,
+            cardInHandPressedPopupVisible: false,
+            cardOnFieldPressedPopupVisible: false,
+            examinePopupVisible: false,
+            graveyardPopupVisible: false,
+            banishedZonePopupVisible: false,
+            cardInGraveyardPressed: false,
+            cardInBanishedZonePressed: false,
+            requestingAccessToGraveyardPopupVisible: false,
+            calculatorVisible: false,
+            mainDeckOptionsVisible: false,
+            deckPopupVisible: false,
+            extraDeckPopupVisible: false,
             opponent: "",
             hosting: null,
-            cardPopupVisible: false,
             cardOptionsPresented: false,
             handZIndex: 10,
             handOpacity: new Animated.Value(1),
             boardsRetrieved: false,
             backgroundImageUrl: false,
             requestType: "",
-            cardOnFieldPressedPopupVisible: false,
             cardInfo: "",
             cardType: { type: "" },
-            examinePopupVisible: false,
-            graveyardPopupVisible: false,
-            cardInGraveyardPressed: false,
-            requestingAccessToGraveyardPopupVisible: false,
             requestApproved: false,
-            extraDeckPopupVisible: false,
             cardInExtraDeckPressed: false,
             hostLifePoints: 8000,
             guestLifePoints: 8000,
             hostLifePointsSelected: false,
-            calculatorVisible: false,
-            mainDeckOptionsVisible: false,
-            deckPopupVisible: false,
             cardInDeckPressed: false
         }
     }
@@ -81,14 +82,12 @@ class DuelingRoomPage extends Component {
         if (obj.hostedBy == "") {
 
             obj.hostedBy = this.props.user.username
-        } else {
         }
         this.setState({ hosting: obj.hosting, hostedBy: obj.hostedBy })
         firestore.collection("rooms").doc(obj.hostedBy)
             .onSnapshot(doc => {
                 if (doc.exists) {
                     const { guestBoard, hostBoard, opponent, host } = doc.data()
-
                     this.setState({ guestBoard, hostBoard, opponent, host, boardsRetrieved: true })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
@@ -140,6 +139,13 @@ class DuelingRoomPage extends Component {
             this.setState({ cardInDeckPressed: !this.state.cardInDeckPressed, cardType })
         }
     }
+    toggleCardInBanishedZoneOptions = (cardType) => {
+        if (!cardType) {
+            this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed })
+        } else {
+            this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed, cardType })
+        }
+    }
 
     toggleGraveyardPopup = async () => {
         const board1 = this.state.hosting ? "hostBoard" : "guestBoard"
@@ -150,12 +156,18 @@ class DuelingRoomPage extends Component {
         this.setState({ requestApproved: false })
 
         this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
-        // this.toggleOpponentGraveyardPopup("dismiss")
     }
-    toggleExtraDeckPopup = async () => {
+    toggleBanishedZonePopup = async () => {
+        this.setState({ banishedZonePopupVisible: !this.state.banishedZonePopupVisible })
+
+        {/* toggleBanishedZonePopup */ }
+        {/* properBoard.banishedZone.length */ }
+    }
+
+    toggleExtraDeckPopup = () => {
         this.setState({ extraDeckPopupVisible: !this.state.extraDeckPopupVisible })
     }
-    toggleDeckPopup = async () => {
+    toggleDeckPopup = () => {
         this.setState({ deckPopupVisible: !this.state.deckPopupVisible, mainDeckOptionsVisible: false })
     }
 
@@ -206,16 +218,9 @@ class DuelingRoomPage extends Component {
             this.toggleExaminePopup()
         }
         this.setState({ cardOnFieldPressedPopupVisible: false })
-        //request types
-        //send to graveyard
-        //change position
-        //return to hand
-        //change ownership
     }
+
     manageCardInGraveyard = async (requestType) => {
-
-        // console.log("request type", requestType)
-
         this.toggleCardInGraveyardOptions()
         const cardDetails = this.state.cardType
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
@@ -223,6 +228,7 @@ class DuelingRoomPage extends Component {
 
         let boardCopy = { ...this.state[board] }
         let graveyard = boardCopy["graveyard"]
+        let banishedZone = boardCopy["banishedZone"]
 
         if (requestType == "Return-To-Hand") {
 
@@ -240,18 +246,12 @@ class DuelingRoomPage extends Component {
                 boardCopy.hand = modifiedHand
                 this.setState({ [board]: boardCopy, cardInfo: "" })
                 await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
-
-
-                // const modifiedHand = [...this.state.hand, cardDetails]
-                // this.setState({ [board]: boardCopy, hand: modifiedHand, cardInfo: "" })
                 await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
             }
             this.toggleGraveyardPopup()
 
         } else if (requestType == "Special-GY") {
             this.toggleGraveyardPopup()
-            // boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
-            // await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
             this.setState({ requestType: "Special-GY", cardOptionsPresented: cardDetails })
 
         } else if (requestType == "Examine") {
@@ -276,6 +276,86 @@ class DuelingRoomPage extends Component {
             //update the cardOptionsPresented to the card
             this.setState({ requestType: "Activate-GY", cardOptionsPresented: cardDetails })
             this.fadeOutHand("Activate-GY")
+        } else if (requestType == "Banish-GY") {
+
+            this.toggleGraveyardPopup()
+            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+            const updatedBanishedZone = [...banishedZone, cardDetails]
+            boardCopy["banishedZone"] = updatedBanishedZone
+
+            //update the card's set property to true
+            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            await alterBoard({ location: [board, "banishedZone"], zone: updatedBanishedZone, hostUsername: this.state.hostedBy })
+
+        }
+    }
+    manageCardInBanishedZone = async (requestType) => {
+        this.toggleCardInBanishedZoneOptions()
+        const cardDetails = this.state.cardType
+        const board = this.state.hosting ? "hostBoard" : "guestBoard"
+
+
+        let boardCopy = { ...this.state[board] }
+        let graveyard = boardCopy["graveyard"]
+        let banishedZone = boardCopy["banishedZone"]
+
+        if (requestType == "Return-To-Hand-BZ") {
+
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            if (extraDeckTypes.includes(cardDetails.type)) {
+                const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
+                boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+                this.setState({ [board]: boardCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
+                await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+            } else {
+                boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+
+
+                const modifiedHand = [...boardCopy.hand, cardDetails]
+                boardCopy.hand = modifiedHand
+                this.setState({ [board]: boardCopy, cardInfo: "" })
+                await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
+                await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+            }
+            this.toggleBanishedZonePopup()
+
+        } else if (requestType == "Special-BZ") {
+            this.toggleBanishedZonePopup()
+            this.setState({ requestType: "Special-BZ", cardOptionsPresented: cardDetails })
+
+        } else if (requestType == "Examine-BZ") {
+            this.setState({ cardType: cardDetails })
+            this.setState({ examinePopupVisible: true })
+        } else if (requestType == "Set-ST-BZ") {
+            //update state's graveyard to remove card
+            this.toggleBanishedZonePopup()
+            boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+            //update the card's set property to true
+            await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+            //update the cardOptionsPresented to the card
+            this.setState({ requestType: "Set-ST-BZ", cardOptionsPresented: cardDetails })
+            this.fadeOutHand("Set-ST-BZ")
+
+        } else if (requestType == "Activate-BZ") {
+            //update state's graveyard to remove card
+            this.toggleBanishedZonePopup()
+            boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+            //update the card's set property to true
+            await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+            //update the cardOptionsPresented to the card
+            this.setState({ requestType: "Activate-BZ", cardOptionsPresented: cardDetails })
+            this.fadeOutHand("Activate-BZ")
+        } else if (requestType == "Send-To-Graveyard-BZ") {
+
+            this.toggleBanishedZonePopup()
+            boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
+            const updatedGraveyard = [...graveyard, cardDetails]
+            boardCopy["graveyard"] = updatedGraveyard
+
+            //update the card's set property to true
+            await alterBoard({ location: [board, "graveyard"], zone: updatedGraveyard, hostUsername: this.state.hostedBy })
+            await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+
         }
     }
     manageCardInDeck = async (requestType) => {
@@ -304,7 +384,7 @@ class DuelingRoomPage extends Component {
             this.setState({ requestType: "Special-D", cardOptionsPresented: cardDetails, mainDeck: filteredDeck })
         } else if (requestType == "Examine-D") {
             this.setState({ cardType: cardDetails })
-            this.setState({ examinePopupVisible: true, cardPopupVisible: false })
+            this.setState({ examinePopupVisible: true, cardInHandPressedPopupVisible: false })
         } else if (requestType == "Send-To-Graveyard-D") {
             boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
             let filteredDeck = [...this.state.mainDeck]
@@ -332,7 +412,7 @@ class DuelingRoomPage extends Component {
             this.setState({ requestType: "Special-ED", cardOptionsPresented: cardDetails, extraDeck: filteredExtraDeck })
         } else if (requestType == "Examine-ED") {
             this.setState({ cardType: cardDetails })
-            this.setState({ examinePopupVisible: true, cardPopupVisible: false })
+            this.setState({ examinePopupVisible: true, cardInHandPressedPopupVisible: false })
         }
     }
 
@@ -388,30 +468,32 @@ class DuelingRoomPage extends Component {
 
     //hand to field (1)
     presentCardOptions = (card) => {
-        this.setState({ cardOptionsPresented: card, cardPopupVisible: true })
+        this.setState({ cardOptionsPresented: card, cardInHandPressedPopupVisible: true })
     }
     //hand to field (1) cancel
     dismissCardPopup = () => {
-        this.setState({ cardPopupVisible: false, cardOnFieldPressedPopupVisible: false });
+        this.setState({ cardInHandPressedPopupVisible: false, cardOnFieldPressedPopupVisible: false });
     }
     //hand to field (2)
     fadeOutHand = (type) => {
         if (type == "Examine") {
             const cardDetails = { ...this.state.cardOptionsPresented }
             this.setState({ cardType: cardDetails })
-            this.setState({ examinePopupVisible: true, cardPopupVisible: false })
+            this.setState({ examinePopupVisible: true, cardInHandPressedPopupVisible: false })
         } else {
             Animated.timing(this.state.handOpacity, { toValue: 0, useNativeDriver: true, }).start();
-            this.setState({ handZIndex: -1, cardPopupVisible: false, requestType: type })
+            this.setState({ handZIndex: -1, cardInHandPressedPopupVisible: false, requestType: type })
         }
     }
     //hand to field (3)
     addCardToBoard = async (location, requestType) => {
-        console.log("request Typ", this.state.requestType)
 
 
 
-        this.setState({ cardPopupVisible: false, cardOnFieldPressedPopupVisible: false });
+
+
+
+        this.setState({ cardInHandPressedPopupVisible: false, cardOnFieldPressedPopupVisible: false });
         if (!requestType) {
             requestType = this.state.requestType
         }
@@ -424,15 +506,15 @@ class DuelingRoomPage extends Component {
             cardDetails = { ...cardOptionsPresented, set: true }
         } else if (requestType === "Normal" || requestType === "Special" || requestType === "Activate") {
             cardDetails = { ...cardOptionsPresented }
-        } else if (requestType === "Send-To-Graveyard") {
+        } else if (requestType === "Send-To-Graveyard" || requestType === "Send-To-Graveyard-BZ") {
             cardDetails = { ...cardOptionsPresented }
-        } else if (requestType === "Examine") {
+        } else if (requestType === "Examine" || requestType === "Examine-BZ") {
             cardDetails = { ...cardOptionsPresented }
-        } else if (requestType === "Special-GY") {
+        } else if (requestType === "Special-GY" || requestType === "Special-BZ") {
             cardDetails = { ...cardOptionsPresented, set: false }
-        } else if (requestType === "Set-ST-GY") {
+        } else if (requestType === "Set-ST-GY" || requestType === "Set-ST-BZ") {
             cardDetails = { ...cardOptionsPresented, set: true }
-        } else if (requestType === "Activate-GY") {
+        } else if (requestType === "Activate-GY" || requestType === "Activate-BZ") {
             cardDetails = { ...cardOptionsPresented, set: false }
         } else if (requestType === "Special-ED" || requestType === "Special-D") {
             cardDetails = { ...cardOptionsPresented, set: false }
@@ -442,7 +524,6 @@ class DuelingRoomPage extends Component {
         const cardZoneIndex = location[2]
 
         if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
-            console.log("nope!")
             this.setState({ cardOptionsPresented: false, requestType: "" })
             //logic that restricts card placement
             // return this.fadeInHand()
@@ -479,7 +560,6 @@ class DuelingRoomPage extends Component {
                     width: 100, height: 200
                 }} />}
             </TouchableOpacity>
-            // <DraggableCards item={item} />
         )
     }
     renderGraveyardCards = ({ item }) => {
@@ -489,7 +569,6 @@ class DuelingRoomPage extends Component {
                     width: 200, height: 400
                 }} />}
             </TouchableOpacity>
-            // <DraggableCards item={item} />
         )
     }
     renderOpponentHand = () => {
@@ -544,7 +623,7 @@ class DuelingRoomPage extends Component {
     }
 
     render() {
-        const { backgroundImageUrl, boardsRetrieved, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
+        const { backgroundImageUrl, boardsRetrieved, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardInHandPressedPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
         const properBoard = this.state.hosting ? "hostBoard" : "guestBoard"
         const opponentBoard = this.state.hosting ? "guestBoard" : "hostBoard"
         const deck = this.state.mainDeck
@@ -577,7 +656,7 @@ class DuelingRoomPage extends Component {
 
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                        <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} toggleMainDeckOptions={this.toggleMainDeckOptions} />
+                        <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} toggleMainDeckOptions={this.toggleMainDeckOptions} toggleBanishedZonePopup={this.toggleBanishedZonePopup} />
                     </View>
                     <View style={{ flex: 4 / 20 }}>
                     </View>
@@ -586,7 +665,7 @@ class DuelingRoomPage extends Component {
 
 
                     <RoomHostHand hand={hand} renderItem={this.renderItem} handOpacity={handOpacity} handZIndex={handZIndex} />
-                    <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardPopupVisible={cardPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} hostLifePoints={this.state.hostLifePoints} guestLifePoints={this.state.guestLifePoints} hostLifePointsSelected={this.state.hostLifePointsSelected} calculatorVisible={this.state.calculatorVisible} toggleLifePointsCalculator={this.toggleLifePointsCalculator} returnNewLifePointVal={this.returnNewLifePointVal} toggleMainDeckOptions={this.toggleMainDeckOptions} mainDeckOptionsVisible={this.state.mainDeckOptionsVisible} drawCard={this.drawCard} deck={deck} deckPopupVisible={this.state.deckPopupVisible} toggleDeckPopup={this.toggleDeckPopup} toggleCardInDeckOptions={this.toggleCardInDeckOptions} manageCardInDeck={this.manageCardInDeck} cardInDeckPressed={this.state.cardInDeckPressed} shuffleDeck={this.shuffleDeck} />
+                    <DuelingRoomDialogs waitingForOpponentPopupVisible={waitingForOpponentPopupVisible} cardInHandPressedPopupVisible={cardInHandPressedPopupVisible} dismissCardPopup={this.dismissCardPopup} cardOptionsPresented={cardOptionsPresented} fadeOutHand={this.fadeOutHand} board={properBoard} addCardToBoard={this.addCardToBoard} cardOnFieldPressedPopupVisible={this.state.cardOnFieldPressedPopupVisible} manageCardOnBoard={this.manageCardOnBoard} cardType={this.state.cardType} examinePopupVisible={examinePopupVisible} toggleExaminePopup={this.toggleExaminePopup} graveyardPopupVisible={graveyardPopupVisible} toggleGraveyardPopup={this.toggleGraveyardPopup} graveyard={this.state[properBoard]['graveyard']} opponentGraveyard={this.state.requestApproved ? this.state[opponentBoard]['graveyard'] : []} cardInGraveyardPressed={cardInGraveyardPressed} toggleCardInGraveyardOptions={this.toggleCardInGraveyardOptions} manageCardInGraveyard={this.manageCardInGraveyard} requestingAccessToGraveyardPopupVisible={this.state.requestingAccessToGraveyardPopupVisible} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} extraDeckPopupVisible={extraDeckPopupVisible} toggleExtraDeckPopup={this.toggleExtraDeckPopup} extraDeck={extraDeck} toggleCardInExtraDeckOptions={this.toggleCardInExtraDeckOptions} cardInExtraDeckPressed={this.state.cardInExtraDeckPressed} manageCardInExtraDeck={this.manageCardInExtraDeck} hostLifePoints={this.state.hostLifePoints} guestLifePoints={this.state.guestLifePoints} hostLifePointsSelected={this.state.hostLifePointsSelected} calculatorVisible={this.state.calculatorVisible} toggleLifePointsCalculator={this.toggleLifePointsCalculator} returnNewLifePointVal={this.returnNewLifePointVal} toggleMainDeckOptions={this.toggleMainDeckOptions} mainDeckOptionsVisible={this.state.mainDeckOptionsVisible} drawCard={this.drawCard} deck={deck} deckPopupVisible={this.state.deckPopupVisible} toggleDeckPopup={this.toggleDeckPopup} toggleCardInDeckOptions={this.toggleCardInDeckOptions} manageCardInDeck={this.manageCardInDeck} cardInDeckPressed={this.state.cardInDeckPressed} shuffleDeck={this.shuffleDeck} banishedZonePopupVisible={this.state.banishedZonePopupVisible} toggleBanishedZonePopup={this.toggleBanishedZonePopup} banishedZone={this.state[properBoard]['banishedZone']} toggleCardInBanishedZoneOptions={this.toggleCardInBanishedZoneOptions} cardInBanishedZonePressed={this.state.cardInBanishedZonePressed} manageCardInBanishedZone={this.manageCardInBanishedZone} />
                 </View>
             </SideMenu >
         )

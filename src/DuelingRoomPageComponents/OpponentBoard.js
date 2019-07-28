@@ -7,7 +7,15 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyard
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>
+                {[1, 2, 3, 4, 5, 6].map(cardIndex => (
+                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderWidth: 2, borderColor: "transparent" }} >
+                    </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
+                    {boardsRetrieved == true && opponentBoard.banishedZone.length > 0 && <Image source={{ uri: opponentBoard.banishedZone[opponentBoard.banishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                </TouchableOpacity>
             </View>
+
             <View style={{ flex: 1, flexDirection: "row" }}>
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
                 </TouchableOpacity>
