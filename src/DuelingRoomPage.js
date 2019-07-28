@@ -351,7 +351,10 @@ class DuelingRoomPage extends Component {
 
 
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
-        const handCopy = [...this.state[board].hand, ...drawnCards]
+        console.log("board", board, "request", this.props.user.username)
+        console.log("hostedBy", this.state.hostedBy)
+
+        const handCopy = [...drawnCards]
 
         await alterBoard({ hostUsername: this.state.hostedBy, location: [board, "hand"], zone: handCopy })
 
