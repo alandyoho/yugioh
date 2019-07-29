@@ -1,6 +1,6 @@
 import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import React from "react"
-// import console = require('console');
+import CustomImage from "../ImageLoader"
 
 const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck, toggleMainDeckOptions, toggleBanishedZonePopup }) => {
     return (
@@ -11,7 +11,7 @@ const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard,
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={toggleBanishedZonePopup}>
-                    {boardsRetrieved == true && properBoard.banishedZone.length > 0 && <Image source={{ uri: properBoard.banishedZone[properBoard.banishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                    {boardsRetrieved == true && properBoard.banishedZone.length > 0 && <CustomImage source={{ uri: properBoard.banishedZone[properBoard.banishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>
 
@@ -20,11 +20,11 @@ const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard,
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
                     <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} onPress={boardsRetrieved == true && !properBoard.m1[cardIndex]['card'].exists ? () => addCardToBoard([board, "m1", cardIndex]) : () => presentCardOnBoardOptions([board, "m1", cardIndex])}>
-                        {boardsRetrieved == true && properBoard.m1[cardIndex]['card'].exists && (properBoard.m1[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : (properBoard.m1[cardIndex]['card'].defensePosition ? <Image source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <Image source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />))}
+                        {boardsRetrieved == true && properBoard.m1[cardIndex]['card'].exists && (properBoard.m1[cardIndex]['card'].set ? <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : (properBoard.m1[cardIndex]['card'].defensePosition ? <CustomImage source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <CustomImage source={{ uri: properBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />))}
                     </TouchableOpacity>
                 ))}
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={toggleGraveyardPopup}>
-                    {boardsRetrieved == true && properBoard.graveyard.length > 0 && <Image source={{ uri: properBoard.graveyard[properBoard.graveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                    {boardsRetrieved == true && properBoard.graveyard.length > 0 && <CustomImage source={{ uri: properBoard.graveyard[properBoard.graveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>
 
@@ -38,7 +38,7 @@ const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard,
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
                     <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} onPress={boardsRetrieved == true && !properBoard.st[cardIndex]['card'].exists ? () => addCardToBoard([board, "st", cardIndex]) : () => presentCardOnBoardOptions([board, "st", cardIndex])}>
-                        {boardsRetrieved == true && properBoard.st[cardIndex]['card'].exists && (properBoard.st[cardIndex]['card'].set ? <Image source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> : <Image source={{ uri: properBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
+                        {boardsRetrieved == true && properBoard.st[cardIndex]['card'].exists && (properBoard.st[cardIndex]['card'].set ? <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> : <CustomImage source={{ uri: properBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
                     </TouchableOpacity>
                 ))}
 

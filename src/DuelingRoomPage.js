@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground } from 'react-native';
+import CustomImage from "./ImageLoader"
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -562,7 +563,7 @@ class DuelingRoomPage extends Component {
     renderItem = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => this.presentCardOptions(item)} style={{ flex: 1 }}>
-                {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
+                {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
                     width: 100, height: 200
                 }} />}
             </TouchableOpacity>
@@ -571,7 +572,7 @@ class DuelingRoomPage extends Component {
     renderGraveyardCards = ({ item }) => {
         return (
             <TouchableOpacity style={{ width: 200, height: 400, flexDirection: "row", justifyContent: "center", alignItems: "center" }} onPress={() => this.presentCardOptions(item)}>
-                {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
+                {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
                     width: 200, height: 400
                 }} />}
             </TouchableOpacity>
@@ -579,7 +580,7 @@ class DuelingRoomPage extends Component {
     }
     renderOpponentHand = () => {
         return (
-            <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
+            <CustomImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
                 width: 100, height: 200
             }} />
         )
@@ -640,7 +641,7 @@ class DuelingRoomPage extends Component {
             <SideMenu menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={styles.container}>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
-                        {backgroundImageUrl && <Image source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
+                        {backgroundImageUrl && <CustomImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
                     </View>
                     <OpponentHand renderOpponentHand={this.renderOpponentHand} opponentHand={opponentHand} />
                     <View style={{ flex: 2 / 20 }}>
