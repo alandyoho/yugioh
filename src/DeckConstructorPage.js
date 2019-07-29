@@ -69,7 +69,7 @@ class DeckConstructorPage extends Component {
         const spells = expandedDeck.filter(card => card.type.includes("Spell")).length
         const monsters = expandedDeck.filter(card => card.type.includes("Monster")).length
         const traps = expandedDeck.filter(card => card.type.includes("Trap")).length
-        const total = expandedDeck.length + expandedExtraDeck.length
+        const total = expandedDeck.length
         const extraDeckLength = expandedExtraDeck.length
         this.setState({ overviewPopupVisible: true, quantities: { spells, monsters, extraDeckLength, traps, total } })
     }
@@ -406,13 +406,13 @@ class DeckConstructorPage extends Component {
                         initialValue: 0, // optional
                         useNativeDriver: true, // optional
                     })}
-                    width={Dimensions.get("window").width * 0.45}
+                    width={Dimensions.get("window").width * 0.70}
                     height={Dimensions.get("window").height * 0.45}
                 >
                     <DialogContent>
-                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
-                            <Text style={{ fontSize: 30, paddingBottom: 20 }}>{this.state.selectedDeck}</Text>
-                            <Text style={{ fontSize: 20 }}>Total: {total}</Text>
+                        <View style={{ flexDirection: "column", justifyContent: "space-evenly", alignItems: "flex-start" }}>
+                            <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center", paddingBottom: 20 }}>{this.state.selectedDeck}</Text>
+
                             <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                 <Image source={require("../assets/spellIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
                                 <Text style={{ fontSize: 20 }}>Spells: {spells}</Text>
@@ -421,8 +421,12 @@ class DeckConstructorPage extends Component {
                                 <Image source={require("../assets/trapIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
                                 <Text style={{ fontSize: 20 }}>Traps: {traps}</Text>
                             </View>
-                            <Text style={{ fontSize: 20 }}>Monsters: {monsters}</Text>
-                            <Text style={{ fontSize: 20 }}>Extra Deck: {extraDeckLength}</Text>
+                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                <Image source={require("../assets/monsterIcon.png")} style={{ height: 25, width: 25 }} resizeMode={"contain"} />
+                                <Text style={{ fontSize: 20 }}>Monsters: {monsters}</Text>
+                            </View>
+                            <Text style={{ fontSize: 20 }}>Main Deck Length: {total}</Text>
+                            <Text style={{ fontSize: 20 }}>Extra Deck Length: {extraDeckLength}</Text>
 
 
 

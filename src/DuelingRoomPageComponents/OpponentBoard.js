@@ -12,7 +12,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyard
                     <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderWidth: 2, borderColor: "transparent" }} >
                     </TouchableOpacity>
                 ))}
-                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }}>
+                <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: "rgb(130, 69, 91)", borderRadius: 10, borderWidth: 2 }}>
                     {boardsRetrieved == true && opponentBoard.banishedZone.length > 0 && <CustomImage source={{ uri: opponentBoard.banishedZone[opponentBoard.banishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                 </TouchableOpacity>
             </View>

@@ -512,6 +512,7 @@ class DuelingRoomPage extends Component {
             //logic that restricts card placement
             // return this.fadeInHand()
         }
+
         let boardCopy = { ...this.state[board] }
         if (cardZone == "graveyard") {
             boardCopy[cardZone].push(cardDetails)
@@ -638,21 +639,32 @@ class DuelingRoomPage extends Component {
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
                         <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
-                    </View>
-                    <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
-
-                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <Text>{this.state.hosting ? this.state.hostedBy : this.state.opponent}</Text>
-                            <TouchableOpacity onPress={() => this.alterLifePoints("host")}><Text>{this.state.hostLifePoints}</Text></TouchableOpacity>
-                        </View>
-
-                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <Text>{this.state.hosting ? this.state.opponent : this.state.hostedBy}</Text>
+                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, transform: [{ rotate: '180deg' }] }}>
+                            <Text>{this.props.user.username === this.state.opponent ? this.state.hostedBy : this.state.opponent}</Text>
                             <TouchableOpacity onPress={() => this.alterLifePoints("guest")}><Text>{this.state.guestLifePoints}</Text></TouchableOpacity>
                         </View>
+                    </View>
+
+                    <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
+                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} >
+                            {/* <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} />  */}
+
+                            {/* {boardsRetrieved == true && properBoard.st[0]['card'].exists && ( <CustomImage source={{ uri: properBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)} */}
+
+
+
+
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} >
+                            {/* <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} />  */}
+                        </TouchableOpacity>
 
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
+                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10 }}>
+                            <Text>{this.props.user.username}</Text>
+                            <TouchableOpacity onPress={() => this.alterLifePoints("host")}><Text>{this.state.hostLifePoints}</Text></TouchableOpacity>
+                        </View>
                         <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} toggleMainDeckOptions={this.toggleMainDeckOptions} toggleBanishedZonePopup={this.toggleBanishedZonePopup} />
                     </View>
                     <View style={{ flex: 4 / 20 }}>
