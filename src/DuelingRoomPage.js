@@ -390,7 +390,6 @@ class DuelingRoomPage extends Component {
         } else if (requestType == "Send-To-Graveyard-D") {
             boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
             let filteredDeck = [...this.state.mainDeck]
-            // console.log("deck length before", filteredExtraDeck.length)
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
             this.setState({ [board]: boardCopy, cardInfo: "", mainDeck: filteredDeck })
             this.toggleCardInDeckOptions()
@@ -406,12 +405,8 @@ class DuelingRoomPage extends Component {
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
         // let boardCopy = { ...this.state[board] }
         if (requestType == "Special-ED") {
-            let filteredExtraDeck = [...this.state.extraDeck]
-            console.log("deck length before", filteredExtraDeck.length)
-            filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
-            console.log("deck length after", filteredExtraDeck.length)
             this.toggleExtraDeckPopup()
-            this.setState({ requestType: "Special-ED", cardOptionsPresented: cardDetails, extraDeck: filteredExtraDeck })
+            this.setState({ requestType: "Special-ED", cardOptionsPresented: cardDetails })
         } else if (requestType == "Examine-ED") {
             this.setState({ cardType: cardDetails })
             this.setState({ examinePopupVisible: true, cardInHandPressedPopupVisible: false })
@@ -545,6 +540,13 @@ class DuelingRoomPage extends Component {
             let banishedZone = boardCopy["banishedZone"]
             boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
             await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+        }
+        if (requestType === "Special-ED") {
+            let filteredExtraDeck = [...this.state.extraDeck]
+            console.log("deck length before", filteredExtraDeck.length)
+            filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
+            console.log("deck length after", filteredExtraDeck.length)
+            this.setState({ extraDeck: filteredExtraDeck })
         }
 
         if (!requestType.includes("-GY") && !requestType.includes("-ED") && !requestType.includes("-D") && !requestType.includes("-BZ")) {

@@ -1,158 +1,147 @@
 import React, { Component } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
-import { retrieveCardsFromDeck, addCardsToDeck, deleteCard, removeCardsFromDeck } from "../Firebase/FireMethods"
+import NumericInput from 'react-native-numeric-input'
 
 import { RectButton } from 'react-native-gesture-handler';
 
 import Swipeable from 'react-native-gesture-handler/Swipeable';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const AnimatedIcon = Animated.createAnimatedComponent(Icon);
+
+
+const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
+    <View style={styles.rectButton} >
+        <Text style={styles.fromText}>{item.name}</Text>
+        <NumericInput
+            containerStyle={{ position: "absolute", right: 45, top: 20 }}
+            initValue={item.quantity}
+            onChange={value => updateCardQuantity({ value: value, card: item, username: username, deck: selectedDeck })}
+            onLimitReached={(isMax, msg) => console.log(isMax, msg)}
+            minValue={1}
+            maxValue={3}
+            totalWidth={120}
+            totalHeight={20}
+            iconSize={25}
+            step={1}
+            editable={false}
+            valueType='real'
+            rounded
+            textColor='#B0228C'
+            iconStyle={{ color: 'white' }}
+            rightButtonBackgroundColor="rgb(130, 69, 91)"
+            leftButtonBackgroundColor="rgb(130, 69, 91)" />
+
+
+        <Text style={styles.dateText}>
+            {'❭'}
+        </Text>
+    </View>
+);
 
 export default class AppleStyleSwipeableRow extends Component {
-    renderItem = ({ item }) => {
-        const { currentlyOpenSwipeable } = this.props;
-        const onOpen = (event, gestureState, swipeable) => {
-            if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
-                currentlyOpenSwipeable.recenter();
-            }
-            this.props.updateCurrentlyOpenSwipeable(swipeable)
-        }
-        const onClose = () => this.props.updateCurrentlyOpenSwipeable(null)
-
+    renderRightActions = (progress, dragX) => {
+        // console.log("progress", progress)
+        // console.log("drag", dragX)
+        const scale = dragX.interpolate({
+            inputRange: [-80, 0],
+            outputRange: [1, 0],
+            extrapolate: 'clamp',
+        });
         return (
-
+            <RectButton style={styles.rightAction} onPress={this.close}>
+                <AnimatedIcon
+                    name="delete-forever"
+                    size={30}
+                    color="#fff"
+                    style={[styles.actionIcon, { transform: [{ scale }] }]}
+                />
+            </RectButton>
+        );
+    };
+    updateRef = ref => {
+        this._swipeableRow = ref;
+    };
+    close = async () => {
+        await this.props.deleteCard(this.props.item)
+        this._swipeableRow.close();
+    };
+    render() {
+        const { children } = this.props;
+        return (
             <Swipeable
-                style={{ height: 60, flex: 1 }}
-                rightButtons={[
-                    <TouchableOpacity onPress={async () => await this.props.deleteCard(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
-                        <Text style={{
-                            fontWeight: '800',
-                            fontSize: 18
-                        }}>Delete</Text>
-                    </TouchableOpacity>,
-                ]}
-                onRightButtonsOpenRelease={onOpen}
-                onRightButtonsCloseRelease={onClose}
-            >
-                <View style={[styles.listItem]}>
-                    <Text
-                        style={{ fontSize: 20, fontWeight: '800', }}>{item.name}</Text>
-                    <NumericInput
-                        containerStyle={{ position: "absolute", right: 10 }}
-                        initValue={item.quantity}
-                        onChange={value => this.props.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
-                        onLimitReached={(isMax, msg) => console.log(isMax, msg)}
-                        minValue={1}
-                        maxValue={3}
-                        totalWidth={120}
-                        totalHeight={25}
-                        iconSize={25}
-                        step={1}
-                        editable={false}
-                        valueType='real'
-                        rounded
-                        textColor='#B0228C'
-                        iconStyle={{ color: 'white' }}
-                        rightButtonBackgroundColor="rgb(130, 69, 91)"
-                        leftButtonBackgroundColor="rgb(130, 69, 91)" />
-                </View>
+                ref={this.updateRef}
+                friction={2}
+                leftThreshold={80}
+                rightThreshold={40}
+                // renderLeftActions={this.renderLeftActions}
+                renderRightActions={this.renderRightActions}>
+                <Row item={this.props.item} updateCardQuantity={this.props.updateCardQuantity} username={this.props.username} selectedDeck={this.props.selectedDeck} />
+
+
             </Swipeable>
-        )
+        );
     }
 }
 
 const styles = StyleSheet.create({
     leftAction: {
         flex: 1,
-        backgroundColor: '#497AFC',
+        backgroundColor: '#388e3c',
         justifyContent: 'center',
     },
-    actionText: {
-        color: 'white',
-        fontSize: 16,
-        backgroundColor: 'transparent',
-        padding: 10,
+    actionIcon: {
+        width: 30,
+        marginHorizontal: 10,
     },
     rightAction: {
-        alignItems: 'center',
-        flex: 1,
-        justifyContent: 'center',
-    },
-    deckSearchTextInput: {
-        alignItems: "center",
-        left: 6,
-        // fontFamily: "Merriweather-Bold",
-        color: "#6F8FA9"
-    },
-    deckSearchContainer: {
-        shadowColor: 'black',
-        backgroundColor: "#FFF",
-        shadowOffset: { height: 5, width: 5 },
-        shadowOpacity: 0.4,
-        shadowRadius: 5,
-        borderRadius: 5,
-        width: "83%",
-        height: 41,
-        alignSelf: "center",
-        // top: 94,
-        justifyContent: "center",
-        // zIndex: 10,
-    },
-
-    item: {
-        width: 64 * 2.5,
-        height: 90 * 2.5,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2,
-        borderColor: '#fff',
-        borderRadius: 10,
-    },
-    panelStyles: {
-        flex: 1,
-        backgroundColor: 'white',
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: 'center',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        padding: 20
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#FFF',
-    },
-    listItem: {
-        height: 75,
-        flexDirection: "row",
-        justifyContent: 'flex-start',
-        alignItems: "center",
-        flex: 1
-
-    },
-    leftSwipeItem: {
-        flex: 1,
         alignItems: 'flex-end',
-        justifyContent: 'center',
-        paddingRight: 20
-    },
-    rightSwipeItem: {
+        backgroundColor: '#dd2c00',
         flex: 1,
         justifyContent: 'center',
-        paddingLeft: 20
     },
-    panelStyles: {
+    rectButton: {
         flex: 1,
+        height: 60,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        justifyContent: 'space-between',
+        flexDirection: 'column',
         backgroundColor: 'white',
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: 'center',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        padding: 20
     },
-    searchIcon: {
-        position: "absolute",
-        height: 13,
-        width: 13,
-        right: 10,
-    }
+    separator: {
+        backgroundColor: 'rgb(200, 199, 204)',
+        height: StyleSheet.hairlineWidth,
+    },
+    fromText: {
+        fontWeight: 'bold',
+        backgroundColor: 'transparent',
+        fontSize: 18
+    },
+    messageText: {
+        color: '#999',
+        backgroundColor: 'transparent',
+        fontSize: 15
+    },
+    dateText: {
+        backgroundColor: 'transparent',
+        position: 'absolute',
+        right: 20,
+        top: 20,
+        color: '#999',
+        fontWeight: 'bold',
+    },
 });
+
+
+
+
+
+
+// export default SwipeableRow = ({ item, index, deleteCard }) => {
+//     return (
+//         // <AppleStyleSwipeableRow>
+//         //     <Row item={item} deleteCard={deleteCard}/>
+//         // </AppleStyleSwipeableRow>
+//     );
+// };

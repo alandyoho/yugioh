@@ -15,6 +15,8 @@ import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import NumericInput from 'react-native-numeric-input'
 import CustomImage from "./ImageLoader"
+import SwipeableRow from "./SwipeableComponent"
+
 class DeckConstructorPage extends Component {
     constructor(props) {
         super(props);
@@ -167,17 +169,7 @@ class DeckConstructorPage extends Component {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         this.setState({ selectedDeck: this.props.selectedDeck, mainDeck, extraDeck })
     }
-    FlatListItemSeparator = () => {
-        return (
-            <View
-                style={{
-                    height: 1,
-                    width: "100%",
-                    backgroundColor: "#607D8B",
-                }}
-            />
-        );
-    }
+
     search = async (cardName) => {
         this.setState({ loading: true })
         try {
@@ -244,192 +236,194 @@ class DeckConstructorPage extends Component {
         this.setState({ extraDeckCardsVisible: !this.state.extraDeckCardsVisible })
     }
 
-    renderItem = ({ item }) => {
-        const { currentlyOpenSwipeable } = this.state;
-        const onOpen = (event, gestureState, swipeable) => {
-            if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
-                currentlyOpenSwipeable.recenter();
-            }
-            this.setState({ currentlyOpenSwipeable: swipeable });
-        }
-        const onClose = () => this.setState({ currentlyOpenSwipeable: null })
+    renderItem = ({ item, index }) => (
+        <SwipeableRow item={item} index={index} deleteCard={this.deleteCard} selectedDeck={this.state.selectedDeck} updateCardQuantity={this.updateCardQuantity} username={this.props.user.username} />
+    )
 
-        return (
 
-            <Swipeable
-                style={{ height: 60, flex: 1 }}
-                rightButtons={[
-                    <TouchableOpacity onPress={async () => await this.deleteCard(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
-                        <Text style={{
-                            fontWeight: '800',
-                            fontSize: 18
-                        }}>Delete</Text>
-                    </TouchableOpacity>,
-                ]}
-                onRightButtonsOpenRelease={onOpen}
-                onRightButtonsCloseRelease={onClose}
-            >
-                <View style={[styles.listItem]}>
-                    <Text
-                        style={{ fontSize: 20, fontWeight: '800', }}>{item.name}</Text>
-                    <NumericInput
-                        containerStyle={{ position: "absolute", right: 10 }}
-                        initValue={item.quantity}
-                        onChange={value => this.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
-                        onLimitReached={(isMax, msg) => console.log(isMax, msg)}
-                        minValue={1}
-                        maxValue={3}
-                        totalWidth={120}
-                        totalHeight={25}
-                        iconSize={25}
-                        step={1}
-                        editable={false}
-                        valueType='real'
-                        rounded
-                        textColor='#B0228C'
-                        iconStyle={{ color: 'white' }}
-                        rightButtonBackgroundColor="rgb(130, 69, 91)"
-                        leftButtonBackgroundColor="rgb(130, 69, 91)" />
-                </View>
-            </Swipeable>
-        )
-    }
+    // const { currentlyOpenSwipeable } = this.state;
+    // const onOpen = (event, gestureState, swipeable) => {
+    //     if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
+    //         currentlyOpenSwipeable.recenter();
+    //     }
+    //     this.setState({ currentlyOpenSwipeable: swipeable });
+    // }
+    // const onClose = () => this.setState({ currentlyOpenSwipeable: null })
+
+    // return (
+
+    //     <Swipeable
+    //         style={{ height: 60, flex: 1 }}
+    //         rightButtons={[
+    //             <TouchableOpacity onPress={async () => await this.deleteCard(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
+    //                 <Text style={{
+    //                     fontWeight: '800',
+    //                     fontSize: 18
+    //                 }}>Delete</Text>
+    //             </TouchableOpacity>,
+    //         ]}
+    //         onRightButtonsOpenRelease={onOpen}
+    //         onRightButtonsCloseRelease={onClose}
+    //     >
+    //         <View style={[styles.listItem]}>
+    //             <Text
+    //                 style={{ fontSize: 20, fontWeight: '800', }}>{item.name}</Text>
+    // <NumericInput
+    //     containerStyle={{ position: "absolute", right: 10 }}
+    //     initValue={item.quantity}
+    //     onChange={value => this.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
+    //     onLimitReached={(isMax, msg) => console.log(isMax, msg)}
+    //     minValue={1}
+    //     maxValue={3}
+    //     totalWidth={120}
+    //     totalHeight={25}
+    //     iconSize={25}
+    //     step={1}
+    //     editable={false}
+    //     valueType='real'
+    //     rounded
+    //     textColor='#B0228C'
+    //     iconStyle={{ color: 'white' }}
+    //     rightButtonBackgroundColor="rgb(130, 69, 91)"
+    //     leftButtonBackgroundColor="rgb(130, 69, 91)" />
+    //         </View>
+    //     </Swipeable>
+    // )
+
     render() {
         const { search } = this.state;
         return (
-            <TouchableWithoutFeedback accessible={false}>
-                <View style={styles.container}>
-                    <View style={{ ...this.state.searchResultsView }}>
-                        {!this.state.loading ? <CoverFlow
-                            style={{ flex: 1 }}
-                            onChange={() => true}
-                            spacing={100}
-                            wingSpan={80}
-                            rotation={50}
-                            midRotation={50}
-                            scaleDown={0.8}
-                            scaleFurther={0.75}
-                            perspective={800}
-                            initialSelection={0}
-                        >
-                            {this.getCards()}
-                        </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
-                        <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
-                            <CustomImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
-                        </TouchableOpacity>
-                        <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
-                            <TouchableOpacity onPress={() => {
-                                Keyboard.dismiss()
-                                this._panel.show()
-                            }}>
-                                <Text style={{ color: "white" }}>Advanced Search</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
-                            <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} />
-                            <CustomImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
-                        </View>
-                        <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
-                            <CustomImage source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                        <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
-                            <TouchableOpacity style={{ position: "absolute", left: 5, top: 0, height: 41, width: 41, flexDirection: "row" }} onPress={() => this.switchDisplayedDeck()}>
-                                <CustomImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
-                                <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
-                            </TouchableOpacity>
-
-
-                            <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
-                            <FlatList
-                                data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
-                                ItemSeparatorComponent={this.FlatListItemSeparator}
-                                contentContainerStyle={{ justifyContent: 'center' }}
-                                renderItem={(item) => this.renderItem(item)}
-                                keyExtractor={(item, index) => index.toString()}
-                            />
-                        </View>
-                    </View>
-                    <Dialog
-                        containerStyle={{ backgroundColor: "transparent" }}
-                        dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
-                        visible={this.state.popUpVisible}
-                        overlayOpacity={0}
-                        onTouchOutside={() => {
-                            this.setState({ popUpVisible: false });
-                        }}
-
-                        footer={
-                            <DialogFooter>
-                                <DialogButton
-                                    style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
-                                    textStyle={{ color: "white" }}
-                                    text="Add To Deck"
-                                    onPress={() => this.addCard(this.state.selectedCard)}
-                                />
-                            </DialogFooter>
-                        }
-                        dialogAnimation={new ScaleAnimation({
-                            initialValue: 0, // optional
-                            useNativeDriver: true, // optional
-                        })}
-                        width={Dimensions.get("window").width * 0.9}
-                        height={Dimensions.get("window").height * 0.9}
+            <View style={styles.container}>
+                <Animated.View style={{ ...this.state.searchResultsView }}>
+                    {!this.state.loading ? <CoverFlow
+                        style={{ flex: 1 }}
+                        onChange={() => true}
+                        spacing={100}
+                        wingSpan={80}
+                        rotation={50}
+                        midRotation={50}
+                        scaleDown={0.8}
+                        scaleFurther={0.75}
+                        perspective={800}
+                        initialSelection={0}
                     >
-                        <DialogContent>
-                            <View style={{ justifyContent: "center", alignItems: "center" }}>
+                        {this.getCards()}
+                    </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
+                    <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
+                        <CustomImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                    </TouchableOpacity>
+                    <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
+                        <TouchableOpacity onPress={() => {
+                            Keyboard.dismiss()
+                            this._panel.show()
+                        }}>
+                            <Text style={{ color: "white" }}>Advanced Search</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
+                        <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} />
+                        <CustomImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
+                    </View>
+                    <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
+                        <CustomImage source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                    </TouchableOpacity>
+                </Animated.View>
 
-                                {!this.state.expanded ? <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
-                                    {this.state.selectedCard && <CustomImage
-                                        source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
-                                        resizeMode="contain"
-                                        style={{
-                                            height: Dimensions.get("window").height * 0.70,
-                                            width: Dimensions.get("window").width * 0.70
-                                        }}
-                                    />}
-                                </TouchableOpacity> :
-                                    <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })} style={{
+                <Animated.View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
+                        <TouchableOpacity style={{ position: "absolute", left: 5, top: 0, height: 41, width: 41, flexDirection: "row" }} onPress={() => this.switchDisplayedDeck()}>
+                            <CustomImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                            <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={{ position: "absolute", right: 40, top: 0, height: 63, width: 63, flexDirection: "row" }} >
+                            <Text>Overview</Text>
+                            <CustomImage source={require("../assets/overview.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                        </TouchableOpacity>
+
+
+                        <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
+                        <FlatList
+                            data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
+                            ItemSeparatorComponent={() => <View style={{
+                                backgroundColor: 'rgb(200, 199, 204)',
+                                height: StyleSheet.hairlineWidth,
+                            }} />}
+                            contentContainerStyle={{ justifyContent: 'center' }}
+                            renderItem={(item, index) => this.renderItem(item, index)}
+                            keyExtractor={(item, index) => index.toString()}
+                        />
+                    </View>
+                </Animated.View>
+                <Dialog
+                    containerStyle={{ backgroundColor: "transparent" }}
+                    dialogStyle={{ backgroundColor: 'rgba(52, 52, 52, alpha)' }}
+                    visible={this.state.popUpVisible}
+                    overlayOpacity={0}
+                    onTouchOutside={() => {
+                        this.setState({ popUpVisible: false });
+                    }}
+
+                    footer={
+                        <DialogFooter>
+                            <DialogButton
+                                style={{ backgroundColor: "rgb(130, 69, 91)", borderRadius: 30 }}
+                                textStyle={{ color: "white" }}
+                                text="Add To Deck"
+                                onPress={() => this.addCard(this.state.selectedCard)}
+                            />
+                        </DialogFooter>
+                    }
+                    dialogAnimation={new ScaleAnimation({
+                        initialValue: 0, // optional
+                        useNativeDriver: true, // optional
+                    })}
+                    width={Dimensions.get("window").width * 0.9}
+                    height={Dimensions.get("window").height * 0.9}
+                >
+                    <DialogContent>
+                        <View style={{ justifyContent: "center", alignItems: "center" }}>
+
+                            {!this.state.expanded ? <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
+                                {this.state.selectedCard && <CustomImage
+                                    source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
+                                    resizeMode="contain"
+                                    style={{
                                         height: Dimensions.get("window").height * 0.70,
                                         width: Dimensions.get("window").width * 0.70
-                                    }}></TouchableOpacity>
-                                }
+                                    }}
+                                />}
+                            </TouchableOpacity> :
+                                <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })} style={{
+                                    height: Dimensions.get("window").height * 0.70,
+                                    width: Dimensions.get("window").width * 0.70
+                                }}></TouchableOpacity>
+                            }
 
-                            </View>
-                        </DialogContent>
-                    </Dialog>
-
-                    <SlidingUpPanel
-                        height={Dimensions.get("window").height * 0.50}
-                        ref={c => this._panel = c}
-                        backdropOpacity={0.25}
-                        backgroundColor={"#00000"}
-                        containerStyle={{ zIndex: 10 }}
-                        draggableRange={{ top: Dimensions.get("window").height * 0.50, bottom: 0 }}
-                    >
-                        <View style={styles.panelStyles}>
-                            <MultiSwitch
-                                currentStatus={'Open'}
-                                disableScroll={value => false}
-                                isParentScrollEnabled={false}
-                                onStatusChanged={text => {
-                                    this.setState({ cardType: text })
-                                    this.onSubmit()
-                                }} />
                         </View>
-                    </SlidingUpPanel>
+                    </DialogContent>
+                </Dialog>
 
-                </View>
+                <SlidingUpPanel
+                    height={Dimensions.get("window").height * 0.50}
+                    ref={c => this._panel = c}
+                    backdropOpacity={0.25}
+                    backgroundColor={"#00000"}
+                    containerStyle={{ zIndex: 10 }}
+                    draggableRange={{ top: Dimensions.get("window").height * 0.50, bottom: 0 }}
+                >
+                    <View style={styles.panelStyles}>
+                        <MultiSwitch
+                            currentStatus={'Open'}
+                            disableScroll={value => false}
+                            isParentScrollEnabled={false}
+                            onStatusChanged={text => {
+                                this.setState({ cardType: text })
+                                this.onSubmit()
+                            }} />
+                    </View>
+                </SlidingUpPanel>
 
-
-
-
-
-
-
-            </TouchableWithoutFeedback>
+            </View>
         );
     }
 }

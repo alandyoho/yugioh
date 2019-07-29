@@ -154,7 +154,6 @@ const addCardsToDeck = async (obj) => {
 
     } else {
         const { mainDeck } = await retrieveCardsFromDeck(obj)
-
         const filt = mainDeck.filter(card => card.id == obj.card.id)
         //check if card exists in "deck" model
         //if exists, increase quantity property by one 
@@ -182,6 +181,8 @@ const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
 const retrieveCardsFromDeck = (obj) => {
+    console.log("what we're working with", obj)
+
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
 
