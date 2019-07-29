@@ -384,6 +384,7 @@ class DuelingRoomPage extends Component {
             this.toggleDeckPopup()
             this.setState({ requestType: "Special-D", cardOptionsPresented: cardDetails, mainDeck: filteredDeck })
         } else if (requestType == "Examine-D") {
+            this.toggleCardInDeckOptions()
             this.setState({ cardType: cardDetails })
             this.setState({ examinePopupVisible: true, cardInHandPressedPopupVisible: false })
         } else if (requestType == "Send-To-Graveyard-D") {
