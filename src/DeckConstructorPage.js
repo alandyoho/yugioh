@@ -16,6 +16,7 @@ import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } fro
 import NumericInput from 'react-native-numeric-input'
 import CustomImage from "./ImageLoader"
 import SwipeableRow from "./SwipeableComponent"
+import { ScrollView } from 'react-native-gesture-handler/GestureHandler';
 
 class DeckConstructorPage extends Component {
     constructor(props) {
@@ -43,12 +44,41 @@ class DeckConstructorPage extends Component {
                 backgroundColor: "#FFF"
             },
             cardWidth: Dimensions.get("window").width * 0.40,
-            loading: false
+            loading: false,
+            deckRetrieved: false,
+            overviewPopupVisible: false,
+            quantities: { spells: 0, monsters: 0, extraDeckLength: 0, traps: 0, total: 0 }
         }
     }
+    refreshOverviewPopup = () => {
+        const expandedDeck = []
+        let { mainDeck, extraDeck } = this.state
+
+        for (let i = 0; i < mainDeck.length; i++) {
+            for (let j = 0; j < mainDeck[i].quantity; j++) {
+                expandedDeck.push(mainDeck[i])
+            }
+        }
+
+        const expandedExtraDeck = []
+        for (let i = 0; i < extraDeck.length; i++) {
+            for (let j = 0; j < extraDeck[i].quantity; j++) {
+                expandedExtraDeck.push(extraDeck[i])
+            }
+        }
+        const spells = expandedDeck.filter(card => card.type.includes("Spell")).length
+        const monsters = expandedDeck.filter(card => card.type.includes("Monster")).length
+        const traps = expandedDeck.filter(card => card.type.includes("Trap")).length
+        const total = expandedDeck.length + expandedExtraDeck.length
+        const extraDeckLength = expandedExtraDeck.length
+        this.setState({ overviewPopupVisible: true, quantities: { spells, monsters, extraDeckLength, traps, total } })
+    }
+
     componentDidMount = async () => {
         await this.refreshCards()
-        // console.log("cards", this.state.mainDeck)
+        await setTimeout(() => {
+            this.setState({ deckRetrieved: true })
+        }, 3000)
     }
 
 
@@ -167,7 +197,13 @@ class DeckConstructorPage extends Component {
 
     refreshCards = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
-        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck, extraDeck })
+        // mainDeck = mainDeck.sort()
+        const deck = mainDeck.sort((a, b) => {
+            if (a.name < b.name) return -1;
+            else if (a.name > b.name) return 1;
+            return 0;
+        })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: deck, extraDeck })
     }
 
     search = async (cardName) => {
@@ -184,7 +220,6 @@ class DeckConstructorPage extends Component {
         this.setState({ selectedCard: cardInfo, popUpVisible: true })
     }
     addCard = async (cardInfo) => {
-        console.log("card info", cardInfo)
         this.setState({ popUpVisible: false })
         await addCardsToDeck({ username: this.props.user.username, deck: this.props.selectedDeck, card: cardInfo })
         await this.refreshCards()
@@ -195,10 +230,8 @@ class DeckConstructorPage extends Component {
         const res = [];
         const exists = Object.keys(this.state.cards).length
         const keys = exists ? Object.keys(this.state.cards) : Object.keys(CARDS)
-        console.log("keys:", keys)
         for (let i = 0; i < keys.length; i++) {
             const card = keys[i];
-            console.log("here's the card", card)
             res.push(
                 <TouchableOpacity disabled={!exists} onPress={() => exists && this.expandCard(this.state.cards[card])} key={card}>
                     <CustomImage
@@ -231,6 +264,7 @@ class DeckConstructorPage extends Component {
         } else if (obj.value < obj.card.quantity) {
             await removeCardsFromDeck({ ...obj, val: obj.value })
         }
+        this.refreshCards()
     }
     switchDisplayedDeck = () => {
         this.setState({ extraDeckCardsVisible: !this.state.extraDeckCardsVisible })
@@ -239,58 +273,8 @@ class DeckConstructorPage extends Component {
     renderItem = ({ item, index }) => (
         <SwipeableRow item={item} index={index} deleteCard={this.deleteCard} selectedDeck={this.state.selectedDeck} updateCardQuantity={this.updateCardQuantity} username={this.props.user.username} />
     )
-
-
-    // const { currentlyOpenSwipeable } = this.state;
-    // const onOpen = (event, gestureState, swipeable) => {
-    //     if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
-    //         currentlyOpenSwipeable.recenter();
-    //     }
-    //     this.setState({ currentlyOpenSwipeable: swipeable });
-    // }
-    // const onClose = () => this.setState({ currentlyOpenSwipeable: null })
-
-    // return (
-
-    //     <Swipeable
-    //         style={{ height: 60, flex: 1 }}
-    //         rightButtons={[
-    //             <TouchableOpacity onPress={async () => await this.deleteCard(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
-    //                 <Text style={{
-    //                     fontWeight: '800',
-    //                     fontSize: 18
-    //                 }}>Delete</Text>
-    //             </TouchableOpacity>,
-    //         ]}
-    //         onRightButtonsOpenRelease={onOpen}
-    //         onRightButtonsCloseRelease={onClose}
-    //     >
-    //         <View style={[styles.listItem]}>
-    //             <Text
-    //                 style={{ fontSize: 20, fontWeight: '800', }}>{item.name}</Text>
-    // <NumericInput
-    //     containerStyle={{ position: "absolute", right: 10 }}
-    //     initValue={item.quantity}
-    //     onChange={value => this.updateCardQuantity({ value: value, card: item, username: this.props.user.username, deck: this.state.selectedDeck })}
-    //     onLimitReached={(isMax, msg) => console.log(isMax, msg)}
-    //     minValue={1}
-    //     maxValue={3}
-    //     totalWidth={120}
-    //     totalHeight={25}
-    //     iconSize={25}
-    //     step={1}
-    //     editable={false}
-    //     valueType='real'
-    //     rounded
-    //     textColor='#B0228C'
-    //     iconStyle={{ color: 'white' }}
-    //     rightButtonBackgroundColor="rgb(130, 69, 91)"
-    //     leftButtonBackgroundColor="rgb(130, 69, 91)" />
-    //         </View>
-    //     </Swipeable>
-    // )
-
     render() {
+        const { spells, monsters, extraDeckLength, traps, total } = this.state.quantities
         const { search } = this.state;
         return (
             <View style={styles.container}>
@@ -312,16 +296,16 @@ class DeckConstructorPage extends Component {
                     <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
                         <CustomImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                     </TouchableOpacity>
-                    <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
+                    {/* <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
                         <TouchableOpacity onPress={() => {
                             Keyboard.dismiss()
                             this._panel.show()
                         }}>
                             <Text style={{ color: "white" }}>Advanced Search</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                     <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
-                        <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} />
+                        <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} autoCorrect={false} autoCapitalize={"none"} />
                         <CustomImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                     </View>
                     <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
@@ -335,14 +319,14 @@ class DeckConstructorPage extends Component {
                             <CustomImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                             <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ position: "absolute", right: 40, top: 0, height: 63, width: 63, flexDirection: "row" }} >
+                        <TouchableOpacity style={{ position: "absolute", right: 15, top: 0, height: 41, width: 63, flexDirection: "row", justifyContent: "center", alignItems: "center" }} onPress={() => this.refreshOverviewPopup()}>
                             <Text>Overview</Text>
                             <CustomImage source={require("../assets/overview.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
 
 
                         <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
-                        <FlatList
+                        {this.state.deckRetrieved ? <FlatList
                             data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
                             ItemSeparatorComponent={() => <View style={{
                                 backgroundColor: 'rgb(200, 199, 204)',
@@ -351,7 +335,17 @@ class DeckConstructorPage extends Component {
                             contentContainerStyle={{ justifyContent: 'center' }}
                             renderItem={(item, index) => this.renderItem(item, index)}
                             keyExtractor={(item, index) => index.toString()}
-                        />
+                        /> : <React.Fragment>
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                            </React.Fragment>}
                     </View>
                 </Animated.View>
                 <Dialog
@@ -402,6 +396,41 @@ class DeckConstructorPage extends Component {
                         </View>
                     </DialogContent>
                 </Dialog>
+                <Dialog
+                    dialogStyle={{ backgroundColor: '#FFF' }}
+                    visible={this.state.overviewPopupVisible}
+                    onTouchOutside={() => {
+                        this.setState({ overviewPopupVisible: false });
+                    }}
+                    dialogAnimation={new ScaleAnimation({
+                        initialValue: 0, // optional
+                        useNativeDriver: true, // optional
+                    })}
+                    width={Dimensions.get("window").width * 0.45}
+                    height={Dimensions.get("window").height * 0.45}
+                >
+                    <DialogContent>
+                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
+                            <Text style={{ fontSize: 30, paddingBottom: 20 }}>{this.state.selectedDeck}</Text>
+                            <Text style={{ fontSize: 20 }}>Total: {total}</Text>
+                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                <Image source={require("../assets/spellIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
+                                <Text style={{ fontSize: 20 }}>Spells: {spells}</Text>
+                            </View>
+                            <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
+                                <Image source={require("../assets/trapIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
+                                <Text style={{ fontSize: 20 }}>Traps: {traps}</Text>
+                            </View>
+                            <Text style={{ fontSize: 20 }}>Monsters: {monsters}</Text>
+                            <Text style={{ fontSize: 20 }}>Extra Deck: {extraDeckLength}</Text>
+
+
+
+                        </View>
+                    </DialogContent>
+                </Dialog>
+
+
 
                 <SlidingUpPanel
                     height={Dimensions.get("window").height * 0.50}

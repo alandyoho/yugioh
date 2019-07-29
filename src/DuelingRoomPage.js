@@ -119,33 +119,20 @@ class DuelingRoomPage extends Component {
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
 
-    toggleCardInGraveyardOptions = (cardType) => {
-        if (!cardType) {
-            this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed })
-        } else {
-            this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed, cardType })
-        }
+    toggleCardInGraveyardOptions = (cardType = { type: "" }) => {
+        this.setState({ cardInGraveyardPressed: !this.state.cardInGraveyardPressed, cardType })
     }
-    toggleCardInExtraDeckOptions = (cardType) => {
-        if (!cardType) {
-            this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed })
-        } else {
-            this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed, cardType })
-        }
+
+    toggleCardInExtraDeckOptions = (cardType = { type: "" }) => {
+        this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed, cardType })
+
     }
-    toggleCardInDeckOptions = (cardType) => {
-        if (!cardType) {
-            this.setState({ cardInDeckPressed: !this.state.cardInDeckPressed })
-        } else {
-            this.setState({ cardInDeckPressed: !this.state.cardInDeckPressed, cardType })
-        }
+    toggleCardInDeckOptions = (cardType = { type: "" }) => {
+        this.setState({ cardInDeckPressed: !this.state.cardInDeckPressed, cardType })
+
     }
-    toggleCardInBanishedZoneOptions = (cardType) => {
-        if (!cardType) {
-            this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed })
-        } else {
-            this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed, cardType })
-        }
+    toggleCardInBanishedZoneOptions = (cardType = { type: "" }) => {
+        this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed, cardType })
     }
 
     toggleGraveyardPopup = async () => {

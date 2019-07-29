@@ -14,7 +14,7 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
     <View style={styles.rectButton} >
         <Text style={styles.fromText}>{item.name}</Text>
         <NumericInput
-            containerStyle={{ position: "absolute", right: 45, top: 20 }}
+            containerStyle={{ position: "absolute", left: 20, top: 35 }}
             initValue={item.quantity}
             onChange={value => updateCardQuantity({ value: value, card: item, username: username, deck: selectedDeck })}
             onLimitReached={(isMax, msg) => console.log(isMax, msg)}
@@ -72,9 +72,7 @@ export default class AppleStyleSwipeableRow extends Component {
             <Swipeable
                 ref={this.updateRef}
                 friction={2}
-                leftThreshold={80}
                 rightThreshold={40}
-                // renderLeftActions={this.renderLeftActions}
                 renderRightActions={this.renderRightActions}>
                 <Row item={this.props.item} updateCardQuantity={this.props.updateCardQuantity} username={this.props.username} selectedDeck={this.props.selectedDeck} />
 
