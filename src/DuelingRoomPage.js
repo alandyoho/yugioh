@@ -639,7 +639,7 @@ class DuelingRoomPage extends Component {
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
                         <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
-                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, transform: [{ rotate: '180deg' }] }}>
+                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, transform: [{ rotate: '180deg' }], backgroundColor: "#FFF", borderRadius: 10, padding: 10 }}>
                             <Text>{this.props.user.username === this.state.opponent ? this.state.hostedBy : this.state.opponent}</Text>
                             <TouchableOpacity onPress={() => this.alterLifePoints("guest")}><Text>{this.state.guestLifePoints}</Text></TouchableOpacity>
                         </View>
@@ -661,7 +661,7 @@ class DuelingRoomPage extends Component {
 
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
-                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10 }}>
+                        <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, backgroundColor: "#FFF", borderRadius: 10, borderRadius: 10, padding: 10 }}>
                             <Text>{this.props.user.username}</Text>
                             <TouchableOpacity onPress={() => this.alterLifePoints("host")}><Text>{this.state.hostLifePoints}</Text></TouchableOpacity>
                         </View>
