@@ -4,6 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
+import CustomImage from "../ImageLoader"
 
 const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed, shuffleDeck, banishedZone, banishedZonePopupVisible, toggleBanishedZonePopup, toggleCardInBanishedZoneOptions, cardInBanishedZonePressed, manageCardInBanishedZone }) => {
     const size = Dimensions.get('window').width / 3
@@ -95,7 +96,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                                 alignItems: "center"
                             }}>
                                 <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInBanishedZoneOptions(item)}>
-                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                    {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
                                         width: 100, height: 200
                                     }} />}
                                 </TouchableOpacity>
@@ -151,7 +152,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                                 alignItems: "center"
                             }}>
                                 <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInDeckOptions(item)}>
-                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                    {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
                                         width: 100, height: 200
                                     }} />}
                                 </TouchableOpacity>
@@ -309,7 +310,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
                         <Text style={{ fontSize: 20, fontWeight: '800' }}>Waiting for opponent...</Text>
-                        <Image source={require("../../assets/yugi-loading.gif")} resizeMode="contain" />
+                        <CustomImage source={require("../../assets/yugi-loading.gif")} resizeMode="contain" />
                     </View>
                 </DialogContent>
             </Dialog>
@@ -445,7 +446,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                 <DialogContent>
                     <View style={{ justifyContent: "center", alignItems: "center" }}>
                         <TouchableOpacity onPress={toggleExaminePopup}>
-                            {cardType.type && <Image
+                            {cardType.type && <CustomImage
                                 source={{ uri: cardType["card_images"][0]["image_url"] }}
                                 resizeMode="contain"
                                 style={{
@@ -539,7 +540,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                                 alignItems: "center"
                             }}>
                                 <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInExtraDeckOptions(item)}>
-                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                    {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
                                         width: 100, height: 200
                                     }} />}
                                 </TouchableOpacity>
@@ -583,7 +584,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                                 alignItems: "center"
                             }}>
                                 <TouchableOpacity style={{ width: 100, height: 200, flexDirection: "row", justifyContent: "center", alignItems: "flex-end" }} onPress={() => toggleCardInGraveyardOptions(item)}>
-                                    {item["card_images"] && <Image source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                                    {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
                                         width: 100, height: 200
                                     }} />}
                                 </TouchableOpacity>

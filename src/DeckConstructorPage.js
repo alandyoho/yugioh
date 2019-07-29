@@ -14,6 +14,7 @@ import MultiSwitch from './rn-slider-switch';
 import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import NumericInput from 'react-native-numeric-input'
+import CustomImage from "./ImageLoader"
 class DeckConstructorPage extends Component {
     constructor(props) {
         super(props);
@@ -208,7 +209,7 @@ class DeckConstructorPage extends Component {
             console.log("here's the card", card)
             res.push(
                 <TouchableOpacity disabled={!exists} onPress={() => exists && this.expandCard(this.state.cards[card])} key={card}>
-                    <Image
+                    <CustomImage
                         key={card}
                         source={exists ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
 
@@ -314,7 +315,7 @@ class DeckConstructorPage extends Component {
                             {this.getCards()}
                         </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
                         <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
-                            <Image source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                            <CustomImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
                         <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
                             <TouchableOpacity onPress={() => {
@@ -326,17 +327,17 @@ class DeckConstructorPage extends Component {
                         </View>
                         <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
                             <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} />
-                            <Image source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
+                            <CustomImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                         </View>
                         <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
-                            <Image source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                            <CustomImage source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                         <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
                             <TouchableOpacity style={{ position: "absolute", left: 5, top: 0, height: 41, width: 41, flexDirection: "row" }} onPress={() => this.switchDisplayedDeck()}>
-                                <Image source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                                <CustomImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                                 <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
                             </TouchableOpacity>
 
@@ -381,7 +382,7 @@ class DeckConstructorPage extends Component {
                             <View style={{ justifyContent: "center", alignItems: "center" }}>
 
                                 {!this.state.expanded ? <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
-                                    {this.state.selectedCard && <Image
+                                    {this.state.selectedCard && <CustomImage
                                         source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
                                         resizeMode="contain"
                                         style={{
