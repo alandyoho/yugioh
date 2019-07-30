@@ -5,7 +5,7 @@ import { FlatList } from 'react-native-gesture-handler';
 
 const OpponentHand = ({ renderOpponentHand, opponentHand }) => {
     var opponentHandLength = opponentHand && Array(opponentHand.length).fill("")
-    console.log("opponentHand", opponentHand)
+    //console.log("opponentHand", opponentHand)
     return (
         <FlatList
             data={opponentHandLength}

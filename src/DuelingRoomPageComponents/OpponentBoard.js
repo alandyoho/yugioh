@@ -4,7 +4,7 @@ import CustomImage from "../ImageLoader"
 
 
 const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyardPopup }) => {
-    // console.log("type of board being used", typeof opponentBoard)
+    // //console.log("type of board being used", typeof opponentBoard)
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>

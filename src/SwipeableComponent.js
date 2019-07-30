@@ -41,8 +41,8 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
 
 export default class AppleStyleSwipeableRow extends Component {
     renderRightActions = (progress, dragX) => {
-        // console.log("progress", progress)
-        // console.log("drag", dragX)
+        // //console.log("progress", progress)
+        // //console.log("drag", dragX)
         const scale = dragX.interpolate({
             inputRange: [-80, 0],
             outputRange: [1, 0],

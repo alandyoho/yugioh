@@ -17,7 +17,7 @@ export default class DraggableCard extends Component {
         this._val = { x: 0, y: 0 }
         this.state.pan.addListener((value) => {
             this._val = value
-            console.log("current location", value)
+            //console.log("current location", value)
         });
 
         this.panResponder = PanResponder.create({

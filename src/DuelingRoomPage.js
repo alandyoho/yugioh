@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import { updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePointsField } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePointsField, alterLinkZone } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
@@ -26,6 +26,7 @@ class DuelingRoomPage extends Component {
             extraDeck: [],
             guestBoard: {},
             hostBoard: {},
+            linkZones: [],
             hostedBy: "",
             host: "",
             waitingForOpponentPopupVisible: false,
@@ -56,7 +57,9 @@ class DuelingRoomPage extends Component {
             hostLifePoints: 8000,
             guestLifePoints: 8000,
             hostLifePointsSelected: false,
-            cardInDeckPressed: false
+            cardInDeckPressed: false,
+            linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 },
+            linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }
         }
     }
     async componentDidMount() {
@@ -88,8 +91,34 @@ class DuelingRoomPage extends Component {
         firestore.collection("rooms").doc(obj.hostedBy)
             .onSnapshot(doc => {
                 if (doc.exists) {
-                    const { guestBoard, hostBoard, opponent, host } = doc.data()
-                    this.setState({ guestBoard, hostBoard, opponent, host, boardsRetrieved: true })
+                    const { guestBoard, hostBoard, opponent, host, linkZones } = doc.data()
+
+                    if (this.state.boardsRetrieved) {
+                        let selectedCard = linkZones[0]["card"]
+                        // console.log("selected card", selectedCard.user)
+                        if (selectedCard && selectedCard.user && selectedCard.user !== this.props.user.username) {
+                            console.log(`card placed by ${this.props.user.username}'s opponent. rotating link zone accordingly`)
+                            this.setState({ linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
+                        }
+                        // else {
+                        //     this.setState({ linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 } })
+                        // }
+                        let selCard = linkZones[1]["card"]
+                        if (selCard && selCard.user && selCard.user !== this.props.user.username) {
+                            console.log(`card placed by ${this.props.user.username}'s opponent. rotating link zone accordingly`)
+                            this.setState({ linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
+                        }
+                        // else {
+                        //     this.setState({ linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '360deg' }] } })
+                        // }
+
+
+                        //console.log(this.state.linkZones[0]["card"].user, "=", this.props.user.username)
+
+                    }
+
+
+                    this.setState({ guestBoard, hostBoard, opponent, host, boardsRetrieved: true, linkZones: linkZones })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
                         this.setState({ waitingForOpponentPopupVisible: false })
@@ -115,6 +144,10 @@ class DuelingRoomPage extends Component {
             })
     }
     presentCardOnBoardOptions = (cardInfo) => {
+        if (cardInfo[0] == "linkZones") {
+            this.setState({ cardOnFieldPressedPopupVisible: true, cardType: this.state.linkZones[cardInfo[1]]["card"], cardInfo })
+            return
+        }
         const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
@@ -147,9 +180,6 @@ class DuelingRoomPage extends Component {
     }
     toggleBanishedZonePopup = async () => {
         this.setState({ banishedZonePopupVisible: !this.state.banishedZonePopupVisible })
-
-        {/* toggleBanishedZonePopup */ }
-        {/* properBoard.banishedZone.length */ }
     }
 
     toggleExtraDeckPopup = () => {
@@ -163,13 +193,58 @@ class DuelingRoomPage extends Component {
 
     manageCardOnBoard = async (requestType) => {
         const { cardInfo } = this.state
+
+        if (cardInfo[0] === "linkZones") {
+
+            let linkZoneCopy = [...this.state.linkZones]
+            let cardDetails = linkZoneCopy[cardInfo[1]]["card"]
+            if (requestType == "Return-To-Hand") {
+                linkZoneCopy[cardInfo[1]] = { card: { exists: false, defensePosition: false, user: "" } }
+                if (cardDetails.user != this.props.user.username) {
+                    console.log(`card removed by ${this.props.user.username}'s opponent. re- rotating link zone ${properZone} accordingly`)
+                    this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
+
+                }
+                cardDetails.user = ""
+                const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
+                this.setState({ linkZones: linkZoneCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
+                await alterLinkZone({ location: cardInfo, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+                const properZone = cardInfo[1] === 0 ? "linkZoneOneStyle" : "linkZoneTwoStyle"
+                this.dismissCardPopup()
+
+
+                // this.setState({ cardOnFieldPressedPopupVisible: false, [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 } })
+
+                return
+            }
+            // else if (requestType == "Change-Position") {
+            //     const curPosition = !boardCopy[cardZone][cardZoneIndex]["card"].defensePosition
+            //     boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: curPosition } }
+            //     this.setState({ [board]: boardCopy, cardInfo: "" })
+            //     await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            // } else if (requestType == "Send-To-Graveyard") {
+            //     boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
+            //     boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
+            //     this.setState({ [board]: boardCopy, cardInfo: "" })
+            //     // await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            //     await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            // } else if (requestType == "Flip-Summon" || requestType == "Activate-Facedown") {
+            //     boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, set: false } }
+            //     this.setState({ [board]: boardCopy, cardInfo: "" })
+            //     await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            // } else if (requestType == "Examine") {
+            //     this.toggleExaminePopup()
+            // }
+
+
+        }
         const board = cardInfo[0]
         const cardZone = cardInfo[1]
         const cardZoneIndex = cardInfo[2]
 
         let boardCopy = { ...this.state[board] }
         let cardDetails = boardCopy[cardZone][cardZoneIndex]["card"]
-        // console.log("card being pressed on", cardDetails)
+        // //console.log("card being pressed on", cardDetails)
         if (requestType == "Return-To-Hand") {
             boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
             cardDetails.defensePosition = false
@@ -347,13 +422,12 @@ class DuelingRoomPage extends Component {
         }
     }
     manageCardInDeck = async (requestType) => {
-        console.log("corresponding card", this.state.cardType)
         const cardDetails = this.state.cardType
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
         let boardCopy = { ...this.state[board] }
         if (requestType == "Add-To-Hand-D") {
             let filteredDeck = [...this.state.mainDeck]
-            // console.log("deck length before", filteredExtraDeck.length)
+            // //console.log("deck length before", filteredExtraDeck.length)
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
             this.toggleCardInDeckOptions()
             this.toggleDeckPopup()
@@ -364,9 +438,9 @@ class DuelingRoomPage extends Component {
             await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
         } else if (requestType == "Special-D") {
             let filteredDeck = [...this.state.mainDeck]
-            // console.log("deck length before", filteredExtraDeck.length)
+            // //console.log("deck length before", filteredExtraDeck.length)
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
-            // console.log("deck length after", filteredExtraDeck.length)
+            // //console.log("deck length after", filteredExtraDeck.length)
             this.toggleCardInDeckOptions()
             this.toggleDeckPopup()
             this.setState({ requestType: "Special-D", cardOptionsPresented: cardDetails, mainDeck: filteredDeck })
@@ -386,7 +460,7 @@ class DuelingRoomPage extends Component {
         }
     }
     manageCardInExtraDeck = (requestType) => {
-        console.log("corresponding card", this.state.cardType)
+        ////console.log("corresponding card", this.state.cardType)
         this.toggleCardInExtraDeckOptions()
         const cardDetails = this.state.cardType
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
@@ -415,14 +489,14 @@ class DuelingRoomPage extends Component {
 
 
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
-        console.log("board", board, "request", this.props.user.username)
-        console.log("hostedBy", this.state.hostedBy)
+        ////console.log("board", board, "request", this.props.user.username)
+        ////console.log("hostedBy", this.state.hostedBy)
 
         const handCopy = [...drawnCards]
 
         await alterBoard({ hostUsername: this.state.hostedBy, location: [board, "hand"], zone: handCopy })
 
-        // console.log("here's the hand from the server", this.state[board].hand)
+        // ////console.log("here's the hand from the server", this.state[board].hand)
         this.setState({ mainDeck: shallowCards })
 
         // this.setState({ hand: drawnCards, mainDeck: shallowCards })
@@ -471,12 +545,6 @@ class DuelingRoomPage extends Component {
     }
     //hand to field (3)
     addCardToBoard = async (location, requestType) => {
-
-
-
-
-
-
         this.setState({ cardInHandPressedPopupVisible: false, cardOnFieldPressedPopupVisible: false });
         if (!requestType) {
             requestType = this.state.requestType
@@ -501,12 +569,14 @@ class DuelingRoomPage extends Component {
         } else if (requestType === "Activate-GY" || requestType === "Activate-BZ") {
             cardDetails = { ...cardOptionsPresented, set: false }
         } else if (requestType === "Special-ED" || requestType === "Special-D") {
-            cardDetails = { ...cardOptionsPresented, set: false }
+            cardDetails = { ...cardOptionsPresented, set: false, user: this.props.user.username }
         }
         const board = location[0]
         const cardZone = location[1]
-        const cardZoneIndex = location[2]
-
+        let cardZoneIndex;
+        if (location[0] != "linkZones") {
+            cardZoneIndex = location[2]
+        }
         if ((cardZone == "st" && cardDetails.type.includes("Monster")) || (cardZone == "m1" && cardDetails.type.includes("Spell"))) {
             this.setState({ cardOptionsPresented: false, requestType: "" })
             //logic that restricts card placement
@@ -519,6 +589,7 @@ class DuelingRoomPage extends Component {
         } else {
             boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: false } }
         }
+
         if (requestType === "Special-GY") {
             let graveyard = boardCopy["graveyard"]
             boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
@@ -529,12 +600,21 @@ class DuelingRoomPage extends Component {
             boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
             await alterBoard({ location: [board, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
         }
+
+
         if (requestType === "Special-ED") {
             let filteredExtraDeck = [...this.state.extraDeck]
-            console.log("deck length before", filteredExtraDeck.length)
+            //console.log("deck length before", filteredExtraDeck.length)
             filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
-            console.log("deck length after", filteredExtraDeck.length)
+            //console.log("deck length after", filteredExtraDeck.length)
             this.setState({ extraDeck: filteredExtraDeck })
+        }
+        if (board === "linkZones" && requestType === "Special-ED") {
+            const cardToAdd = { card: { ...cardDetails, exists: true, defensePosition: false, user: this.props.user.username } }
+            let linkZoneCopy = [...this.state.linkZones]
+            linkZoneCopy[cardZone] = cardToAdd
+            await alterLinkZone({ location, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+            return
         }
 
         if (!requestType.includes("-GY") && !requestType.includes("-ED") && !requestType.includes("-D") && !requestType.includes("-BZ")) {
@@ -586,7 +666,7 @@ class DuelingRoomPage extends Component {
         return Math.floor(Math.random() * Math.floor(7));
     }
     // requestAccessToGraveyard = async () => {
-    //     console.log("requesting access (1)")
+    //     //console.log("requesting access (1)")
     //     const board = this.state.hosting ? "guestBoard" : "hostBoard"
     //     const hostUsername = this.state.hostedBy
     //     const obj = { hostUsername, board }
@@ -646,17 +726,14 @@ class DuelingRoomPage extends Component {
                     </View>
 
                     <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
-                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} >
-                            {/* <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} />  */}
+                        <TouchableOpacity style={this.state.linkZoneOneStyle} onPress={boardsRetrieved == true && !this.state.linkZones[0]['card'].exists ? () => this.addCardToBoard(["linkZones", 0, null]) : () => this.presentCardOnBoardOptions(["linkZones", 0])}>
 
-                            {/* {boardsRetrieved == true && properBoard.st[0]['card'].exists && ( <CustomImage source={{ uri: properBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)} */}
-
-
-
-
+                            {this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[0]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
                         </TouchableOpacity>
-                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} >
-                            {/* <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} />  */}
+
+                        <TouchableOpacity style={this.state.linkZoneTwoStyle} onPress={boardsRetrieved == true && !this.state.linkZones[1]['card'].exists ? () => this.addCardToBoard(["linkZones", 1, null]) : () => this.presentCardOnBoardOptions(["linkZones", 1])}>
+                            {this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[1]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
+
                         </TouchableOpacity>
 
                     </View>
