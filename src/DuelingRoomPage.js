@@ -121,6 +121,7 @@ class DuelingRoomPage extends Component {
         if (cardInfo[0] == "linkZones") {
             //handle opponent pressing your cards
             if (this.state.linkZones[cardInfo[1]]["card"].user != this.props.user.username) {
+                this.examineOpponentCard(this.state.linkZones[cardInfo[1]]["card"])
                 return
             }
             this.setState({ cardOnFieldPressedPopupVisible: true, cardType: this.state.linkZones[cardInfo[1]]["card"], cardInfo })
