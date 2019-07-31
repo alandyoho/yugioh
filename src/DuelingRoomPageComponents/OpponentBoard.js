@@ -21,7 +21,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyard
                 <TouchableOpacity style={{ flex: 1, width: 50, height: null, borderColor: 'rgb(130, 69, 91)', borderRadius: 10, borderWidth: 2 }} >
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
-                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={(boardsRetrieved == true && opponentBoard.m1[cardIndex]['card'].exists) ? () => examineOpponentCard(opponentBoard.m1[cardIndex]['card']) : () => console.log("no card in slot")}>
+                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: "black", borderRadius: 10, borderWidth: 2 }} onPress={(boardsRetrieved == true && opponentBoard.m1[cardIndex]['card'].exists && !opponentBoard.m1[cardIndex]['card'].set) ? () => examineOpponentCard(opponentBoard.m1[cardIndex]['card']) : () => console.log("no card in slot")}>
                         {boardsRetrieved == true && opponentBoard.m1[cardIndex]['card'].exists && (opponentBoard.m1[cardIndex]['card'].set ? <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : (opponentBoard.m1[cardIndex]['card'].defensePosition ? <CustomImage source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: [{ rotate: '90deg' }] }} /> : <CustomImage source={{ uri: opponentBoard.m1[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />))}
                     </TouchableOpacity>
                 ))}
@@ -39,7 +39,7 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyard
                     </ImageBackground>
                 </TouchableOpacity>
                 {[1, 2, 3, 4, 5].map(cardIndex => (
-                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} onPress={(boardsRetrieved == true && opponentBoard.st[cardIndex]['card'].exists) ? () => examineOpponentCard(opponentBoard.st[cardIndex]['card']) : () => console.log("no card in slot")}>
+                    <TouchableOpacity key={cardIndex} style={{ flex: 1, width: 50, height: null, borderColor: 'black', borderRadius: 10, borderWidth: 2 }} onPress={(boardsRetrieved == true && opponentBoard.st[cardIndex]['card'].exists && !opponentBoard.st[cardIndex]['card'].set) ? () => examineOpponentCard(opponentBoard.st[cardIndex]['card']) : () => console.log("no card in slot")}>
                         {boardsRetrieved == true && opponentBoard.st[cardIndex]["card"].exists && (opponentBoard.st[cardIndex]['card'].set ? <CustomImage source={require("../../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} /> : <CustomImage source={{ uri: opponentBoard.st[cardIndex]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
                     </TouchableOpacity>
                 ))}
