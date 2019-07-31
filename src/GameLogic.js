@@ -1,16 +1,22 @@
+// import console = require("console");
 
 class GameLogic {
     constructor() {
-
+        this.user = null
     }
 
+
     initialShuffleDeck = (cards) => {
+        
         // const shallowCards = [...cards]
+
         const expandedCards = []
         for (let i = 0; i < cards.length; i++) {
             const cardQuantity = cards[i].quantity
             for (let a = 0; a < cardQuantity; a++) {
-                // //console.log("card,", cards[i])
+                // //
+                cards[i].user = this.user
+
                 expandedCards.push(cards[i])
             }
         }
@@ -21,7 +27,7 @@ class GameLogic {
             expandedCards[m] = expandedCards[i];
             expandedCards[i] = t;
         }
-        // //console.log("expanded Cards", expandedCards)
+        // //
         return expandedCards;
     }
     shuffleDeck = (cards) => {
@@ -33,7 +39,7 @@ class GameLogic {
             cards[m] = cards[i];
             cards[i] = t;
         }
-        // //console.log("expanded Cards", expandedCards)
+        // //
         return cards;
     }
 
@@ -50,6 +56,9 @@ class GameLogic {
             drawnCards.push(topCard)
         }
         return { drawnCards, shallowCards }
+    }
+    addUser = (user) => {
+        this.user = user
     }
 }
 

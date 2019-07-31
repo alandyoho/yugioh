@@ -17,7 +17,7 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
             containerStyle={{ position: "absolute", left: 20, top: 35 }}
             initValue={item.quantity}
             onChange={value => updateCardQuantity({ value: value, card: item, username: username, deck: selectedDeck })}
-            onLimitReached={(isMax, msg) => console.log(isMax, msg)}
+            onLimitReached={(isMax, msg) => console.log("limit")}
             minValue={1}
             maxValue={3}
             totalWidth={120}
@@ -41,8 +41,8 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
 
 export default class AppleStyleSwipeableRow extends Component {
     renderRightActions = (progress, dragX) => {
-        // //console.log("progress", progress)
-        // //console.log("drag", dragX)
+        // //
+        // //
         const scale = dragX.interpolate({
             inputRange: [-80, 0],
             outputRange: [1, 0],

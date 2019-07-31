@@ -487,10 +487,6 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                 // overlayOpacity={0}
                 dialogStyle={{ position: 'absolute', bottom: 0, backgroundColor: "transparent" }}
             >
-
-
-
-
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFF", width: WIDTH, height: cardType && cardType.type.includes("Monster") ? Dimensions.get("window").height * 0.30 : (cardType.set ? Dimensions.get("window").height * 0.30 : Dimensions.get("window").height * 0.24), borderRadius: 10, bottom: 0 }}>
                         {cardType.type && cardType.type.includes("Monster") ?

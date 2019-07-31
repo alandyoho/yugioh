@@ -24,14 +24,14 @@ import MultiSwitch from 'rn-slider-switch';
 <MultiSwitch
                     currentStatus={'Open'}
                     disableScroll={value => {
-                        //console.log('scrollEnabled', value);
+                        //
                         // this.scrollView.setNativeProps({
                         //     scrollEnabled: value
                         // });
                     }}
                     isParentScrollEnabled={false}
                     onStatusChanged={text => {
-                        //console.log('Change Status ', text);
+                        //
                     }}
 ```
 

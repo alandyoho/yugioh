@@ -95,9 +95,9 @@ class DuelingRoomPage extends Component {
 
                     if (this.state.boardsRetrieved) {
                         let selectedCard = linkZones[0]["card"]
-                        // console.log("selected card", selectedCard.user)
+                        // 
                         if (selectedCard && selectedCard.user && selectedCard.user !== this.props.user.username) {
-                            console.log(`card placed by ${this.props.user.username}'s opponent. rotating link zone accordingly`)
+
                             this.setState({ linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
                         }
                         // else {
@@ -105,7 +105,7 @@ class DuelingRoomPage extends Component {
                         // }
                         let selCard = linkZones[1]["card"]
                         if (selCard && selCard.user && selCard.user !== this.props.user.username) {
-                            console.log(`card placed by ${this.props.user.username}'s opponent. rotating link zone accordingly`)
+
                             this.setState({ linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
                         }
                         // else {
@@ -113,7 +113,7 @@ class DuelingRoomPage extends Component {
                         // }
 
 
-                        //console.log(this.state.linkZones[0]["card"].user, "=", this.props.user.username)
+                        //
 
                     }
 
@@ -144,11 +144,20 @@ class DuelingRoomPage extends Component {
             })
     }
     presentCardOnBoardOptions = (cardInfo) => {
+
         if (cardInfo[0] == "linkZones") {
+            //handle opponent pressing your cards
+            if (this.state.linkZones[cardInfo[1]]["card"].user != this.props.user.username) {
+                return
+            }
             this.setState({ cardOnFieldPressedPopupVisible: true, cardType: this.state.linkZones[cardInfo[1]]["card"], cardInfo })
             return
         }
         const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
+        //handle opponent pressing your cards
+        if (this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"].user != this.props.user.username) {
+            return
+        }
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
     }
 
@@ -192,6 +201,7 @@ class DuelingRoomPage extends Component {
 
 
     manageCardOnBoard = async (requestType) => {
+
         const { cardInfo } = this.state
 
         if (cardInfo[0] === "linkZones") {
@@ -199,10 +209,14 @@ class DuelingRoomPage extends Component {
             let boardCopy = { ...this.state[board] }
             let linkZoneCopy = [...this.state.linkZones]
             let cardDetails = linkZoneCopy[cardInfo[1]]["card"]
+            console.log("card details", cardDetails)
+            // if (cardDetails.user != this.props.user.username) {
+            //     return
+            // }
             if (requestType == "Return-To-Hand") {
                 linkZoneCopy[cardInfo[1]] = { card: { exists: false, defensePosition: false, user: "" } }
                 if (cardDetails.user != this.props.user.username) {
-                    console.log(`card removed by ${this.props.user.username}'s opponent. re- rotating link zone ${properZone} accordingly`)
+
                     this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
 
                 }
@@ -211,12 +225,7 @@ class DuelingRoomPage extends Component {
                 this.setState({ linkZones: linkZoneCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
                 await alterLinkZone({ location: cardInfo, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
                 const properZone = cardInfo[1] === 0 ? "linkZoneOneStyle" : "linkZoneTwoStyle"
-                this.dismissCardPopup()
 
-
-                // this.setState({ cardOnFieldPressedPopupVisible: false, [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 } })
-
-                return
             } else if (requestType == "Send-To-Graveyard") {
 
                 const properZone = cardInfo[1] === 0 ? "linkZoneOneStyle" : "linkZoneTwoStyle"
@@ -225,7 +234,7 @@ class DuelingRoomPage extends Component {
 
                 linkZoneCopy[cardInfo[1]] = { card: { exists: false, defensePosition: false, user: "" } }
                 if (cardDetails.user != this.props.user.username) {
-                    console.log(`card removed by ${this.props.user.username}'s opponent. re- rotating link zone ${properZone} accordingly`)
+
                     this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
 
                 }
@@ -246,12 +255,14 @@ class DuelingRoomPage extends Component {
                 await alterLinkZone({ location: cardInfo, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
                 this.setState({ cardOnFieldPressedPopupVisible: false })
 
-                return this.dismissCardPopup()
 
                 // await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
             } else if (requestType == "Examine") {
                 this.toggleExaminePopup()
+
             }
+
+            return this.dismissCardPopup()
 
 
         }
@@ -261,7 +272,7 @@ class DuelingRoomPage extends Component {
 
         let boardCopy = { ...this.state[board] }
         let cardDetails = boardCopy[cardZone][cardZoneIndex]["card"]
-        // //console.log("card being pressed on", cardDetails)
+        // //
         if (requestType == "Return-To-Hand") {
             boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
             cardDetails.defensePosition = false
@@ -444,7 +455,7 @@ class DuelingRoomPage extends Component {
         let boardCopy = { ...this.state[board] }
         if (requestType == "Add-To-Hand-D") {
             let filteredDeck = [...this.state.mainDeck]
-            // //console.log("deck length before", filteredExtraDeck.length)
+            // //
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
             this.toggleCardInDeckOptions()
             this.toggleDeckPopup()
@@ -455,9 +466,9 @@ class DuelingRoomPage extends Component {
             await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
         } else if (requestType == "Special-D") {
             let filteredDeck = [...this.state.mainDeck]
-            // //console.log("deck length before", filteredExtraDeck.length)
+            // //
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === cardDetails.id), 1);
-            // //console.log("deck length after", filteredExtraDeck.length)
+            // //
             this.toggleCardInDeckOptions()
             this.toggleDeckPopup()
             this.setState({ requestType: "Special-D", cardOptionsPresented: cardDetails, mainDeck: filteredDeck })
@@ -477,7 +488,7 @@ class DuelingRoomPage extends Component {
         }
     }
     manageCardInExtraDeck = (requestType) => {
-        ////console.log("corresponding card", this.state.cardType)
+        ////
         this.toggleCardInExtraDeckOptions()
         const cardDetails = this.state.cardType
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
@@ -497,6 +508,7 @@ class DuelingRoomPage extends Component {
         //set the state with shuffled retrieved cards and selected deck
 
         //after retrieving appropriate deck from firestore, update proper board's hand property 
+        GameLogic.shared.addUser(this.props.user.username)
 
         this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.initialShuffleDeck(extraDeck) })
 
@@ -506,14 +518,14 @@ class DuelingRoomPage extends Component {
 
 
         const board = this.state.hosting ? "hostBoard" : "guestBoard"
-        ////console.log("board", board, "request", this.props.user.username)
-        ////console.log("hostedBy", this.state.hostedBy)
+        ////
+        ////
 
         const handCopy = [...drawnCards]
 
         await alterBoard({ hostUsername: this.state.hostedBy, location: [board, "hand"], zone: handCopy })
 
-        // ////console.log("here's the hand from the server", this.state[board].hand)
+        // ////
         this.setState({ mainDeck: shallowCards })
 
         // this.setState({ hand: drawnCards, mainDeck: shallowCards })
@@ -608,9 +620,33 @@ class DuelingRoomPage extends Component {
         }
 
         if (requestType === "Special-GY") {
-            let graveyard = boardCopy["graveyard"]
-            boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
-            await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            if (board === "linkZones") {
+                let propBoard = this.state.hosting ? "hostBoard" : "guestBoard"
+                let boardCopy = { ...this.state[propBoard] }
+                let graveyard = boardCopy["graveyard"]
+
+
+
+                "beans"
+                boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+                await alterBoard({ location: [propBoard, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+
+
+
+                const cardToAdd = { card: { ...cardDetails, exists: true, defensePosition: false, user: this.props.user.username } }
+                let linkZoneCopy = [...this.state.linkZones]
+                linkZoneCopy[cardZone] = cardToAdd
+                await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+                this.setState({ cardInfo: "", cardType: { type: "" }, requestType: "" })
+                return
+
+
+                return
+            } else {
+                let graveyard = boardCopy["graveyard"]
+                boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
+                await alterBoard({ location: [board, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            }
         }
         if (requestType === "Special-BZ") {
             let banishedZone = boardCopy["banishedZone"]
@@ -621,9 +657,9 @@ class DuelingRoomPage extends Component {
 
         if (requestType === "Special-ED") {
             let filteredExtraDeck = [...this.state.extraDeck]
-            //console.log("deck length before", filteredExtraDeck.length)
+            //
             filteredExtraDeck.splice(filteredExtraDeck.findIndex(e => e.id === cardDetails.id), 1);
-            //console.log("deck length after", filteredExtraDeck.length)
+            //
             this.setState({ extraDeck: filteredExtraDeck })
         }
         if (board === "linkZones" && requestType === "Special-ED") {
@@ -631,6 +667,7 @@ class DuelingRoomPage extends Component {
             let linkZoneCopy = [...this.state.linkZones]
             linkZoneCopy[cardZone] = cardToAdd
             await alterLinkZone({ location, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+            this.setState({ cardInfo: "", cardType: { type: "" }, requestType: "" })
             return
         }
 
@@ -683,7 +720,7 @@ class DuelingRoomPage extends Component {
         return Math.floor(Math.random() * Math.floor(7));
     }
     // requestAccessToGraveyard = async () => {
-    //     //console.log("requesting access (1)")
+    //     //
     //     const board = this.state.hosting ? "guestBoard" : "hostBoard"
     //     const hostUsername = this.state.hostedBy
     //     const obj = { hostUsername, board }

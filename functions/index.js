@@ -20,7 +20,7 @@ exports.searchResults = functions.https.onRequest(async (request, response) => {
         }
     }
     const card = cardParser(cardType)
-    // //console.log("here's the card type", card)
+    // //
     const cardName = request.body.data.name
     const arrayToObject = (arr) =>
         arr.reduce((obj, item) => {
@@ -30,9 +30,9 @@ exports.searchResults = functions.https.onRequest(async (request, response) => {
 
     try {
         const data = await axios.get(`https://db.ygoprodeck.com/api/v5/cardinfo.php?&fname=${cardName}&${card}&sort=name&num=10`)
-        //console.log("(1)", data.data)
+        //
         const dataAsArr = arrayToObject(data.data)
-        //console.log("2", dataAsArr)
+        //
         response.send({ data: dataAsArr })
     } catch (err) {
         response.send({ data: false })

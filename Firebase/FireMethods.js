@@ -12,7 +12,7 @@ const updateUserInfo = (obj) => {
     authUser.updateProfile({
         displayName: obj.username
     }).then(function () {
-        //console.log("update successful")
+        //
     }).catch(function (error) {
         // An error happened.
     });
@@ -20,7 +20,7 @@ const updateUserInfo = (obj) => {
 const updateMainDeckInfo = async (obj) => {
     const { decks } = await retrieveDeckInfo(obj.username)
     if (decks && decks.includes(obj.deck)) {
-        // //console.log("deck already exists")
+        // //
         return false
     }
     firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).set({
@@ -75,7 +75,7 @@ const removeCardsFromDeck = async (obj) => {
             })
         }
     } else {
-        // //console.log("cards from deck", cards)
+        // //
         const filt = mainDeck.filter(card => card.id == obj.card.id)
         if (filt.length && obj.val == 0) {
             await deleteCard(obj)
@@ -96,15 +96,15 @@ const removeCardsFromDeck = async (obj) => {
 }
 
 const alterBoard = async (obj) => {
-    console.log("should contain graveyard cards", obj)
+    // 
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
 const alterLinkZone = async (obj) => {
-    //console.log("almost thereeeeeeee", obj)
+    //
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}`]: obj.updates })
 }
 const requestAccessToGraveyard = async (obj) => {
-    //console.log("requesting access (2)", obj)
+    //
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board}.requestingAccessToGraveyard`]: { popupVisible: true, approved: false } });
 }
 const dismissRequestAccessToGraveyard = async (obj) => {
@@ -185,7 +185,7 @@ const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
 const retrieveCardsFromDeck = (obj) => {
-    //console.log("what we're working with", obj)
+    //
 
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
@@ -199,7 +199,7 @@ const returnAvailableDuels = async (requestId) => {
     const snapshot = await firebase.firestore().collection('rooms').get()
     const docsWithRequestIdFiltered = snapshot.docs.filter(doc => doc.id != requestId).map(d => d.data()).filter(c => c.opponent === "").map(d => d.host)
     // filter(d => d.data().opponent === "")
-    //console.log(docsWithRequestIdFiltered)
+    //
     return docsWithRequestIdFiltered
 }
 const joinDuel = (obj) => {
@@ -214,12 +214,12 @@ const leaveDuel = async (obj) => {
         //request is being made by room host
         //delete room from database
         firestore.collection("rooms").doc(hostedBy).delete()
-        //console.log("request is being made by room host")
+        //
     } else {
         //request is being made by room guest
         //delete opponent property on room
         firestore.collection("rooms").doc(hostedBy).set({ opponent: "" }, { merge: true })
-        //console.log("request is being made by room guest")
+        //
     }
     firestore.collection("users").doc(username).set({ hostedBy: "", hosting: false }, { merge: true })
 }
