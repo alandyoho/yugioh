@@ -15,8 +15,6 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
     const SPACE = Dimensions.get("window").width * 0.025
     return (
         <React.Fragment>
-
-
             <Dialog
                 visible={cardInGraveyardPressed}
                 width={0.95}

@@ -138,8 +138,17 @@ const addCardsToDeck = async (obj) => {
         const filt = extraDeck.filter(card => card.id == obj.card.id)
         //check if card exists in "deck" model
         //if exists, increase quantity property by one 
-        if (filt.length && filt[0].quantity <= 3) {
-            if (filt[0].quantity === 3) return "max quantity reached"
+        console.log('obj.card', obj.card)
+        let maxQuant = 3
+        if ('banlist_info' in obj.card) {
+            if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
+                maxQuant = 1
+            } else if (obj.card["banlist_info"]["ban_tcg"] == "Semi-Limited") {
+                maxQuant = 2
+            }
+        }
+        if (filt.length && filt[0].quantity <= maxQuant) {
+            if (filt[0].quantity === maxQuant) return "max quantity reached"
             // const quant = filt[0].quantity
             firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "extraDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])
@@ -159,10 +168,19 @@ const addCardsToDeck = async (obj) => {
     } else {
         const { mainDeck } = await retrieveCardsFromDeck(obj)
         const filt = mainDeck.filter(card => card.id == obj.card.id)
+        console.log('obj.card', obj.card)
+        let maxQuant = 3
+        if ('banlist_info' in obj.card) {
+            if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
+                maxQuant = 1
+            } else if (obj.card["banlist_info"]["ban_tcg"] == "Semi-Limited") {
+                maxQuant = 2
+            }
+        }
         //check if card exists in "deck" model
         //if exists, increase quantity property by one 
-        if (filt.length && filt[0].quantity <= 3) {
-            if (filt[0].quantity === 3) return "max quantity reached"
+        if (filt.length && filt[0].quantity <= maxQuant) {
+            if (filt[0].quantity === maxQuant) return "max quantity reached"
             // const quant = filt[0].quantity
             firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "mainDeck": firebase.firestore.FieldValue.arrayRemove(filt[0])

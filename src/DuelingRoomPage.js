@@ -58,8 +58,7 @@ class DuelingRoomPage extends Component {
             guestLifePoints: 8000,
             hostLifePointsSelected: false,
             cardInDeckPressed: false,
-            linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 },
-            linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 }
+
         }
     }
     async componentDidMount() {
@@ -92,32 +91,6 @@ class DuelingRoomPage extends Component {
             .onSnapshot(doc => {
                 if (doc.exists) {
                     const { guestBoard, hostBoard, opponent, host, linkZones } = doc.data()
-
-                    if (this.state.boardsRetrieved) {
-                        let selectedCard = linkZones[0]["card"]
-                        // 
-                        if (selectedCard && selectedCard.user && selectedCard.user !== this.props.user.username) {
-
-                            this.setState({ linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
-                        }
-                        // else {
-                        //     this.setState({ linkZoneOneStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 } })
-                        // }
-                        let selCard = linkZones[1]["card"]
-                        if (selCard && selCard.user && selCard.user !== this.props.user.username) {
-
-                            this.setState({ linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
-                        }
-                        // else {
-                        //     this.setState({ linkZoneTwoStyle: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '360deg' }] } })
-                        // }
-
-
-                        //
-
-                    }
-
-
                     this.setState({ guestBoard, hostBoard, opponent, host, boardsRetrieved: true, linkZones: linkZones })
 
                     if (this.state.opponent != "" && this.state.waitingForOpponentPopupVisible == true) {
@@ -155,7 +128,7 @@ class DuelingRoomPage extends Component {
         }
         const cardType = this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"]
         //handle opponent pressing your cards
-        if (this.state[cardInfo[0]][cardInfo[1]][cardInfo[2]]["card"].user != this.props.user.username) {
+        if (cardType.user != this.props.user.username) {
             return
         }
         this.setState({ cardOnFieldPressedPopupVisible: true, cardInfo, cardType })
@@ -202,6 +175,7 @@ class DuelingRoomPage extends Component {
 
     manageCardOnBoard = async (requestType) => {
 
+
         const { cardInfo } = this.state
 
         if (cardInfo[0] === "linkZones") {
@@ -209,7 +183,7 @@ class DuelingRoomPage extends Component {
             let boardCopy = { ...this.state[board] }
             let linkZoneCopy = [...this.state.linkZones]
             let cardDetails = linkZoneCopy[cardInfo[1]]["card"]
-            console.log("card details", cardDetails)
+            // console.log("card details", cardDetails)
             // if (cardDetails.user != this.props.user.username) {
             //     return
             // }
@@ -220,7 +194,6 @@ class DuelingRoomPage extends Component {
                     this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
 
                 }
-                cardDetails.user = ""
                 const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
                 this.setState({ linkZones: linkZoneCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
                 await alterLinkZone({ location: cardInfo, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
@@ -238,7 +211,6 @@ class DuelingRoomPage extends Component {
                     this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
 
                 }
-                cardDetails.user = ""
 
                 //extra deck is stored locally so we're updating in state and setting state
                 // const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
@@ -627,7 +599,6 @@ class DuelingRoomPage extends Component {
 
 
 
-                "beans"
                 boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
                 await alterBoard({ location: [propBoard, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
 
@@ -783,14 +754,14 @@ class DuelingRoomPage extends Component {
                         </View>
                     </View>
 
-                    <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center" }}>
-                        <TouchableOpacity style={this.state.linkZoneOneStyle} onPress={boardsRetrieved == true && !this.state.linkZones[0]['card'].exists ? () => this.addCardToBoard(["linkZones", 0, null]) : () => this.presentCardOnBoardOptions(["linkZones", 0])}>
+                    <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center", transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }}>
+                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].user && this.props.user.username === this.state.linkZones[0]['card'].user ? [{ rotate: "0deg" }] : [{ rotate: '180deg' }] }} onPress={boardsRetrieved == true && !this.state.linkZones[0]['card'].exists ? () => this.addCardToBoard(["linkZones", 0, null]) : () => this.presentCardOnBoardOptions(["linkZones", 0])}>
 
-                            {this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[0]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
+                            {this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[0]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={this.state.linkZoneTwoStyle} onPress={boardsRetrieved == true && !this.state.linkZones[1]['card'].exists ? () => this.addCardToBoard(["linkZones", 1, null]) : () => this.presentCardOnBoardOptions(["linkZones", 1])}>
-                            {this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[1]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />)}
+                        <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].user && this.props.user.username === this.state.linkZones[1]['card'].user ? [{ rotate: "0deg" }] : [{ rotate: '180deg' }] }} onPress={boardsRetrieved == true && !this.state.linkZones[1]['card'].exists ? () => this.addCardToBoard(["linkZones", 1, null]) : () => this.presentCardOnBoardOptions(["linkZones", 1])}>
+                            {this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[1]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
 
                         </TouchableOpacity>
 

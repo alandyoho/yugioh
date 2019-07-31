@@ -208,7 +208,7 @@ class DeckConstructorPage extends Component {
             else if (a.name > b.name) return 1;
             return 0;
         })
-        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: deck, extra })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: deck, extraDeck: extra })
     }
 
     search = async (cardName) => {
