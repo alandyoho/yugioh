@@ -96,7 +96,7 @@ const removeCardsFromDeck = async (obj) => {
 }
 
 const alterBoard = async (obj) => {
-    // //console.log("should contain graveyard cards", obj.zone)
+    console.log("should contain graveyard cards", obj)
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
 const alterLinkZone = async (obj) => {

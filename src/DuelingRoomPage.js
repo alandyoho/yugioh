@@ -195,7 +195,8 @@ class DuelingRoomPage extends Component {
         const { cardInfo } = this.state
 
         if (cardInfo[0] === "linkZones") {
-
+            const board = this.state.hosting ? "hostBoard" : "guestBoard"
+            let boardCopy = { ...this.state[board] }
             let linkZoneCopy = [...this.state.linkZones]
             let cardDetails = linkZoneCopy[cardInfo[1]]["card"]
             if (requestType == "Return-To-Hand") {
@@ -216,25 +217,41 @@ class DuelingRoomPage extends Component {
                 // this.setState({ cardOnFieldPressedPopupVisible: false, [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2 } })
 
                 return
+            } else if (requestType == "Send-To-Graveyard") {
+
+                const properZone = cardInfo[1] === 0 ? "linkZoneOneStyle" : "linkZoneTwoStyle"
+
+                boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
+
+                linkZoneCopy[cardInfo[1]] = { card: { exists: false, defensePosition: false, user: "" } }
+                if (cardDetails.user != this.props.user.username) {
+                    console.log(`card removed by ${this.props.user.username}'s opponent. re- rotating link zone ${properZone} accordingly`)
+                    this.setState({ [properZone]: { width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: [{ rotate: '180deg' }] } })
+
+                }
+                cardDetails.user = ""
+
+                //extra deck is stored locally so we're updating in state and setting state
+                // const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
+                // this.setState({ linkZones: linkZoneCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
+                this.setState({ linkZones: linkZoneCopy, cardInfo: "", cardOptionsPresented: false })
+
+
+
+                //updates graveyard copy with cardDetails
+                //update linkZoneCopy to be set to null
+
+                // await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+                await alterBoard({ location: [board, "graveyard"], zone: boardCopy["graveyard"], hostUsername: this.state.hostedBy })
+                await alterLinkZone({ location: cardInfo, updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+                this.setState({ cardOnFieldPressedPopupVisible: false })
+
+                return this.dismissCardPopup()
+
+                // await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+            } else if (requestType == "Examine") {
+                this.toggleExaminePopup()
             }
-            // else if (requestType == "Change-Position") {
-            //     const curPosition = !boardCopy[cardZone][cardZoneIndex]["card"].defensePosition
-            //     boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, defensePosition: curPosition } }
-            //     this.setState({ [board]: boardCopy, cardInfo: "" })
-            //     await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
-            // } else if (requestType == "Send-To-Graveyard") {
-            //     boardCopy["graveyard"] = [...boardCopy["graveyard"], cardDetails]
-            //     boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
-            //     this.setState({ [board]: boardCopy, cardInfo: "" })
-            //     // await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
-            //     await doubleAlterBoard({ location: cardInfo, zoneOne: boardCopy["graveyard"], zoneTwo: boardCopy[cardZone], hostUsername: this.state.hostedBy })
-            // } else if (requestType == "Flip-Summon" || requestType == "Activate-Facedown") {
-            //     boardCopy[cardZone][cardZoneIndex] = { card: { ...cardDetails, exists: true, set: false } }
-            //     this.setState({ [board]: boardCopy, cardInfo: "" })
-            //     await alterBoard({ location: cardInfo, zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
-            // } else if (requestType == "Examine") {
-            //     this.toggleExaminePopup()
-            // }
 
 
         }
