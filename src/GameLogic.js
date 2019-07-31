@@ -5,9 +5,28 @@ class GameLogic {
         this.user = null
     }
 
+    alphabetize = (cards) => {
+        const expandedCards = []
+        for (let i = 0; i < cards.length; i++) {
+            const cardQuantity = cards[i].quantity
+            for (let a = 0; a < cardQuantity; a++) {
+                // //
+                cards[i].user = this.user
 
+                expandedCards.push(cards[i])
+            }
+        }
+
+
+        return expandedCards.sort((a, b) => {
+            if (a.name < b.name) return -1;
+            else if (a.name > b.name) return 1;
+            return 0;
+        })
+
+    }
     initialShuffleDeck = (cards) => {
-        
+
         // const shallowCards = [...cards]
 
         const expandedCards = []

@@ -203,7 +203,12 @@ class DeckConstructorPage extends Component {
             else if (a.name > b.name) return 1;
             return 0;
         })
-        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: deck, extraDeck })
+        const extra = extraDeck.sort((a, b) => {
+            if (a.name < b.name) return -1;
+            else if (a.name > b.name) return 1;
+            return 0;
+        })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: deck, extra })
     }
 
     search = async (cardName) => {

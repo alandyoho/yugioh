@@ -510,7 +510,7 @@ class DuelingRoomPage extends Component {
         //after retrieving appropriate deck from firestore, update proper board's hand property 
         GameLogic.shared.addUser(this.props.user.username)
 
-        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.initialShuffleDeck(extraDeck) })
+        this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.alphabetize(extraDeck) })
 
         //set the state with five cards 
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.mainDeck)
@@ -753,6 +753,10 @@ class DuelingRoomPage extends Component {
     toggleMainDeckOptions = () => {
         this.setState({ mainDeckOptionsVisible: !this.state.mainDeckOptionsVisible })
     }
+    examineOpponentCard = (card) => {
+        this.setState({ cardType: card })
+        this.toggleExaminePopup()
+    }
 
     render() {
         const { backgroundImageUrl, boardsRetrieved, handOpacity, handZIndex, waitingForOpponentPopupVisible, cardInHandPressedPopupVisible, cardOptionsPresented, examinePopupVisible, graveyardPopupVisible, cardInGraveyardPressed, mainDeck, extraDeck, extraDeckPopupVisible } = this.state
@@ -772,7 +776,7 @@ class DuelingRoomPage extends Component {
                     <View style={{ flex: 2 / 20 }}>
                     </View>
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start", transform: [{ rotate: '180deg' }] }}>
-                        <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} />
+                        <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} examineOpponentCard={this.examineOpponentCard} />
                         <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, transform: [{ rotate: '180deg' }], backgroundColor: "#FFF", borderRadius: 10, padding: 10 }}>
                             <Text>{this.props.user.username === this.state.opponent ? this.state.hostedBy : this.state.opponent}</Text>
                             <TouchableOpacity onPress={() => this.alterLifePoints("guest")}><Text>{this.state.guestLifePoints}</Text></TouchableOpacity>
