@@ -108,7 +108,7 @@ class HomePage extends Component {
                         }}
                     >
                         <DialogContent style={{ flex: 1 }}>
-                            <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.duelingRoomSelectPageZPosition, opacity: this.state.duelingRoomSelectPageOpacity }}>
+                            <Animated.View style={{ flex: 1, zIndex: this.state.duelingRoomSelectPageZPosition, opacity: this.state.duelingRoomSelectPageOpacity }}>
                                 <DuelingRoomSelectPage user={user} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} fadeOutDuelingRoomSelectPage={this.fadeOutDuelingRoomSelectPage} />
                             </Animated.View>
                             <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity }}>

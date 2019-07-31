@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import { Button } from 'react-native-elements';
 import { hostDuel, returnAvailableDuels, joinDuel } from "../../Firebase/FireMethods"
 
@@ -85,12 +85,11 @@ export default class DuelingRoomSelectPage extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: "column",
     },
     listItem: {
         height: 75,
         alignItems: 'center',
         justifyContent: 'center',
-        width: "100%"
+        width: Dimensions.get("window").width
     },
 })

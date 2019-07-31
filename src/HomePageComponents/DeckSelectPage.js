@@ -64,7 +64,7 @@ export default class DeckSelectPage extends Component {
         const onClose = () => this.setState({ currentlyOpenSwipeable: null })
         return (
             <Swipeable
-                style={{ height: 60 }}
+                style={{ height: 75 }}
                 rightButtons={[
                     <TouchableOpacity onPress={async () => await this.deleteDeck(item)} style={[styles.rightSwipeItem, { backgroundColor: 'red' }]}>
                         <Text>Delete</Text>
@@ -74,7 +74,7 @@ export default class DeckSelectPage extends Component {
                 onRightButtonsCloseRelease={onClose}
             >
                 <TouchableOpacity style={[styles.listItem, { alignSelf: "flex-start", backgroundColor: 'white' }]} onPress={() => this.onPressItem(item)}>
-                    <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{`${item}`}</Text>
+                    <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{item}</Text>
                 </TouchableOpacity>
             </Swipeable>
         )

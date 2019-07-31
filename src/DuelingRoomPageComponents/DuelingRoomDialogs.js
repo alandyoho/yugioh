@@ -261,6 +261,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                 width={0.85}
                 height={0.40}
                 children={[]}
+                dialogStyle={{ borderColor: "#FFF", borderWidth: 10, borderRadius: 10 }}
                 dialogAnimation={new ScaleAnimation({
                     initialValue: 0, // optional
                     useNativeDriver: true, // optional
@@ -268,7 +269,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
             >
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", top: 10, bottom: 10 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '800' }}>Waiting for opponent...</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '800', position: "absolute", top: 10, zIndex: 5 }}>Waiting for opponent...</Text>
                         <CustomImage source={require("../../assets/yugi-loading.gif")} resizeMode="contain" />
                     </View>
                 </DialogContent>
