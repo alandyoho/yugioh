@@ -10,6 +10,8 @@ import { DuelingRoomSelectPage, DeckSelectPage, DeckSelectPopup } from "./HomePa
 import { updateSelectedDeck } from "./actions"
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
+import { Audio } from 'expo-av';
+
 
 class HomePage extends Component {
     constructor() {
@@ -23,6 +25,23 @@ class HomePage extends Component {
             deckSelectPopupZPosition: 2,
             type: ""
         }
+        this.soundObject = new Audio.Sound();
+    }
+    async componentDidMount() {
+        try {
+            await this.soundObject.loadAsync(require('../assets/machete.mp3'));
+            await this.soundObject.playAsync();
+            // Your sound is playing!
+        } catch (error) {
+            // An error occurred!
+        }
+    }
+    stopAudio = async () => {
+        await this.soundObject.stopAsync()
+        // await this.soundObject.unloadAsync()
+    }
+    enableAudio = async () => {
+        await this.soundObject.playAsync()
     }
     fadeOutDuelingRoomSelectPage = (type) => {
         Animated.timing(this.state.duelingRoomSelectPageOpacity, { toValue: 0, useNativeDriver: true, }).start();
@@ -90,7 +109,7 @@ class HomePage extends Component {
                         }}
                     >
                         <DialogContent style={{ flex: 1 }}>
-                            <DeckSelectPage user={user} navigation={navigation} updateSelectedDeck={updateSelectedDeck} dismissDeckSelectPage={() => this.setState({ deckSelectPageVisible: false })} />
+                            <DeckSelectPage user={user} navigation={navigation} updateSelectedDeck={updateSelectedDeck} dismissDeckSelectPage={() => this.setState({ deckSelectPageVisible: false })} disableAudio={this.stopAudio} enableAudio={this.enableAudio} />
                         </DialogContent>
                     </Dialog>
                     <Dialog
@@ -112,7 +131,7 @@ class HomePage extends Component {
                                 <DuelingRoomSelectPage user={user} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} fadeOutDuelingRoomSelectPage={this.fadeOutDuelingRoomSelectPage} />
                             </Animated.View>
                             <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity }}>
-                                <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} type={this.state.type} />
+                                <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} type={this.state.type} disableAudio={this.stopAudio} enableAudio={this.enableAudio} />
                             </Animated.View>
                         </DialogContent>
                     </Dialog>

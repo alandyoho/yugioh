@@ -26,7 +26,7 @@ export default class DeckSelectPopup extends Component {
         this.setState({ decks })
     }
 
-    onPressItem = (deck) => {
+    onPressItem = async (deck) => {
         this.props.resetState()
         if (this.props.type == "Host") {
 
@@ -35,9 +35,13 @@ export default class DeckSelectPopup extends Component {
 
             joinDuel(this.props.type)
         }
+
+        await this.props.disableAudio()
         this.props.updateSelectedDeck(deck)
         this.props.dismissDuelingRoomSelectPage()
-        this.props.navigation.navigate("DuelingRoomPage")
+        this.props.navigation.navigate("DuelingRoomPage", {
+            enableAudio: this.props.enableAudio
+        })
 
     }
 

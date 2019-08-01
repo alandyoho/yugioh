@@ -8,6 +8,7 @@ import AuthLoadingScreen from "./src/AuthLoadingPage"
 import { createSwitchNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
 import { StatusBar } from 'react-native';
 import DraggableCards from "./src/DraggableCards"
+import { Audio } from 'expo-av';
 
 const AppStack = createStackNavigator({
   HomePage: {
@@ -19,7 +20,9 @@ const AppStack = createStackNavigator({
   DeckConstructorPage: {
     screen: DeckConstructorPage,
     navigationOptions: {
-      header: null
+      header: null,
+      gesturesEnabled: false,
+
     }
   },
   DuelingRoomPage: {
@@ -31,6 +34,8 @@ const AppStack = createStackNavigator({
     }
   }
 });
+
+
 const AuthStack = createStackNavigator({
   LogInSignUpPage: {
     screen: LogInSignUpPage,

@@ -62,7 +62,7 @@ class DuelingRoomPage extends Component {
         }
     }
     async componentDidMount() {
-        const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png")]
+        const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png"), require("../assets/background-7.png"), , require("../assets/background-8.png"), require("../assets/background-9.png")]
         const randomNum = this.getRandomInt()
         this.setState({ backgroundImageUrl: backgroundImages[randomNum], waitingForOpponentPopupVisible: true })
         const { hostedBy, hosting } = await retrieveDeckInfo(this.props.user.username)
@@ -521,8 +521,17 @@ class DuelingRoomPage extends Component {
         }
         this.toggleMainDeckOptions()
     }
-    leaveDuel = () => {
+    leaveDuel = async () => {
         leaveDuel([this.props.user.username, this.state.hostedBy])
+        try {
+            const enableAudio = this.props.navigation.getParam('enableAudio', 'NO-ID');
+            await enableAudio()
+            console.log("playing")
+        } catch (error) {
+            console.log(error)
+        }
+
+
         this.props.navigation.navigate("HomePage")
     }
 
@@ -742,7 +751,7 @@ class DuelingRoomPage extends Component {
             <SideMenu menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={styles.container}>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
-                        {backgroundImageUrl && <CustomImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} />}
+                        {backgroundImageUrl && <CustomImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} resizeMode={"contain"} />}
                     </View>
                     <OpponentHand renderOpponentHand={this.renderOpponentHand} opponentHand={opponentHand} />
                     <View style={{ flex: 2 / 20 }}>

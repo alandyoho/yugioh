@@ -23,20 +23,21 @@ export default class PhotoReel extends Component {
 
     render() {
         return (
-            <Carousel
-                inactiveSlideScale={1}
-                scrollEnabled={false}
-                loop={true}
-                autoplay={true}
-                containerCustomStyle={{ zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0, backgroundColor: "black" }}
-                ref={(c) => { this._carousel = c; }}
-                data={[{ source: one }, { source: three }, { source: four }, { source: five }, { source: six }, { source: seven }, { source: eight }]}
-                renderItem={this._renderItem}
-                sliderHeight={Dimensions.get("window").height}
-                sliderWidth={Dimensions.get("window").width}
-                itemWidth={Dimensions.get("window").width}
-                itemHeight={Dimensions.get("window").height}
-            />
+            // <Carousel
+            //     inactiveSlideScale={1}
+            //     scrollEnabled={false}
+            //     loop={true}
+            //     autoplay={true}
+            //     containerCustomStyle={{ zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0, backgroundColor: "black" }}
+            //     ref={(c) => { this._carousel = c; }}
+            //     data={[{ source: one }, { source: three }, { source: four }, { source: five }, { source: six }, { source: seven }, { source: eight }]}
+            //     renderItem={this._renderItem}
+            //     sliderHeight={Dimensions.get("window").height}
+            //     sliderWidth={Dimensions.get("window").width}
+            //     itemWidth={Dimensions.get("window").width}
+            //     itemHeight={Dimensions.get("window").height}
+            // />
+            <Image source={require("../assets/loadingScreen-1.gif")} style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} />
         );
     }
 }

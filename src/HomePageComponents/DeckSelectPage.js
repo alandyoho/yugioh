@@ -46,11 +46,14 @@ export default class DeckSelectPage extends Component {
         await this.refreshDeckInfo()
     }
 
-    onPressItem = (deck) => {
+    onPressItem = async (deck) => {
         const { navigate } = this.props.navigation
         this.props.updateSelectedDeck(deck)
         this.props.dismissDeckSelectPage()
-        navigate("DeckConstructorPage")
+        await this.props.disableAudio()
+        navigate('DeckConstructorPage', {
+            enableAudio: this.props.enableAudio
+        })
     }
 
     renderItem = ({ item }) => {

@@ -10,6 +10,36 @@ export default class CustomSideMenu extends Component {
         auth.signOut()
         this.props.navigation.navigate("LogInSignUpPage")
     }
+    renderScreen = () => {
+        if (this.props.screen === "HomePage") {
+            return (
+                <TouchableOpacity onPress={this.logOut} style={styles.tabContainerTouchableOpacity}>
+                    <View style={styles.tabContainerContents}>
+                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                        <Text style={styles.tabContainerText}>Log Out</Text>
+                    </View>
+                </TouchableOpacity>)
+        } else if (this.props.screen === "DuelingRoomPage") {
+            return (
+                <TouchableOpacity onPress={this.props.leaveDuel} style={styles.tabContainerTouchableOpacity}>
+                    <View style={styles.tabContainerContents}>
+                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                        <Text style={styles.tabContainerText}>Leave Duel</Text>
+                    </View>
+                </TouchableOpacity>
+            )
+        } else if (this.props.screen === "DeckConstructorPage") {
+            return (
+                <TouchableOpacity onPress={this.props.goHome} style={styles.tabContainerTouchableOpacity}>
+                    <View style={styles.tabContainerContents}>
+                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                        <Text style={styles.tabContainerText}>Home</Text>
+                    </View>
+                </TouchableOpacity>
+            )
+
+        }
+    }
     render() {
         return (
             <ScrollView style={styles.scrollViewContainer}
@@ -22,19 +52,7 @@ export default class CustomSideMenu extends Component {
                 <SafeAreaView style={styles.safeAreaViewContainer} forceInset={{ top: 'always', horizontal: 'never' }}>
                     <View style={styles.tabContainer}>
                         {
-                            this.props.screen === "HomePage" ?
-                                <TouchableOpacity onPress={this.logOut} style={styles.tabContainerTouchableOpacity}>
-                                    <View style={styles.tabContainerContents}>
-                                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
-                                        <Text style={styles.tabContainerText}>Log Out</Text>
-                                    </View>
-                                </TouchableOpacity> :
-                                <TouchableOpacity onPress={this.props.leaveDuel} style={styles.tabContainerTouchableOpacity}>
-                                    <View style={styles.tabContainerContents}>
-                                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
-                                        <Text style={styles.tabContainerText}>Leave Duel</Text>
-                                    </View>
-                                </TouchableOpacity>
+                            this.renderScreen()
                         }
 
                     </View>
@@ -67,7 +85,7 @@ const styles = StyleSheet.create({
     tabContainerContents: {
         flexDirection: "row",
         justifyContent: "flex-start",
-        alignItems: "center"
+        alignItems: "center",
     },
     tabContainerImage: {
         width: 25,
