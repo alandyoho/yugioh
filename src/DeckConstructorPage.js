@@ -350,10 +350,10 @@ class DeckConstructorPage extends Component {
                             <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
                             {this.state.deckRetrieved ? <FlatList
                                 data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
-                                ItemSeparatorComponent={() => <View style={{
-                                    backgroundColor: 'rgb(200, 199, 204)',
-                                    height: StyleSheet.hairlineWidth,
-                                }} />}
+                                // ItemSeparatorComponent={() => <View style={{
+                                //     backgroundColor: 'rgb(200, 199, 204)',
+                                //     height: StyleSheet.hairlineWidth,
+                                // }} />}
                                 contentContainerStyle={{ justifyContent: 'center' }}
                                 renderItem={(item, index) => this.renderItem(item, index)}
                                 keyExtractor={(item, index) => index.toString()}

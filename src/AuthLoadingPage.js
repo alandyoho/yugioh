@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
     View,
-    Image,
+    Image, Dimensions
 } from 'react-native';
 import * as firebase from "firebase"
 import { createUser, updateDeckList } from "./actions"
@@ -9,6 +9,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { retrieveDeckInfo, retrieveCardsFromDeck } from "../Firebase/FireMethods"
 import { Asset } from 'expo-asset';
+import { setCustomText } from 'react-native-global-props';
+import { Font } from "expo"
+
+
+// import MatrixRegularSmallCaps from "../assets/MatrixRegularSmallCaps.ttf"
+
 
 
 
@@ -20,6 +26,9 @@ function cacheImages(images) {
             return Asset.fromModule(image).downloadAsync();
         }
     });
+}
+async function cacheFonts(font) {
+    return Font.loadAsync(font)
 }
 
 class AuthLoadingScreen extends Component {
@@ -70,14 +79,8 @@ class AuthLoadingScreen extends Component {
         }, 5000)
     }
     async _loadAssetsAsync(images = []) {
+        // const fontAssets = cacheFonts(MatrixRegularSmallCaps);
         const imageAssets = cacheImages([
-            require("../assets/1.gif"),
-            require("../assets/3.gif"),
-            require("../assets/4.gif"),
-            require("../assets/5.gif"),
-            require("../assets/6.gif"),
-            require("../assets/7.gif"),
-            require("../assets/8.gif"),
             require("../assets/background-0.png"),
             require("../assets/background-1.png"),
             require("../assets/background-2.png"),
@@ -96,21 +99,20 @@ class AuthLoadingScreen extends Component {
             require("../assets/searchIcon.png"),
             require("../assets/skeletonscreen.gif"),
             require("../assets/upArrow.png"),
+            require("../assets/yugioh_gif1.gif"),
+            require("../assets/yugioh_gif2.gif"),
             ...images
         ]);
         await Promise.all([...imageAssets]);
+
     }
 
 
 
     render() {
         return (
-            <View style={{ backgroundColor: "white", flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <Image source={require('../assets/textLoading.gif')} resizeMode="contain" style={{
-                    height: "30%",
-                }}
-                />
-                <Image source={require('../assets/loading.gif')} />
+            <View style={{ backgroundColor: "black", flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Image source={require('../assets/yugioh_gif2.gif')} style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} />
             </View>
         );
     }

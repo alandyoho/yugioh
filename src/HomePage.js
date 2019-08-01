@@ -29,7 +29,7 @@ class HomePage extends Component {
     }
     async componentDidMount() {
         try {
-            await this.soundObject.loadAsync(require('../assets/machete.mp3'));
+            await this.soundObject.loadAsync(require('../assets/yugioh-theme2.mp3'));
             await this.soundObject.playAsync();
             // Your sound is playing!
         } catch (error) {
@@ -57,7 +57,7 @@ class HomePage extends Component {
         const { user, navigation, updateSelectedDeck } = this.props
         const { duelingRoomSelectPageVisible, deckSelectPageVisible } = this.state
         return (
-            <SideMenu menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} />}>
+            <SideMenu menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} />}>
                 <View style={styles.container}>
                     <PhotoReel />
                     <Button
@@ -65,7 +65,7 @@ class HomePage extends Component {
                         titleStyle={{
                             color: 'white',
                             fontWeight: '800',
-                            fontSize: 18
+                            fontSize: 18,
                         }}
                         buttonStyle={{
                             backgroundColor: 'rgb(130, 69, 91)',

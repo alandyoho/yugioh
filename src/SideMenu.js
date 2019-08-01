@@ -47,7 +47,8 @@ export default class CustomSideMenu extends Component {
                 contentContainerStyle={{
                     flex: 1,
                     flexDirection: "column",
-                    justifyContent: "flex-end"
+                    justifyContent: "flex-end",
+                    backgroundColor: 'black'
                 }}>
                 <SafeAreaView style={styles.safeAreaViewContainer} forceInset={{ top: 'always', horizontal: 'never' }}>
                     <View style={styles.tabContainer}>
@@ -66,20 +67,23 @@ export default class CustomSideMenu extends Component {
 
 const styles = StyleSheet.create({
     scrollViewContainer: {
+        backgroundColor: "#FFF"
     },
     safeAreaViewContainer: {
         flex: 1,
+        backgroundColor: "#FFF"
     },
     tabContainer: {
         flex: 1,
         paddingLeft: 20,
         flexDirection: "column",
         justifyContent: "flex-end",
+        backgroundColor: "#FFF"
     },
 
     tabContainerTouchableOpacity: {
-        borderWidth: 2,
-        borderColor: "#fff",
+        // borderWidth: 2,
+        // borderColor: "#fff",
         padding: 20
     },
     tabContainerContents: {
@@ -93,6 +97,8 @@ const styles = StyleSheet.create({
     },
     tabContainerText: {
         fontSize: 20,
+        color: "black",
+        fontWeight: "800"
     }
 
 
