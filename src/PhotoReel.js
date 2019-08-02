@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { Dimensions, Image } from 'react-native';
+import FadeScaleImage from "./FadeScaleImage"
 import Carousel from 'react-native-snap-carousel';
 
 const one = require("../assets/1.gif")
@@ -37,7 +38,7 @@ export default class PhotoReel extends Component {
             //     itemWidth={Dimensions.get("window").width}
             //     itemHeight={Dimensions.get("window").height}
             // />
-            <Image source={require("../assets/yugioh_gif1.gif")} style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} />
+            <FadeScaleImage source={require("../assets/yugioh_gif1.gif")} style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} />
         );
     }
 }

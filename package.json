@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "expo": "^33.0.0",
+    "expo-file-system": "^5.0.1",
     "firebase-admin": "^8.2.0",
     "firebase-functions": "^3.0.1",
     "gambler": "^0.1.0",
@@ -19,6 +20,7 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-coverflow": "^0.1.7",
     "react-native-draggable": "^1.0.15",
+    "react-native-draggable-flatlist": "^1.1.7",
     "react-native-elements": "^1.1.0",
     "react-native-gifted-form": "^0.1.1",
     "react-native-global-props": "^1.1.5",
@@ -38,7 +40,8 @@
     "redux": "^4.0.1",
     "rn-slider-switch": "0.0.3",
     "rn-sliding-up-panel": "^2.3.0",
-    "shuffle": "^0.2.2"
+    "shuffle": "^0.2.2",
+    "toggle-switch-react-native": "^2.0.2"
   },
   "devDependencies": {
     "babel-preset-expo": "^5.1.1",

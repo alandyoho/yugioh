@@ -14,12 +14,13 @@ import MultiSwitch from './rn-slider-switch';
 import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import NumericInput from 'react-native-numeric-input'
-import CustomImage from "./ImageLoader"
+import FadeScaleImage from "./FadeScaleImage"
 import SwipeableRow from "./SwipeableComponent"
 import { ScrollView } from 'react-native-gesture-handler/GestureHandler';
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { Audio } from 'expo-av';
+import CustomText from "./CustomText"
 
 class DeckConstructorPage extends Component {
     constructor(props) {
@@ -242,7 +243,7 @@ class DeckConstructorPage extends Component {
             const card = keys[i];
             res.push(
                 <TouchableOpacity disabled={!exists} onPress={() => exists && this.expandCard(this.state.cards[card])} key={card}>
-                    <CustomImage
+                    <FadeScaleImage
                         key={card}
                         source={exists ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
 
@@ -284,7 +285,9 @@ class DeckConstructorPage extends Component {
     goHome = async () => {
         try {
             const enableAudio = this.props.navigation.getParam('enableAudio', 'NO-ID');
-            await enableAudio()
+            if (this.props.preferences.musicEnabled) {
+                await enableAudio()
+            }
             console.log("playing")
             // Your sound is playing!
         } catch (error) {
@@ -316,38 +319,38 @@ class DeckConstructorPage extends Component {
                             {this.getCards()}
                         </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
                         <TouchableOpacity style={{ position: "absolute", left: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandSearchCardsListView()}>
-                            <CustomImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                            <FadeScaleImage source={require("../assets/downArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
                         {/* <View style={{ height: 20, width: "33%", justifyContent: "center", alignSelf: "center", alignItems: "center", backgroundColor: "rgb(130, 69, 91)", borderTopLeftRadius: 30, borderTopRightRadius: 30, bottom: 0, marginTop: 15 }}>
                         <TouchableOpacity onPress={() => {
                             Keyboard.dismiss()
                             this._panel.show()
                         }}>
-                            <Text style={{ color: "white" }}>Advanced Search</Text>
+                            <CustomTextstyle={{ color: "white" }}>Advanced Search</CustomText>
                         </TouchableOpacity>
                     </View> */}
                         <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
                             <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} autoCorrect={false} autoCapitalize={"none"} />
-                            <CustomImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
+                            <FadeScaleImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                         </View>
                         <TouchableOpacity style={{ position: "absolute", right: 0, bottom: 15, height: 41, width: 41 }} onPress={() => this.expandDeckCardsListView()}>
-                            <CustomImage source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                            <FadeScaleImage source={require("../assets/upArrow.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                         </TouchableOpacity>
                     </Animated.View>
 
                     <Animated.View style={{ ...this.state.deckListView, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                         <View style={{ flex: 1, flexDirection: "column", width: "100%" }}>
                             <TouchableOpacity style={{ position: "absolute", left: 5, top: 0, height: 41, width: 41, flexDirection: "row" }} onPress={() => this.switchDisplayedDeck()}>
-                                <CustomImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
-                                <Text>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</Text>
+                                <FadeScaleImage source={require("../assets/switch.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                                <CustomText>{this.state.extraDeckCardsVisible ? "Main Deck" : "Extra Deck"}</CustomText>
                             </TouchableOpacity>
                             <TouchableOpacity style={{ position: "absolute", right: 15, top: 0, height: 41, width: 63, flexDirection: "row", justifyContent: "center", alignItems: "center" }} onPress={() => this.refreshOverviewPopup()}>
-                                <Text>Overview</Text>
-                                <CustomImage source={require("../assets/overview.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
+                                <CustomText>Overview</CustomText>
+                                <FadeScaleImage source={require("../assets/overview.png")} style={{ height: 35, width: 35 }} resizeMode={"contain"} />
                             </TouchableOpacity>
 
 
-                            <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</Text>
+                            <CustomText style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</CustomText>
                             {this.state.deckRetrieved ? <FlatList
                                 data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
                                 // ItemSeparatorComponent={() => <View style={{
@@ -358,15 +361,15 @@ class DeckConstructorPage extends Component {
                                 renderItem={(item, index) => this.renderItem(item, index)}
                                 keyExtractor={(item, index) => index.toString()}
                             /> : <React.Fragment>
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
-                                    <CustomImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
+                                    <FadeScaleImage source={require("../assets/skeletonscreen.gif")} style={{ width: "100%", height: 60 }} resizeMode={"stretch"} />
                                 </React.Fragment>}
                         </View>
                     </Animated.View>
@@ -400,7 +403,7 @@ class DeckConstructorPage extends Component {
                             <View style={{ justifyContent: "center", alignItems: "center" }}>
 
                                 {!this.state.expanded ? <TouchableOpacity onPress={() => this.setState({ popUpVisible: false })}>
-                                    {this.state.selectedCard && <CustomImage
+                                    {this.state.selectedCard && <FadeScaleImage
                                         source={{ uri: this.state.selectedCard["card_images"][0]["image_url"] }}
                                         resizeMode="contain"
                                         style={{
@@ -433,28 +436,28 @@ class DeckConstructorPage extends Component {
                     >
                         <DialogContent>
                             <View style={{ flexDirection: "column", justifyContent: "space-evenly", alignItems: "flex-start" }}>
-                                <Text style={{ fontSize: 30, fontWeight: "800", alignSelf: "center", paddingBottom: 20 }}>{this.state.selectedDeck}</Text>
+                                <CustomText style={{ fontSize: 30, fontWeight: "800", alignSelf: "center", paddingBottom: 20 }}>{this.state.selectedDeck}</CustomText>
 
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Image source={require("../assets/spellIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
-                                    <Text style={{ fontSize: 20 }}>Spells: {spells}</Text>
+                                    <CustomText style={{ fontSize: 20 }}>Spells: {spells}</CustomText>
                                 </View>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Image source={require("../assets/trapIcon.png")} style={{ height: 20, width: 20 }} resizeMode={"contain"} />
-                                    <Text style={{ fontSize: 20 }}>Traps: {traps}</Text>
+                                    <CustomText style={{ fontSize: 20 }}>Traps: {traps}</CustomText>
                                 </View>
                                 <View style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
                                     <Image source={require("../assets/monsterIcon.png")} style={{ height: 25, width: 25 }} resizeMode={"contain"} />
-                                    <Text style={{ fontSize: 20 }}>Monsters: {monsters}</Text>
+                                    <CustomText style={{ fontSize: 20 }}>Monsters: {monsters}</CustomText>
                                 </View>
-                                <Text style={{ fontSize: 20 }}>Main Deck Length: {total}</Text>
-                                <Text style={{ fontSize: 20 }}>Extra Deck Length: {extraDeckLength}</Text>
+                                <CustomText style={{ fontSize: 20 }}>Main Deck Length: {total}</CustomText>
+                                <CustomText style={{ fontSize: 20 }}>Extra Deck Length: {extraDeckLength}</CustomText>
 
 
 
-                            </View>
-                        </DialogContent>
-                    </Dialog>
+                            </View >
+                        </DialogContent >
+                    </Dialog >
 
 
 
@@ -478,8 +481,8 @@ class DeckConstructorPage extends Component {
                         </View>
                     </SlidingUpPanel>
 
-                </View>
-            </SideMenu>
+                </View >
+            </SideMenu >
         );
     }
 }
@@ -487,8 +490,8 @@ class DeckConstructorPage extends Component {
 
 
 const mapStateToProps = (state) => {
-    const { user, cards, selectedDeck } = state
-    return { user, cards, selectedDeck }
+    const { user, cards, selectedDeck, preferences } = state
+    return { user, cards, selectedDeck, preferences }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
@@ -501,7 +504,7 @@ const styles = StyleSheet.create({
     deckSearchTextInput: {
         alignItems: "center",
         left: 6,
-        // fontFamily: "Merriweather-Bold",
+        fontFamily: "MatrixRegularSmallCaps",
         color: "#6F8FA9"
     },
     deckSearchContainer: {

@@ -15,3 +15,8 @@ export const updateHostName = host => ({
     type: "UPDATE_HOST_NAME",
     host
 })
+
+export const updatePreferences = preferences => ({
+    type: "UPDATE_PREFERENCES",
+    preferences
+})

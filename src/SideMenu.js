@@ -13,12 +13,21 @@ export default class CustomSideMenu extends Component {
     renderScreen = () => {
         if (this.props.screen === "HomePage") {
             return (
-                <TouchableOpacity onPress={this.logOut} style={styles.tabContainerTouchableOpacity}>
-                    <View style={styles.tabContainerContents}>
-                        {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
-                        <Text style={styles.tabContainerText}>Log Out</Text>
-                    </View>
-                </TouchableOpacity>)
+                <React.Fragment>
+                    <TouchableOpacity onPress={this.props.toggleSettingsPopup} style={styles.tabContainerTouchableOpacity}>
+                        <View style={styles.tabContainerContents}>
+                            {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                            <Text style={styles.tabContainerText}>Settings</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={this.logOut} style={styles.tabContainerTouchableOpacity}>
+                        <View style={styles.tabContainerContents}>
+                            {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                            <Text style={styles.tabContainerText}>Log Out</Text>
+                        </View>
+                    </TouchableOpacity>
+                </React.Fragment>
+            )
         } else if (this.props.screen === "DuelingRoomPage") {
             return (
                 <TouchableOpacity onPress={this.props.leaveDuel} style={styles.tabContainerTouchableOpacity}>

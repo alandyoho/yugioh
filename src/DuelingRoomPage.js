@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground } from 'react-native';
-import CustomImage from "./ImageLoader"
+import FadeScaleImage from "./FadeScaleImage"
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -525,7 +525,9 @@ class DuelingRoomPage extends Component {
         leaveDuel([this.props.user.username, this.state.hostedBy])
         try {
             const enableAudio = this.props.navigation.getParam('enableAudio', 'NO-ID');
-            await enableAudio()
+            if (this.props.preferences.musicEnabled) {
+                await enableAudio()
+            }
             console.log("playing")
         } catch (error) {
             console.log(error)
@@ -669,7 +671,7 @@ class DuelingRoomPage extends Component {
     renderItem = ({ item }) => {
         return (
             <TouchableOpacity onPress={() => this.presentCardOptions(item)} style={{ flex: 1 }}>
-                {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
+                {item["card_images"] && <FadeScaleImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
                     width: 100, height: 200
                 }} />}
             </TouchableOpacity>
@@ -678,7 +680,7 @@ class DuelingRoomPage extends Component {
     renderGraveyardCards = ({ item }) => {
         return (
             <TouchableOpacity style={{ width: 200, height: 400, flexDirection: "row", justifyContent: "center", alignItems: "center" }} onPress={() => this.presentCardOptions(item)}>
-                {item["card_images"] && <CustomImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
+                {item["card_images"] && <FadeScaleImage source={{ uri: item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} style={{
                     width: 200, height: 400
                 }} />}
             </TouchableOpacity>
@@ -686,7 +688,7 @@ class DuelingRoomPage extends Component {
     }
     renderOpponentHand = () => {
         return (
-            <CustomImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
+            <FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
                 width: 100, height: 200
             }} />
         )
@@ -751,7 +753,7 @@ class DuelingRoomPage extends Component {
             <SideMenu menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={styles.container}>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
-                        {backgroundImageUrl && <CustomImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} resizeMode={"contain"} />}
+                        {backgroundImageUrl && <FadeScaleImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} resizeMode={"contain"} />}
                     </View>
                     <OpponentHand renderOpponentHand={this.renderOpponentHand} opponentHand={opponentHand} />
                     <View style={{ flex: 2 / 20 }}>
@@ -767,11 +769,11 @@ class DuelingRoomPage extends Component {
                     <View style={{ flex: 2 / 20, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center", transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }}>
                         <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].user && this.props.user.username === this.state.linkZones[0]['card'].user ? [{ rotate: "0deg" }] : [{ rotate: '180deg' }] }} onPress={boardsRetrieved == true && !this.state.linkZones[0]['card'].exists ? () => this.addCardToBoard(["linkZones", 0, null]) : () => this.presentCardOnBoardOptions(["linkZones", 0])}>
 
-                            {this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[0]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
+                            {this.state.boardsRetrieved == true && this.state.linkZones[0]['card'].exists && (<FadeScaleImage source={{ uri: this.state.linkZones[0]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
                         </TouchableOpacity>
 
                         <TouchableOpacity style={{ width: Dimensions.get("window").width / 7, height: 75, borderColor: 'black', borderRadius: 10, borderWidth: 2, transform: this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].user && this.props.user.username === this.state.linkZones[1]['card'].user ? [{ rotate: "0deg" }] : [{ rotate: '180deg' }] }} onPress={boardsRetrieved == true && !this.state.linkZones[1]['card'].exists ? () => this.addCardToBoard(["linkZones", 1, null]) : () => this.presentCardOnBoardOptions(["linkZones", 1])}>
-                            {this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].exists && (<CustomImage source={{ uri: this.state.linkZones[1]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
+                            {this.state.boardsRetrieved == true && this.state.linkZones[1]['card'].exists && (<FadeScaleImage source={{ uri: this.state.linkZones[1]['card'].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null, transform: this.props.user.username === this.state.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }] }} />)}
 
                         </TouchableOpacity>
 
@@ -817,8 +819,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { user, cards, selectedDeck } = state
-    return { user, cards, selectedDeck }
+    const { user, cards, selectedDeck, preferences } = state
+    return { user, cards, selectedDeck, preferences }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({

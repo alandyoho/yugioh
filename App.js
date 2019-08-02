@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage } from "./src"
+import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage, SettingsPopup } from "./src"
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import userReducer from './src/reducer';
@@ -7,8 +7,6 @@ import { Platform } from 'react-native'
 import AuthLoadingScreen from "./src/AuthLoadingPage"
 import { createSwitchNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
 import { StatusBar } from 'react-native';
-import DraggableCards from "./src/DraggableCards"
-import { Audio } from 'expo-av';
 
 const AppStack = createStackNavigator({
   HomePage: {
@@ -32,7 +30,7 @@ const AppStack = createStackNavigator({
       gesturesEnabled: false,
 
     }
-  }
+  },
 });
 
 

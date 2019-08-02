@@ -6,11 +6,12 @@ import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
 import PhotoReel from './PhotoReel';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-import { DuelingRoomSelectPage, DeckSelectPage, DeckSelectPopup } from "./HomePageComponents"
-import { updateSelectedDeck } from "./actions"
+import { DuelingRoomSelectPage, DeckSelectPage, DeckSelectPopup, SettingsPopup } from "./HomePageComponents"
+import { updateSelectedDeck, updatePreferences } from "./actions"
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { Audio } from 'expo-av';
+import FadeImage from "./FadeImage"
 
 
 class HomePage extends Component {
@@ -23,11 +24,19 @@ class HomePage extends Component {
             deckSelectPopupOpacity: new Animated.Value(0),
             duelingRoomSelectPageZPosition: 3,
             deckSelectPopupZPosition: 2,
-            type: ""
+            type: "",
+            settingsPopupVisible: false
         }
         this.soundObject = new Audio.Sound();
     }
     async componentDidMount() {
+        console.log("preferences from redux", this.props.preferences)
+        if (this.props.preferences.musicEnabled) {
+            await this.loadAndEnableAudio()
+        }
+
+    }
+    loadAndEnableAudio = async () => {
         try {
             await this.soundObject.loadAsync(require('../assets/yugioh-theme2.mp3'));
             await this.soundObject.playAsync();
@@ -37,7 +46,13 @@ class HomePage extends Component {
         }
     }
     stopAudio = async () => {
-        await this.soundObject.stopAsync()
+        try {
+            await this.soundObject.pauseAsync()
+
+        } catch (err) {
+            console.log(err)
+        }
+
         // await this.soundObject.unloadAsync()
     }
     enableAudio = async () => {
@@ -53,13 +68,29 @@ class HomePage extends Component {
         Animated.timing(this.state.deckSelectPopupOpacity, { toValue: 0, useNativeDriver: true, }).start();
         this.setState({ duelingRoomSelectPageZPosition: 3, deckSelectPopupZPosition: 2, type: "" })
     }
+    dismissSettingsPopup = async () => {
+        this.setState({ settingsPopupVisible: false });
+        if (this.props.preferences.musicEnabled) {
+            try {
+                await this.enableAudio()
+
+            } catch (err) {
+                await this.loadAndEnableAudio()
+            }
+        } else {
+            await this.stopAudio()
+        }
+    }
     render() {
         const { user, navigation, updateSelectedDeck } = this.props
-        const { duelingRoomSelectPageVisible, deckSelectPageVisible } = this.state
+        const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible } = this.state
         return (
-            <SideMenu menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} />}>
+            <SideMenu menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} />}>
                 <View style={styles.container}>
                     <PhotoReel />
+                    <View style={{ height: 100, marginBottom: 25, width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+                        <FadeImage source={require("../assets/yugiohLogo.png")} resizeMode="contain" style={{ width: "80%" }} />
+                    </View>
                     <Button
                         title="Deck Constructor"
                         titleStyle={{
@@ -135,6 +166,23 @@ class HomePage extends Component {
                             </Animated.View>
                         </DialogContent>
                     </Dialog>
+                    <Dialog
+                        visible={settingsPopupVisible}
+                        width={0.85}
+                        height={0.40}
+
+                        dialogAnimation={new ScaleAnimation({
+                            initialValue: 0, // optional
+                            useNativeDriver: true, // optional
+                        })}
+                        onTouchOutside={() => {
+                            this.dismissSettingsPopup()
+                        }}
+                    >
+                        <DialogContent style={{ flex: 1 }}>
+                            <SettingsPopup updatePreferences={this.props.updatePreferences} preferences={this.props.preferences} loadAndEnableAudio={this.loadAndEnableAudio} />
+                        </DialogContent>
+                    </Dialog>
                 </View>
             </SideMenu>
         )
@@ -161,13 +209,13 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { user, cards } = state
-    return { user, cards }
+    const { user, cards, preferences } = state
+    return { user, cards, preferences }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
         createUser,
-        updateSelectedDeck
+        updateSelectedDeck, updatePreferences
     }, dispatch)
 );
 

@@ -6,6 +6,8 @@ import { RectButton } from 'react-native-gesture-handler';
 
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import CustomText from "./CustomText"
+
 
 const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 
@@ -13,7 +15,7 @@ const AnimatedIcon = Animated.createAnimatedComponent(Icon);
 const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
     <View style={styles.rectButtonContainer}>
         <View style={styles.rectButton} >
-            <Text style={styles.fromText}>{item.name}</Text>
+            <CustomText style={styles.fromText}>{item.name}</CustomText>
             <NumericInput
                 containerStyle={{ left: 20, top: 0 }}
                 initValue={item.quantity}
@@ -34,9 +36,9 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
                 leftButtonBackgroundColor="rgb(130, 69, 91)" />
 
 
-            <Text style={styles.dateText}>
+            <CustomText style={styles.dateText}>
                 {'❭'}
-            </Text>
+            </CustomText>
         </View>
     </View>
 );
@@ -107,10 +109,9 @@ const styles = StyleSheet.create({
         // justifyContent: 'space-between',
         flexDirection: 'column',
         borderRadius: 10,
-
-        shadowColor: 'black',
+        shadowColor: 'grey',
         backgroundColor: "#FFF",
-        shadowOffset: { height: 0.5, width: 0.5 },
+        shadowOffset: { height: 0.25, width: 0.25 },
         shadowOpacity: 0.8,
         shadowRadius: 2.5,
         borderRadius: 2.5,

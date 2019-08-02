@@ -1,7 +1,7 @@
 import { View, StyleSheet, Animated } from 'react-native';
 import React, { Component } from "react"
 
-export default class ImageLoader extends Component {
+export default class FadeImage extends Component {
     state = {
         opacity: new Animated.Value(0),
 
@@ -22,15 +22,7 @@ export default class ImageLoader extends Component {
                 {...this.props}
                 style={[
                     {
-                        opacity: this.state.opacity,
-                        transform: [
-                            {
-                                scale: this.state.opacity.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: [0.85, 1],
-                                })
-                            },
-                        ],
+                        opacity: this.state.opacity
                     },
                     this.props.style,
                 ]}
