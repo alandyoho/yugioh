@@ -301,7 +301,7 @@ class DeckConstructorPage extends Component {
         const { spells, monsters, extraDeckLength, traps, total } = this.state.quantities
         const { search } = this.state;
         return (
-            <SideMenu menu={<CustomSideMenu screen={"DeckConstructorPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} goHome={this.goHome} />}>
+            <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"DeckConstructorPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} goHome={this.goHome} />}>
                 <View style={styles.container}>
                     <Animated.View style={{ ...this.state.searchResultsView }}>
                         {!this.state.loading ? <CoverFlow
@@ -353,10 +353,6 @@ class DeckConstructorPage extends Component {
                             <CustomText style={{ fontSize: 30, fontWeight: "800", alignSelf: "center" }}>{this.state.selectedDeck}</CustomText>
                             {this.state.deckRetrieved ? <FlatList
                                 data={this.state.extraDeckCardsVisible ? this.state.extraDeck : this.state.mainDeck}
-                                // ItemSeparatorComponent={() => <View style={{
-                                //     backgroundColor: 'rgb(200, 199, 204)',
-                                //     height: StyleSheet.hairlineWidth,
-                                // }} />}
                                 contentContainerStyle={{ justifyContent: 'center' }}
                                 renderItem={(item, index) => this.renderItem(item, index)}
                                 keyExtractor={(item, index) => index.toString()}
@@ -458,9 +454,6 @@ class DeckConstructorPage extends Component {
                             </View >
                         </DialogContent >
                     </Dialog >
-
-
-
                     <SlidingUpPanel
                         height={Dimensions.get("window").height * 0.50}
                         ref={c => this._panel = c}

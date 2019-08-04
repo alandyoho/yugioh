@@ -30,6 +30,7 @@ export default class CustomSideMenu extends Component {
             )
         } else if (this.props.screen === "DuelingRoomPage") {
             return (
+
                 <TouchableOpacity onPress={this.props.leaveDuel} style={styles.tabContainerTouchableOpacity}>
                     <View style={styles.tabContainerContents}>
                         {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}

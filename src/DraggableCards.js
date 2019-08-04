@@ -80,7 +80,7 @@ export default class DraggableCard extends Component {
                     {...this.panResponder.panHandlers}
                     style={[panStyle, { opacity: this.state.opacity, backgroundColor: "transparent" }]}
                 >
-                    <Image source={{ uri: this.props.item["card_images"][0]["image_url"] }} resizeMode={"contain"} style={{
+                    <Image source={require("../assets/default_card.png")} resizeMode={"contain"} style={{
                         width: 100, height: 200
                     }} />
                 </Animated.View>

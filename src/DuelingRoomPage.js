@@ -543,7 +543,7 @@ class DuelingRoomPage extends Component {
     }
     //hand to field (1) cancel
     dismissCardPopup = () => {
-        this.setState({ cardInHandPressedPopupVisible: false, cardOnFieldPressedPopupVisible: false });
+        this.setState({ cardInHandPressedPopupVisible: false, cardOnFieldPressedPopupVisible: false, cardInGraveyardPressed: false });
     }
     //hand to field (2)
     fadeOutHand = (type) => {
@@ -750,7 +750,7 @@ class DuelingRoomPage extends Component {
         const hand = this.state[properBoard].hand
         const opponentHand = this.state[opponentBoard].hand
         return (
-            <SideMenu menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
+            <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={styles.container}>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -10 }}>
                         {backgroundImageUrl && <FadeScaleImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null }} resizeMode={"contain"} />}

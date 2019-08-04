@@ -18,7 +18,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
             <Dialog
                 visible={cardInGraveyardPressed}
                 width={0.95}
-                height={0.30}
+                height={cardType.type && !cardType.type.includes("Monster") ? 0.37 : 0.30}
                 children={[]}
                 dialogAnimation={new SlideAnimation({
                     slideFrom: 'bottom',
@@ -28,7 +28,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
             >
 
                 <DialogContent style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFF", width: WIDTH, height: Dimensions.get("window").height * 0.30, borderRadius: 10, bottom: 0 }}>
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFF", width: WIDTH, height: cardType.type && !cardType.type.includes("Monster") ? Dimensions.get("window").height * 0.37 : Dimensions.get("window").height * 0.30, borderRadius: 10, bottom: 0 }}>
                         {cardType.type && cardType.type.includes("Monster") ?
                             <React.Fragment>
                                 <TouchableOpacity onPress={() => manageCardInGraveyard("Examine")} style={{ borderColor: "transparent", borderBottomColor: 'rgb(200, 199, 204)', borderWidth: StyleSheet.hairlineWidth, height: BUTTONHEIGHT, width: WIDTH, justifyContent: "center", alignItems: "center" }}>
@@ -56,8 +56,11 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
                                 <TouchableOpacity onPress={() => manageCardInGraveyard("Activate-GY")} style={{ borderColor: "transparent", borderBottomColor: 'rgb(200, 199, 204)', borderWidth: StyleSheet.hairlineWidth, height: BUTTONHEIGHT, width: WIDTH, justifyContent: "center", alignItems: "center" }}>
                                     <Text>Activate</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => manageCardInGraveyard("Set-ST-GY")} style={{ borderColor: "transparent", borderWidth: StyleSheet.hairlineWidth, height: BUTTONHEIGHT, width: WIDTH, justifyContent: "center", alignItems: "center" }}>
+                                <TouchableOpacity onPress={() => manageCardInGraveyard("Set-ST-GY")} style={{ borderColor: "transparent", borderBottomColor: 'rgb(200, 199, 204)', borderWidth: StyleSheet.hairlineWidth, height: BUTTONHEIGHT, width: WIDTH, justifyContent: "center", alignItems: "center" }}>
                                     <Text>Set</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => manageCardInGraveyard("Banish-GY")} style={{ borderColor: "transparent", borderWidth: StyleSheet.hairlineWidth, height: BUTTONHEIGHT, width: WIDTH, justifyContent: "center", alignItems: "center" }}>
+                                    <Text>Banish</Text>
                                 </TouchableOpacity>
                             </React.Fragment>
                         }

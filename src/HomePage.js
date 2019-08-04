@@ -85,7 +85,7 @@ class HomePage extends Component {
         const { user, navigation, updateSelectedDeck } = this.props
         const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible } = this.state
         return (
-            <SideMenu menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} />}>
+            <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} />}>
                 <View style={styles.container}>
                     <PhotoReel />
                     <View style={{ height: 100, marginBottom: 25, width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>

@@ -61,13 +61,13 @@ class AuthLoadingScreen extends Component {
                         console.log("post")
                         const { decks } = await retrieveDeckInfo(user.displayName)
                         let cardImgs = []
-                        // for (let i = 0; i < decks.length; i++) {
-                        //     const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: user.displayName, deck: decks[i] })
-                        //     for (let j = 0; j < mainDeck.length; j++) {
-                        //         const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
-                        //         cardImgs.push(cardImg)
-                        //     }
-                        // }
+                        for (let i = 0; i < decks.length; i++) {
+                            const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: user.displayName, deck: decks[i] })
+                            for (let j = 0; j < mainDeck.length; j++) {
+                                const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
+                                cardImgs.push(cardImg)
+                            }
+                        }
                         await this._loadAssetsAsync(cardImgs)
                         this.props.navigation.navigate("App")
                         this.props.updateDeckList(decks)
