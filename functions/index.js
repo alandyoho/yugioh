@@ -4,7 +4,7 @@ const { dummyData } = require("./dummyData")
 const admin = require("firebase-admin");
 admin.initializeApp({
     credential: admin.credential.cert(require("./admin-cert.json")),
-    databaseURL: "https://yugioh-b9744.firebaseio.com",
+    databaseURL: "https://yugioh-c720d.firebaseio.com"
 });
 
 exports.searchResults = functions.https.onRequest(async (request, response) => {

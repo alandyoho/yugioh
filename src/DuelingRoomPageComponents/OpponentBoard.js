@@ -4,7 +4,6 @@ import FadeScaleImage from "../FadeScaleImage"
 
 
 const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyardPopup, examineOpponentCard }) => {
-    // //
     return (
         <React.Fragment>
             <View style={{ flex: 1, flexDirection: "row" }}>
@@ -52,7 +51,6 @@ const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyard
                 </TouchableOpacity>
             </View>
         </React.Fragment>
-
     )
 }
 

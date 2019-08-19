@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "yugioh-b9744"
+    "default": "yugioh-c720d",
+    "yugioh": "yugioh-c720d"
   }
 }

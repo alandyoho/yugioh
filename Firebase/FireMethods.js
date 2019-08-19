@@ -138,7 +138,7 @@ const addCardsToDeck = async (obj) => {
         const filt = extraDeck.filter(card => card.id == obj.card.id)
         //check if card exists in "deck" model
         //if exists, increase quantity property by one 
-        console.log('obj.card', obj.card)
+        
         let maxQuant = 3
         if ('banlist_info' in obj.card) {
             if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
@@ -168,7 +168,7 @@ const addCardsToDeck = async (obj) => {
     } else {
         const { mainDeck } = await retrieveCardsFromDeck(obj)
         const filt = mainDeck.filter(card => card.id == obj.card.id)
-        console.log('obj.card', obj.card)
+        
         let maxQuant = 3
         if ('banlist_info' in obj.card) {
             if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
@@ -203,13 +203,11 @@ const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
 const retrieveCardsFromDeck = (obj) => {
-    //
-
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
 
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ host: obj, opponent: "", linkZones: [{ card: { exists: false, defensePosition: false, user: "" } }, { card: { exists: false, defensePosition: false, user: "" } }], hostBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] }, guestBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] } })
+    firestore.collection("rooms").doc(obj).set({ host: obj, opponent: "", linkZones: [{ card: { exists: false, defensePosition: false, user: "" } }, { card: { exists: false, defensePosition: false, user: "" } }], hostBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] }, guestBoard: { requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] } })
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 

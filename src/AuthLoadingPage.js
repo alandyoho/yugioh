@@ -41,11 +41,11 @@ class AuthLoadingScreen extends Component {
             if (value !== null) {
                 // We have data!!
                 const valueAsObj = JSON.parse(value)
-                console.log("(1)", valueAsObj)
+
                 return valueAsObj
             }
         } catch (error) {
-            console.log("error retrieving data")
+
         }
     };
 
@@ -56,9 +56,7 @@ class AuthLoadingScreen extends Component {
                     try {
                         this.props.createUser({ username: user.displayName, email: user.email })
                         const preferences = await this._retrieveData()
-                        console.log("(2)")
                         this.props.updatePreferences(preferences)
-                        console.log("post")
                         const { decks } = await retrieveDeckInfo(user.displayName)
                         let cardImgs = []
                         for (let i = 0; i < decks.length; i++) {
@@ -75,10 +73,11 @@ class AuthLoadingScreen extends Component {
                         console.error(err)
                     }
                 } else {
+                    await this._loadAssetsAsync()
                     this.props.navigation.navigate("Auth")
                 }
             })
-        }, 5000)
+        }, 3000)
     }
     async _loadAssetsAsync(images = []) {
         await Font.loadAsync({
@@ -106,7 +105,8 @@ class AuthLoadingScreen extends Component {
             require("../assets/upArrow.png"),
             require("../assets/yugioh_gif1.gif"),
             require("../assets/yugioh_gif2.gif"),
-            // ...images
+            require("../assets/returnToHand.gif"),
+            ...images
         ]);
         await Promise.all([...imageAssets]);
 

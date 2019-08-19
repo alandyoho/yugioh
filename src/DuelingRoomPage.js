@@ -11,7 +11,7 @@ import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
 import CARDS from "./cards"
-import DraggableCards from "./DraggableCards";
+// import DraggableCards from "./DraggableCards";
 import { OpponentBoard, OpponentHand, RoomHostBoard, RoomHostHand, DuelingRoomDialogs } from "./DuelingRoomPageComponents"
 import SwipeUpDown from 'react-native-swipe-up-down';
 import SideMenu from "react-native-side-menu"
@@ -184,7 +184,7 @@ class DuelingRoomPage extends Component {
             let boardCopy = { ...this.state[board] }
             let linkZoneCopy = [...this.state.linkZones]
             let cardDetails = linkZoneCopy[cardInfo[1]]["card"]
-            // console.log("card details", cardDetails)
+            // 
             // if (cardDetails.user != this.props.user.username) {
             //     return
             // }
@@ -528,9 +528,9 @@ class DuelingRoomPage extends Component {
             if (this.props.preferences.musicEnabled) {
                 await enableAudio()
             }
-            console.log("playing")
+            
         } catch (error) {
-            console.log(error)
+            
         }
 
 
@@ -762,7 +762,9 @@ class DuelingRoomPage extends Component {
                         <OpponentBoard boardsRetrieved={boardsRetrieved} opponentBoard={this.state[opponentBoard]} toggleOpponentGraveyardPopup={this.toggleOpponentGraveyardPopup} examineOpponentCard={this.examineOpponentCard} />
                         <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, transform: [{ rotate: '180deg' }], backgroundColor: "#FFF", borderRadius: 10, padding: 10 }}>
                             <Text>{this.props.user.username === this.state.opponent ? this.state.hostedBy : this.state.opponent}</Text>
-                            <TouchableOpacity onPress={() => this.alterLifePoints("guest")}><Text>{this.state.guestLifePoints}</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.alterLifePoints("host")}>
+                                {/* <Text>{this.state.guestLifePoints}</Text> */}
+                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -781,7 +783,9 @@ class DuelingRoomPage extends Component {
                     <View style={{ flex: 6 / 20, flexDirection: "column", alignItems: "center", justifyContent: "flex-start" }}>
                         <View style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", position: "absolute", top: 0, left: 10, backgroundColor: "#FFF", borderRadius: 10, borderRadius: 10, padding: 10 }}>
                             <Text>{this.props.user.username}</Text>
-                            <TouchableOpacity onPress={() => this.alterLifePoints("host")}><Text>{this.state.hostLifePoints}</Text></TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.alterLifePoints("host")}>
+                                {/* <Text>{this.state.hostLifePoints}</Text> */}
+                            </TouchableOpacity>
                         </View>
                         <RoomHostBoard extraDeck={extraDeck} boardsRetrieved={boardsRetrieved} properBoard={this.state[properBoard]} mainDeck={mainDeck} drawCard={this.drawCard} addCardToBoard={this.addCardToBoard} board={properBoard} presentCardOnBoardOptions={this.presentCardOnBoardOptions} toggleGraveyardPopup={this.toggleGraveyardPopup} toggleExtraDeckPopup={this.toggleExtraDeckPopup} toggleMainDeckOptions={this.toggleMainDeckOptions} toggleBanishedZonePopup={this.toggleBanishedZonePopup} />
                     </View>

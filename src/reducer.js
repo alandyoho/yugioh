@@ -16,7 +16,7 @@ export default reducer = (state = INITIAL_STATE, action) => {
         case "UPDATE_HOST_NAME":
             newState.hostName = action.hostName
         case "UPDATE_PREFERENCES":
-            console.log("saved preferences", action.preferences)
+            
             newState.preferences = { ...newState.preferences, ...action.preferences }
         default:
             return newState

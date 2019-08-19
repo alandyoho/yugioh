@@ -30,7 +30,7 @@ class HomePage extends Component {
         this.soundObject = new Audio.Sound();
     }
     async componentDidMount() {
-        console.log("preferences from redux", this.props.preferences)
+
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }
@@ -50,7 +50,7 @@ class HomePage extends Component {
             await this.soundObject.pauseAsync()
 
         } catch (err) {
-            console.log(err)
+
         }
 
         // await this.soundObject.unloadAsync()
@@ -162,7 +162,7 @@ class HomePage extends Component {
                                 <DuelingRoomSelectPage user={user} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} fadeOutDuelingRoomSelectPage={this.fadeOutDuelingRoomSelectPage} />
                             </Animated.View>
                             <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity }}>
-                                <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} type={this.state.type} disableAudio={this.stopAudio} enableAudio={this.enableAudio} />
+                                <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} type={this.state.type} disableAudio={this.stopAudio} enableAudio={this.enableAudio} preferences={this.props.preferences} />
                             </Animated.View>
                         </DialogContent>
                     </Dialog>

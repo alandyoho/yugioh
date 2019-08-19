@@ -14,16 +14,17 @@ export default class SettingsPopup extends Component {
         super(props)
         this.state = {
             musicEnabled: false,
-            soundEffectsEnabled: false
+            soundEffectsEnabled: false,
+            dragAndDropEnabled: false
         }
     }
-    _storeData = async ({ musicEnabled, soundEffectsEnabled }) => {
+    _storeData = async ({ musicEnabled, soundEffectsEnabled, dragAndDropEnabled }) => {
         try {
-            const preferences = { musicEnabled, soundEffectsEnabled }
+            const preferences = { musicEnabled, soundEffectsEnabled, dragAndDropEnabled }
             await AsyncStorage.setItem('sound-preferences', JSON.stringify(preferences));
             this.props.updatePreferences(preferences)
         } catch (error) {
-            console.log(error)
+
         }
     };
     _retrieveData = async () => {
@@ -34,24 +35,28 @@ export default class SettingsPopup extends Component {
                 return value
             }
         } catch (error) {
-            console.log("error retrieving data")
+
         }
     };
     updateMusicEnabled = async (isOn) => {
         this.setState({ musicEnabled: isOn })
-        await this._storeData({ musicEnabled: isOn, soundEffectsEnabled: this.state.soundEffectsEnabled })
+        await this._storeData({ musicEnabled: isOn, soundEffectsEnabled: this.state.soundEffectsEnabled, dragAndDropEnabled: this.state.dragAndDropEnabled })
     }
     updateSoundEffectsEnabled = async (isOn) => {
         this.setState({ soundEffectsEnabled: isOn })
-        await this._storeData({ musicEnabled: this.state.musicEnabled, soundEffectsEnabled: isOn })
+        await this._storeData({ musicEnabled: this.state.musicEnabled, soundEffectsEnabled: isOn, dragAndDropEnabled: this.state.dragAndDropEnabled })
+    }
+    updateDragAndDropEnabled = async (isOn) => {
+        this.setState({ dragAndDropEnabled: isOn })
+        await this._storeData({ musicEnabled: this.state.musicEnabled, soundEffectsEnabled: this.state.musicEnabled, dragAndDropEnabled: isOn })
     }
 
 
     async componentDidMount() {
         const presets = await this._retrieveData()
-        console.log("presets", presets)
-        const { musicEnabled, soundEffectsEnabled } = JSON.parse(presets)
-        this.setState({ musicEnabled, soundEffectsEnabled })
+
+        const { musicEnabled, soundEffectsEnabled, dragAndDropEnabled } = JSON.parse(presets)
+        this.setState({ musicEnabled, soundEffectsEnabled, dragAndDropEnabled })
     }
 
     render() {
@@ -79,6 +84,17 @@ export default class SettingsPopup extends Component {
                         labelStyle={{ color: 'black', fontWeight: '900' }}
                         size='small'
                         onToggle={(isOn) => this.updateSoundEffectsEnabled(isOn)}
+                    />
+                </View>
+                <View style={{ alignSelf: "center", flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", width: "80%" }}>
+                    <Text style={{ fontSize: 15, fontWeight: '900', position: "absolute", left: 20 }}>Drag and Drop</Text>
+                    <ToggleSwitch
+                        isOn={this.state.dragAndDropEnabled}
+                        onColor='green'
+                        offColor='red'
+                        labelStyle={{ color: 'black', fontWeight: '900' }}
+                        size='small'
+                        onToggle={(isOn) => this.updateDragAndDropEnabled(isOn)}
                     />
                 </View>
             </View>

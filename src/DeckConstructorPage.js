@@ -288,10 +288,10 @@ class DeckConstructorPage extends Component {
             if (this.props.preferences.musicEnabled) {
                 await enableAudio()
             }
-            console.log("playing")
+            
             // Your sound is playing!
         } catch (error) {
-            console.log(error)
+            
             // An error occurred!
         }
         this.props.navigation.navigate("HomePage")
@@ -497,7 +497,6 @@ const styles = StyleSheet.create({
     deckSearchTextInput: {
         alignItems: "center",
         left: 6,
-        fontFamily: "MatrixRegularSmallCaps",
         color: "#6F8FA9"
     },
     deckSearchContainer: {

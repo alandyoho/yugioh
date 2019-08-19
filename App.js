@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage, SettingsPopup } from "./src"
+import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage } from "./src"
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import userReducer from './src/reducer';
@@ -7,6 +7,9 @@ import { Platform } from 'react-native'
 import AuthLoadingScreen from "./src/AuthLoadingPage"
 import { createSwitchNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
 import { StatusBar } from 'react-native';
+import DraggableRoomHostBoard from "./src/DraggableDuelingRoomPage"
+import { Root } from "native-base";
+
 
 const AppStack = createStackNavigator({
   HomePage: {
@@ -24,7 +27,17 @@ const AppStack = createStackNavigator({
     }
   },
   DuelingRoomPage: {
+    // screen: DraggableRoomHostBoard,
     screen: DuelingRoomPage,
+    navigationOptions: {
+      header: null,
+      gesturesEnabled: false,
+
+    }
+  },
+  DraggableDuelingRoomPage: {
+    screen: DraggableRoomHostBoard,
+    // screen: DuelingRoomPage,
     navigationOptions: {
       header: null,
       gesturesEnabled: false,
@@ -61,7 +74,6 @@ export default class App extends Component {
         initialRouteName: 'AuthLoading',
       }
     ));
-
   }
   componentDidMount() {
     StatusBar.setHidden(true);
@@ -70,7 +82,10 @@ export default class App extends Component {
   render() {
     return (
       <Provider store={store}>
-        <Yugioh />
+        <Root>
+          <Yugioh />
+        </Root>
+
       </Provider>
     )
   }

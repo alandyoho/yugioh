@@ -39,9 +39,18 @@ export default class DeckSelectPopup extends Component {
         await this.props.disableAudio()
         this.props.updateSelectedDeck(deck)
         this.props.dismissDuelingRoomSelectPage()
-        this.props.navigation.navigate("DuelingRoomPage", {
-            enableAudio: this.props.enableAudio
-        })
+
+        if (this.props.preferences.dragAndDropEnabled) {
+            this.props.navigation.navigate("DraggableDuelingRoomPage", {
+                enableAudio: this.props.enableAudio
+            })
+        } else {
+            this.props.navigation.navigate("DuelingRoomPage", {
+                enableAudio: this.props.enableAudio
+            })
+        }
+
+
 
     }
 
