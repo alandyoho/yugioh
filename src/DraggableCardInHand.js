@@ -58,7 +58,7 @@ export default class DraggableCardInHand extends Component {
                         this.props.presentHandOptions(closestSpot.location, this.props.item)
                     }
                 } else {
-                    
+
                 }
             },
             onPanResponderTerminate: (evt, gestureState) => {
@@ -75,7 +75,7 @@ export default class DraggableCardInHand extends Component {
                         this.props.presentHandOptions(closestSpot.location, this.props.item)
                     }
                 } else {
-                    
+
                 }
             }
         });
@@ -83,8 +83,8 @@ export default class DraggableCardInHand extends Component {
     closestSpot = (gesture) => {
         const monsterZones = this.props.coords
         if (monsterZones.length) {
-            const closestSpot = monsterZones.sort((zone1, zone2) => Math.hypot(zone1.coords.x - gesture.moveX, zone1.coords.y - gesture.moveY) - Math.hypot(zone2.coords.x - gesture.moveX, zone2.coords.y - gesture.moveY))[0]
-            return closestSpot
+            const closestSpot = monsterZones.sort((zone1, zone2) => Math.hypot(zone1.coords.x - gesture.moveX, zone1.coords.y - gesture.moveY) - Math.hypot(zone2.coords.x - gesture.moveX, zone2.coords.y - gesture.moveY))
+            return closestSpot[0]
         }
         return null
     }

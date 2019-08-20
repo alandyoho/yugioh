@@ -106,16 +106,29 @@ class DraggableDuelingRoomPage extends Component {
     }
     storePopupZoneLocations = () => {
         let zones = []
+
+
+        // width: Dimensions.get("window").width / 7.1,
+        // height: Dimensions.get("window").height / 12, //10.5
+
+
         if (!this.state.extraDeckPopupVisible) {
             this[`_SendToBanishedZone0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["SendToBanishedZone", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+
+
+                zones.push({ location: ["SendToBanishedZone", 0], coords: { x: { x: pageX - (width), y: pageY } } })
             })
+
             this[`_SendToGraveyard0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["SendToGraveyard", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+
+
+                zones.push({ location: ["SendToGraveyard", 0], coords: { x: { x: pageX - (width), y: pageY } } })
             })
         }
         this[`_MainDeckView0`].measure((x, y, width, height, pageX, pageY) => {
-            zones.push({ location: ["MainDeckView", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+
+
+            zones.push({ location: ["MainDeckView", 0], coords: { x: { x: pageX - (width), y: pageY } } })
         })
         this.setState({ popupZoneCoords: zones })
     }
@@ -134,47 +147,53 @@ class DraggableDuelingRoomPage extends Component {
 
     }
     storeZoneLocations = () => {
-        if (!this.state.coords.length) {
-            console.log("storeZoneLocations triggered")
-            let zones = []
-            for (let i = 1; i < 6; i++) {
-                this[`_m1${i}`].measure((x, y, width, height, pageX, pageY) => {
-                    zones.push({ location: ["m1", i], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-                })
-                this[`_st${i}`].measure((x, y, width, height, pageX, pageY) => {
-                    zones.push({ location: ["st", i], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-                })
-            }
-            this[`_cancel0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["cancel", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
 
-            this[`_banishedZone0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["banishedZone", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        console.log("storeZoneLocations triggered")
+        let zones = []
+        for (let i = 1; i < 6; i++) {
+            this[`_m1${i}`].measure((x, y, width, height, pageX, pageY) => {
+                zones.push({ location: ["m1", i], coords: { x: pageX - (width), y: pageY } })
             })
-            this[`_graveyard0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["graveyard", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+            this[`_st${i}`].measure((x, y, width, height, pageX, pageY) => {
+                zones.push({ location: ["st", i], coords: { x: pageX - (width), y: pageY } })
             })
-
-            this[`_st6`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["st", 6], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
-
-            this[`_mainDeck0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["mainDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
-            this[`_extraDeck0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["extraDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
-            this[`_linkZone0`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["linkZone", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
-            this[`_linkZone1`].measure((x, y, width, height, pageX, pageY) => {
-                zones.push({ location: ["linkZone", 1], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
-            })
-
-            this.setState({ coords: zones })
         }
+        this[`_cancel0`].measure((x, y, width, height, pageX, pageY) => {
+            zones.push({ location: ["cancel", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        })
+
+        this[`_banishedZone0`].measure((x, y, width, height, pageX, pageY) => {
+            zones.push({ location: ["banishedZone", 0], coords: { x: pageX - (width), y: pageY } })
+        })
+        this[`_graveyard0`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["graveyard", 0], coords: { x: pageX - (width), y: pageY } })
+        })
+
+        this[`_st6`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["st", 6], coords: { x: pageX - (width), y: pageY } })
+        })
+
+        this[`_mainDeck0`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["mainDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        })
+        this[`_extraDeck0`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["extraDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        })
+        this[`_linkZone0`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["linkZone", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        })
+        this[`_linkZone1`].measure((x, y, width, height, pageX, pageY) => {
+
+            zones.push({ location: ["linkZone", 1], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
+        })
+
+        this.setState({ coords: zones })
+
 
     }
     toggleHandZone = () => {
@@ -770,12 +789,12 @@ class DraggableDuelingRoomPage extends Component {
                             <View key={cardIndex} style={{ ...styles.viewStyles, borderColor: "transparent" }}>
                             </View>
                         ))}
-                        <View key={0} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} ref={view => { this[`_linkZone0`] = view }}>
+                        <View key={0} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_linkZone0`] = view }}>
                             {boardsRetrieved === true && this.state.linkZones[0].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["linkZone", 0]} item={this.state.linkZones[0]} user={this.props.user.username} host={this.state.host} />}
                         </View>
                         <View style={{ ...styles.viewStyles, borderColor: "transparent" }}>
                         </View>
-                        <View key={1} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} ref={view => { this[`_linkZone1`] = view }}>
+                        <View key={1} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_linkZone1`] = view }}>
                             {boardsRetrieved === true && this.state.linkZones[1].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["linkZone", 1]} item={this.state.linkZones[1]} user={this.props.user.username} host={this.state.host} />}
                         </View>
                         {[1, 2].map(cardIndex => (
@@ -791,31 +810,31 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_banishedZone0`] = view; }}>
                             </View>
                         </TouchableOpacity>
-                        <View style={styles.viewStyles} onLayout={this.storeZoneLocations} ref={view => { this[`_st6`] = view; }}>
+                        <View style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st6`] = view; }}>
                             {boardsRetrieved === true && this.state[thisBoard].st[6].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["st", 6]} item={this.state[thisBoard].st[6]} />}
                         </View>
                         {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} ref={view => { this[`_m1${cardIndex}`] = view }}>
+                            <View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_m1${cardIndex}`] = view }}>
                                 {boardsRetrieved === true && this.state[thisBoard].m1[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["m1", cardIndex]} item={this.state[thisBoard].m1[cardIndex]} />}
                             </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.toggleGraveyardPopup} onLongPress={this.handleGraveyardLongPress} disabled={boardsRetrieved && this.state[this.state.thisBoard].graveyard.length === 0}>
                             {boardsRetrieved === true && thisGraveyard.length > 0 && <FadeScaleImage source={{ uri: thisGraveyard[thisGraveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_graveyard0`] = view; }}>
+                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_graveyard0`] = view; }}>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.toggleExtraDeckPopup} onLongPress={this.handleExtraDeckLongPress} disabled={boardsRetrieved && this.state.extraDeck.length === 0}>
                             {boardsRetrieved && extraDeck.length > 0 &&
                                 <FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_extraDeck0`] = view; }}>
+                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_extraDeck0`] = view; }}>
                             </View>
                         </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (<View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} ref={view => { this[`_st${cardIndex}`] = view; }}>
+                        {[1, 2, 3, 4, 5].map(cardIndex => (<View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st${cardIndex}`] = view; }}>
                             {boardsRetrieved && this.state[thisBoard].st[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["st", cardIndex]} item={this.state[thisBoard].st[cardIndex]} />}
                         </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.presentDeckOptions} onLongPress={this.handleDeckLongPress} disabled={boardsRetrieved && this.state.mainDeck.length === 0}>
                             {boardsRetrieved && mainDeck.length > 0 &&
                                 <FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
-                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_mainDeck0`] = view; }}>
+                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_mainDeck0`] = view; }}>
                                 <Text style={{ color: boardsRetrieved && mainDeck.length > 0 ? "#FFF" : "black" }} >{this.state.mainDeck.length}</Text>
                             </View>
                         </TouchableOpacity>
@@ -835,7 +854,7 @@ class DraggableDuelingRoomPage extends Component {
                             scrollEnabled={!dragBegin}
                             style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: this.state.handZoneHeight, zIndex: 2 }}
                         />
-                        <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 150, zIndex: 1, width: "100%" }} onLayout={this.storeZoneLocations} ref={view => { this[`_cancel0`] = view; }}>
+                        <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 150, zIndex: 1, width: "100%" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_cancel0`] = view; }}>
                         </View>
                     </Animated.View>
                     <Dialog
@@ -866,12 +885,12 @@ class DraggableDuelingRoomPage extends Component {
                                     horizontal={true}
                                 />
                             </View>
-                            <View style={{ height: 0, width: 0 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
+                            <View style={{ height: 0, width: 0 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
                             </View>
-                            <View style={{ height: 0, width: 0 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToGraveyard0`] = view; }}>
+                            <View style={{ height: 0, width: 0 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToGraveyard0`] = view; }}>
                             </View>
                             <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
-                                <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderWidth: 1, borderBottomRightRadius: 20, borderBottomLeftRadius: 20 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_MainDeckView0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderWidth: 1, borderBottomRightRadius: 20, borderBottomLeftRadius: 20 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_MainDeckView0`] = view; }}>
                                 </View>
                             </View>
                         </DialogContent>
@@ -934,13 +953,13 @@ class DraggableDuelingRoomPage extends Component {
                                 />
                             </View>
                             <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Banished Zone</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_MainDeckView0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_MainDeckView0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Deck</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToGraveyard0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToGraveyard0`] = view; }}>
 
                                 </View>
 
@@ -978,13 +997,13 @@ class DraggableDuelingRoomPage extends Component {
                                 />
                             </View>
                             <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_MainDeckView0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_MainDeckView0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Deck</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToGraveyard0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToGraveyard0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Graveyard</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
                                 </View>
                             </View>
                         </DialogContent>
@@ -1020,13 +1039,13 @@ class DraggableDuelingRoomPage extends Component {
 
                             </View>
                             <View style={{ height: Dimensions.get("window").height * 0.60, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Banished Zone</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_SendToGraveyard0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToGraveyard0`] = view; }}>
                                     <Text style={{ color: this.state.popupFontColor }}>Send to Graveyard</Text>
                                 </View>
-                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={this.storePopupZoneLocations} ref={view => { this[`_MainDeckView0`] = view; }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.30, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_MainDeckView0`] = view; }}>
 
                                 </View>
                                 <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} ref={view => { this[`_DragToField0`] = view; }}>
