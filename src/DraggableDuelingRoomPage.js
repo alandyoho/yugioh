@@ -3,16 +3,13 @@ import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, L
 import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField } from "./ComplexComponents"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { createUser } from "./actions"
-import { updateSelectedDeck } from "./actions"
+import { createUser, updateSelectedDeck } from "./actions"
 import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import GameLogic from "./GameLogic"
-
+import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
+import { GameLogic } from "./DuelingRoomPageComponents"
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
-import { FlatList } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
@@ -57,7 +54,9 @@ class DraggableDuelingRoomPage extends Component {
             backgroundImageUrl: null
         }
     }
+    extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
     async componentDidMount() {
+        console.log(this.extraDeckTypes)
         const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png"), require("../assets/background-7.png"), , require("../assets/background-8.png"), require("../assets/background-9.png")]
         const randomNum = this.getRandomInt()
         this.setState({ backgroundImageUrl: backgroundImages[randomNum], waitingForOpponentPopupVisible: true })
@@ -87,17 +86,11 @@ class DraggableDuelingRoomPage extends Component {
                         this.initialDraw()
                         this.setState({ initializeNewGame: false })
                     }
-
-
-
-
                 }
             })
     }
     initialDraw = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
-        //uncomment this for dev
-        // const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: "Frog" })
         GameLogic.shared.addUser(this.props.user.username)
         this.setState({ selectedDeck: this.props.selectedDeck, mainDeck: GameLogic.shared.initialShuffleDeck(mainDeck), extraDeck: GameLogic.shared.alphabetize(extraDeck) })
         const { shallowCards, drawnCards } = GameLogic.shared.initialDraw(this.state.mainDeck)
@@ -292,7 +285,7 @@ class DraggableDuelingRoomPage extends Component {
         }
 
         //attempt to escape fuction if end card zone is invalid 
-        if (endCardZone === "extraDeck" && !(extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (extraDeckTypes.includes(card.type))) {
+        if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
             this.toggleAppropriateZone(startCardZone)
             return console.log("bad request!")
         }
@@ -337,7 +330,7 @@ class DraggableDuelingRoomPage extends Component {
             card.set = false
             card.defensePosition = false
             if (endCardZone === "cancel") endCardZone = "hand"
-            if (endCardZone === "hand" && extraDeckTypes.includes(card.type)) {
+            if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
                 boardCopy[endCardZone] = [...boardCopy[endCardZone], card] //update Locally
@@ -345,7 +338,7 @@ class DraggableDuelingRoomPage extends Component {
             }
             this.toggleAppropriateZone(startCardZone)
         } else if (endCardZone === "MainDeckView" || endCardZone === "mainDeck") {
-            if (extraDeckTypes.includes(card.type)) {
+            if (this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
                 this.setState({ mainDeck: [...this.state.mainDeck, card] })
@@ -354,7 +347,7 @@ class DraggableDuelingRoomPage extends Component {
                 this.toggleAppropriateZone(startCardZone)
             }
         } else if (endCardZone === "extraDeck") {
-            if (extraDeckTypes.includes(card.type)) {
+            if (this.extraDeckTypes.includes(card.type)) {
                 let extraDeck = [...this.state.extraDeck]
                 extraDeck.push(card)
                 this.setState({ extraDeck })
@@ -402,7 +395,7 @@ class DraggableDuelingRoomPage extends Component {
         let boardCopy = { ...this.state[thisBoard] }
 
         console.log(startCardZone, "=>", endCardZone)
-        if (endCardZone === "extraDeck" && !(extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (extraDeckTypes.includes(card.type))) {
+        if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
             this.toggleAppropriateZone(startCardZone)
             return console.log("bad request!")
         }
@@ -428,7 +421,7 @@ class DraggableDuelingRoomPage extends Component {
             card.set = false
             card.defensePosition = false
             if (endCardZone === "cancel") endCardZone = "hand"
-            if (endCardZone === "hand" && extraDeckTypes.includes(card.type)) {
+            if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
                 boardCopy[startCardZone][startCardIndex] = { card: { defenseMode: false, exists: false } }
@@ -440,7 +433,7 @@ class DraggableDuelingRoomPage extends Component {
             card.defensePosition = false
             let linkZones = [...this.state.linkZones]
             if (endCardZone === "cancel") endCardZone = "hand"
-            if (endCardZone === "hand" && extraDeckTypes.includes(card.type)) {
+            if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
                 linkZones[startCardIndex] = { card: { defenseMode: false, exists: false } }
@@ -517,10 +510,7 @@ class DraggableDuelingRoomPage extends Component {
                     boardCopy[startCardZone][startCardIndex] = { card: { defenseMode: false, exists: false } }
                     boardCopy[endCardZone][endCardIndex] = card
                 }
-
             }
-
-
         }
         await alterBoard({ location: [thisBoard, startCardZone], hostUsername: this.state.hostedBy, zone: boardCopy[startCardZone] })
         await alterBoard({ location: [thisBoard, endCardZone], hostUsername: this.state.hostedBy, zone: boardCopy[endCardZone] })
@@ -743,6 +733,12 @@ class DraggableDuelingRoomPage extends Component {
         }
         this.props.navigation.navigate("HomePage")
     }
+    freezeHand = () => {
+        this["hand"].setNativeProps({ scrollEnabled: false })
+    }
+    unFreezeHand = () => {
+        this["hand"].setNativeProps({ scrollEnabled: true })
+    }
     render() {
         const { thisBoard, thatBoard, boardsRetrieved, mainDeck, extraDeck, mainDeckPopupVisible, extraDeckPopupVisible, coords, graveyardPopupVisible, dragBegin, banishedZonePopupVisible, overlayBackgroundColor, popupOverlayOpacity, backgroundImageUrl } = this.state
         const { hand: thisHand, graveyard: thisGraveyard, banishedZone: thisBanishedZone } = boardsRetrieved && this.state[thisBoard]
@@ -879,10 +875,11 @@ class DraggableDuelingRoomPage extends Component {
                     <Animated.View style={{ position: "absolute", bottom: -30, left: 0, right: 0, height: this.state.handZoneHeight, zIndex: 0, opacity: this.state.opacity }}>
                         <FlatList
                             data={thisHand}
-                            renderItem={({ item }) => <DraggableCardInHand item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                            ref={list => { this["hand"] = list; }}
+                            renderItem={({ item }) => <DraggableCardInHand freezeHand={this.freezeHand} unFreezeHand={this.unFreezeHand} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                             keyExtractor={(item, index) => index.toString()}
                             horizontal={true}
-                            scrollEnabled={!dragBegin}
+                            // scrollEnabled={!dragBegin}
                             style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: this.state.handZoneHeight, zIndex: 2 }}
                         />
                         <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 150, zIndex: 1, width: "100%" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_cancel0`] = view; }}>

@@ -1,24 +1,17 @@
 import React, { Component } from 'react';
-// import { StyleSheet, Text, View, Image, Slider, Alert, Dimensions, TextInput, TouchableOpacity } from 'react-native';
 import { TouchableOpacity, Alert, View, Image, Dimensions, StyleSheet, Text, Animated, TextInput, TouchableWithoutFeedback, Keyboard, LayoutAnimation, DeviceEventEmitter, ActivityIndicator } from "react-native"
-
 import CoverFlow from 'react-native-coverflow';
 import { functions } from "../Firebase/Fire"
 import { FlatList } from 'react-native-gesture-handler';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { retrieveCardsFromDeck, addCardsToDeck, deleteCard, removeCardsFromDeck } from "../Firebase/FireMethods"
-import Swipeable from 'react-native-swipeable';
 import SlidingUpPanel from 'rn-sliding-up-panel';
 import { MultiSwitch, FadeScaleImage, SwipeableRow, CustomText } from './ComplexComponents';
 import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-import NumericInput from 'react-native-numeric-input'
-
-import { ScrollView } from 'react-native-gesture-handler/GestureHandler';
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
-import { Audio } from 'expo-av';
 
 class DeckConstructorPage extends Component {
     constructor(props) {
@@ -199,7 +192,6 @@ class DeckConstructorPage extends Component {
 
     refreshCards = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
-        // mainDeck = mainDeck.sort()
         const deck = mainDeck.sort((a, b) => {
             if (a.name < b.name) return -1;
             else if (a.name > b.name) return 1;
@@ -231,8 +223,6 @@ class DeckConstructorPage extends Component {
         await addCardsToDeck({ username: this.props.user.username, deck: this.props.selectedDeck, card: cardInfo })
         await this.refreshCards()
     }
-
-
     getCards() {
         const res = [];
         const exists = Object.keys(this.state.cards).length
@@ -276,7 +266,6 @@ class DeckConstructorPage extends Component {
     switchDisplayedDeck = () => {
         this.setState({ extraDeckCardsVisible: !this.state.extraDeckCardsVisible })
     }
-
     renderItem = ({ item, index }) => (
         <SwipeableRow item={item} index={index} deleteCard={this.deleteCard} selectedDeck={this.state.selectedDeck} updateCardQuantity={this.updateCardQuantity} username={this.props.user.username} />
     )
@@ -375,7 +364,6 @@ class DeckConstructorPage extends Component {
                         onTouchOutside={() => {
                             this.setState({ popUpVisible: false });
                         }}
-
                         footer={
                             <DialogFooter>
                                 <DialogButton

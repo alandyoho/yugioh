@@ -5,6 +5,6 @@ import DraggableCardOnField from "./DraggableCardOnField"
 import FadeImage from "./FadeImage"
 import FadeScaleImage from "./FadeScaleImage"
 import FadeScaleText from "./FadeScaleText"
-import SwipeableComponent from "./SwipeableComponent"
+import SwipeableRow from "./SwipeableComponent"
 import MultiSwitch from "./rn-slider-switch"
-export { CustomText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, FadeImage, FadeScaleImage, FadeScaleText, SwipeableComponent, MultiSwitch }
+export { CustomText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, FadeImage, FadeScaleImage, FadeScaleText, SwipeableRow, MultiSwitch }

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground } from 'react-native';
 import { FadeScaleImage } from "./ComplexComponents"
-import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
@@ -9,11 +8,7 @@ import { updateSelectedDeck } from "./actions"
 import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePointsField, alterLinkZone } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import GameLogic from "./GameLogic"
-import CARDS from "./cards"
-// import DraggableCards from "./DraggableCards";
-import { OpponentBoard, OpponentHand, RoomHostBoard, RoomHostHand, DuelingRoomDialogs } from "./DuelingRoomPageComponents"
-import SwipeUpDown from 'react-native-swipe-up-down';
+import { OpponentBoard, OpponentHand, RoomHostBoard, RoomHostHand, DuelingRoomDialogs, GameLogic } from "./DuelingRoomPageComponents"
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 
@@ -58,7 +53,6 @@ class DuelingRoomPage extends Component {
             guestLifePoints: 8000,
             hostLifePointsSelected: false,
             cardInDeckPressed: false,
-
         }
     }
     async componentDidMount() {

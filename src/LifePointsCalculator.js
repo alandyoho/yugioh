@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import {
-    View, TouchableHighlight,
-    Text, StyleSheet
-} from 'react-native';
+import { View, TouchableHighlight, Text, StyleSheet } from 'react-native';
 
 class InputButton extends Component {
 

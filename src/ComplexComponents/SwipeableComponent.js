@@ -34,8 +34,6 @@ const Row = ({ item, updateCardQuantity, username, selectedDeck }) => (
                 iconStyle={{ color: 'white' }}
                 rightButtonBackgroundColor="rgb(130, 69, 91)"
                 leftButtonBackgroundColor="rgb(130, 69, 91)" />
-
-
             <CustomText style={styles.dateText}>
                 {'❭'}
             </CustomText>
