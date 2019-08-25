@@ -11,7 +11,7 @@ import { updateSelectedDeck, updatePreferences, updateUser, updateFriendsList, a
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { Audio } from 'expo-av';
-import FadeImage from "./ComplexComponents/FadeImage"
+import { FadeImage } from "./ComplexComponents"
 import * as Haptics from 'expo-haptics';
 import EditProfileForm from "./HomePageComponents/EditProfileForm"
 import FriendsPopup from "./HomePageComponents/FriendsPopup"

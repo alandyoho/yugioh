@@ -1,6 +1,6 @@
 import { View, Image, Text, ImageBackground, TouchableOpacity } from 'react-native';
 import React from "react"
-import FadeScaleImage from "../ComplexComponents/FadeScaleImage"
+import { FadeScaleImage } from "../ComplexComponents"
 
 const RoomHostBoard = ({ boardsRetrieved, properBoard, drawCard, addCardToBoard, board, presentCardOnBoardOptions, toggleGraveyardPopup, toggleExtraDeckPopup, mainDeck, extraDeck, toggleMainDeckOptions, toggleBanishedZonePopup }) => {
     return (

@@ -10,7 +10,7 @@ import { bindActionCreators } from 'redux';
 import { retrieveDeckInfo, retrieveCardsFromDeck } from "../Firebase/FireMethods"
 import { Asset } from 'expo-asset';
 import * as Font from "expo-font"
-import FadeImage from "./ComplexComponents/FadeImage"
+import { FadeImage } from "./ComplexComponents"
 import MatrixRegularSmallCaps from "../assets/MatrixRegularSmallCaps.ttf"
 import { AsyncStorage } from 'react-native';
 

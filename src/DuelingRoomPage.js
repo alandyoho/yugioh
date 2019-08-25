@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground } from 'react-native';
-import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
+import { FadeScaleImage } from "./ComplexComponents"
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';

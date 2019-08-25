@@ -10,17 +10,15 @@ import { bindActionCreators } from 'redux';
 import { retrieveCardsFromDeck, addCardsToDeck, deleteCard, removeCardsFromDeck } from "../Firebase/FireMethods"
 import Swipeable from 'react-native-swipeable';
 import SlidingUpPanel from 'rn-sliding-up-panel';
-import MultiSwitch from './ComplexComponents/rn-slider-switch';
+import { MultiSwitch, FadeScaleImage, SwipeableRow, CustomText } from './ComplexComponents';
 import CARDS from "./cards.js"
 import Dialog, { DialogContent, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import NumericInput from 'react-native-numeric-input'
-import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
-import SwipeableRow from "./ComplexComponents/SwipeableComponent"
+
 import { ScrollView } from 'react-native-gesture-handler/GestureHandler';
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { Audio } from 'expo-av';
-import CustomText from "./ComplexComponents/CustomText"
 
 class DeckConstructorPage extends Component {
     constructor(props) {

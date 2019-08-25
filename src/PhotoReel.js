@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { Dimensions, Image } from 'react-native';
-import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
+import { FadeScaleImage } from "./ComplexComponents"
 
 export default class PhotoReel extends Component {
     render() {

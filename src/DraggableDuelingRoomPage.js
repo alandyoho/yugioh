@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, LayoutAnimation, ActionSheetIOS } from 'react-native';
-import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
-import FadeScaleText from "./ComplexComponents/FadeScaleText"
+import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField } from "./ComplexComponents"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser } from "./actions"
@@ -11,13 +10,10 @@ import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GameLogic from "./GameLogic"
 
-import DraggableCardInHand from "./ComplexComponents/DraggableCardInHand";
-import DraggableCardInPopup from "./ComplexComponents/DraggableCardInPopup";
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { FlatList } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
-import DraggableCardOnField from "./ComplexComponents/DraggableCardOnField"
 import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
 

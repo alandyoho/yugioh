@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { View, Text, StyleSheet, Dimensions, Image, SectionList, TextInput, Animated } from "react-native"
 import { FlatList } from "react-native-gesture-handler"
-import FadeScaleImage from "../ComplexComponents/FadeScaleImage"
+import { FadeScaleImage } from "../ComplexComponents"
 import FriendRow from "./FriendRow"
 import FriendRequestRow from "./FriendRequestRow"
 import FriendSearchRow from "./FriendSearchRow"
