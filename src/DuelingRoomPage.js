@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground } from 'react-native';
-import FadeScaleImage from "./FadeScaleImage"
+import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -249,7 +249,7 @@ class DuelingRoomPage extends Component {
         if (requestType == "Return-To-Hand") {
             boardCopy[cardZone][cardZoneIndex] = { card: { exists: false, defensePosition: false } }
             cardDetails.defensePosition = false
-            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
             if (extraDeckTypes.includes(cardDetails.type)) {
                 const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
                 this.setState({ [board]: boardCopy, extraDeck: modifiedExtraDeck, cardInfo: "" })
@@ -296,7 +296,7 @@ class DuelingRoomPage extends Component {
 
         if (requestType == "Return-To-Hand") {
 
-            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
             if (extraDeckTypes.includes(cardDetails.type)) {
                 const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
                 boardCopy["graveyard"] = graveyard.splice(graveyard.findIndex(e => e.id === cardDetails.id), 1);
@@ -365,7 +365,7 @@ class DuelingRoomPage extends Component {
 
         if (requestType == "Return-To-Hand-BZ") {
 
-            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+            const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
             if (extraDeckTypes.includes(cardDetails.type)) {
                 const modifiedExtraDeck = [...this.state.extraDeck, cardDetails]
                 boardCopy["banishedZone"] = banishedZone.splice(banishedZone.findIndex(e => e.id === cardDetails.id), 1);
@@ -528,9 +528,9 @@ class DuelingRoomPage extends Component {
             if (this.props.preferences.musicEnabled) {
                 await enableAudio()
             }
-            
+
         } catch (error) {
-            
+
         }
 
 

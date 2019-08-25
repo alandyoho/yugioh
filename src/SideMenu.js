@@ -2,22 +2,58 @@ import React, { Component } from "react"
 import { ScrollView, SafeAreaView, StyleSheet, View, Dimensions, Image, Text, Animated } from 'react-native';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { auth } from "../Firebase/Fire"
-// import { ScrollView, SafeAreaView, View, Text, TouchableOpacity, Image } from "react-native"
-
+import * as Haptics from 'expo-haptics';
+import defaultAvatarImage from "../assets/default-image.jpg"
 
 export default class CustomSideMenu extends Component {
     logOut = () => {
         auth.signOut()
         this.props.navigation.navigate("LogInSignUpPage")
     }
+    handleLongPress = (type) => {
+        Haptics.impactAsync("heavy")
+        if (type === "preferences") {
+            this.props.toggleSettingsPopup()
+        } else if (type === "friends") {
+            this.props.toggleFriendsPopup()
+        } else if (type === "profile") {
+            this.props.toggleProfilePopup()
+        }
+    }
     renderScreen = () => {
         if (this.props.screen === "HomePage") {
             return (
                 <React.Fragment>
-                    <TouchableOpacity onPress={this.props.toggleSettingsPopup} style={styles.tabContainerTouchableOpacity}>
+
+                    <TouchableOpacity onPress={this.props.toggleProfilePopup} onLongPress={() => this.handleLongPress("profile")}>
+                        <Image style={{
+                            width: 130,
+                            height: 130,
+                            borderRadius: 63,
+                            borderWidth: 2,
+                            borderColor: "#000000",
+                            marginBottom: 10,
+                        }} source={(this.props.user.imageURL ? { uri: this.props.user.imageURL } : defaultAvatarImage)}
+                        />
+
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={this.props.toggleProfilePopup} onLongPress={() => this.handleLongPress("profile")} style={styles.tabContainerTouchableOpacity}>
                         <View style={styles.tabContainerContents}>
                             {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
-                            <Text style={styles.tabContainerText}>Settings</Text>
+                            <Text style={styles.tabContainerText}>Profile</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={this.props.toggleFriendsPopup} onLongPress={() => this.handleLongPress("friends")} style={styles.tabContainerTouchableOpacity}>
+                        <View style={styles.tabContainerContents}>
+                            {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                            <Text style={styles.tabContainerText}>Friends</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={this.props.toggleSettingsPopup} onLongPress={() => this.handleLongPress("preferences")} style={styles.tabContainerTouchableOpacity}>
+                        <View style={styles.tabContainerContents}>
+                            {/* <Image style={styles.tabContainerImage} source={require("../../assets/logout.png")} /> */}
+                            <Text style={styles.tabContainerText}>Preferences</Text>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={this.logOut} style={styles.tabContainerTouchableOpacity}>

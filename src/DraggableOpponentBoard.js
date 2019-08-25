@@ -1,6 +1,6 @@
 import { StyleSheet, View, Dimensions, TouchableOpacity } from 'react-native';
 import React, { PureComponent } from "react"
-import FadeScaleImage from "./FadeScaleImage"
+import FadeScaleImage from "./ComplexComponents/FadeScaleImage"
 
 class DraggableOpponentBoard extends PureComponent {
     render() {

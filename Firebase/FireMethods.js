@@ -5,18 +5,32 @@ import NumericInput from 'react-native-numeric-input'
 const updateLifePointsField = (val) => {
 
 }
+const clean = (obj) => {
+    for (var propName in obj) {
+        if (obj[propName] === null || obj[propName] === undefined) {
+            delete obj[propName];
+        }
+    }
+    return obj
+}
 
 const updateUserInfo = (obj) => {
-    firestore.collection("users").doc(obj.username).set({ name: obj.name, email: obj.email, username: obj.username, hostedBy: "", hosting: false, decks: [] }, { merge: true })
+    console.log("obj before", obj)
+    obj = clean(obj)
+    console.log("obj after", obj)
+
+    firestore.collection("users").doc(obj.username).set({ hostedBy: "", hosting: false, decks: [], friends: [], friendRequests: [], ...obj }, { merge: true })
     var authUser = auth.currentUser;
-    authUser.updateProfile({
-        displayName: obj.username
+    return authUser.updateProfile({
+        displayName: obj.username,
+        imageURL: obj.imageURL
     }).then(function () {
-        //
+        return true
     }).catch(function (error) {
-        // An error happened.
+        return false
     });
 }
+
 const updateMainDeckInfo = async (obj) => {
     const { decks } = await retrieveDeckInfo(obj.username)
     if (decks && decks.includes(obj.deck)) {
@@ -42,7 +56,7 @@ const deleteDeck = async (obj) => {
 }
 
 const deleteCard = async (obj) => {
-    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
     const { mainDeck, extraDeck } = await retrieveCardsFromDeck(obj)
 
     if (extraDeckTypes.includes(obj.card.type)) {
@@ -59,7 +73,7 @@ const deleteCard = async (obj) => {
 }
 const removeCardsFromDeck = async (obj) => {
     //check quantity property.
-    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
     const { mainDeck, extraDeck } = await retrieveCardsFromDeck(obj)
     if (extraDeckTypes.includes(obj.card.type)) {
         const filt = extraDeck.filter(card => card.id == obj.card.id)
@@ -131,14 +145,15 @@ const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 
     //else add card to deck model and set quantity property to 1
-    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster"]
+
+    const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
 
     if (extraDeckTypes.includes(obj.card.type)) {
         const { extraDeck } = await retrieveCardsFromDeck(obj)
         const filt = extraDeck.filter(card => card.id == obj.card.id)
         //check if card exists in "deck" model
         //if exists, increase quantity property by one 
-        
+
         let maxQuant = 3
         if ('banlist_info' in obj.card) {
             if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
@@ -168,7 +183,7 @@ const addCardsToDeck = async (obj) => {
     } else {
         const { mainDeck } = await retrieveCardsFromDeck(obj)
         const filt = mainDeck.filter(card => card.id == obj.card.id)
-        
+
         let maxQuant = 3
         if ('banlist_info' in obj.card) {
             if (obj.card["banlist_info"]["ban_tcg"] == "Limited") {
@@ -211,13 +226,7 @@ const hostDuel = (obj) => {
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 
-const returnAvailableDuels = async (requestId) => {
-    const snapshot = await firebase.firestore().collection('rooms').get()
-    const docsWithRequestIdFiltered = snapshot.docs.filter(doc => doc.id != requestId).map(d => d.data()).filter(c => c.opponent === "").map(d => d.host)
-    // filter(d => d.data().opponent === "")
-    //
-    return docsWithRequestIdFiltered
-}
+
 const joinDuel = (obj) => {
     firestore.collection("rooms").doc(obj.hostUsername).update({ opponent: obj.username })
     firestore.collection("users").doc(obj.username).update({ hostedBy: obj.hostUsername })
@@ -243,5 +252,80 @@ const leaveDuel = async (obj) => {
 const listenForBoardUpdates = (obj) => {
     return firestore.collection("rooms").doc(obj).onSnapshot(function (doc) { return doc.data() })
 }
+const addFriend = async (obj) => {
+    await firestore.collection("users").doc(obj.username).update({
+        "friends": firebase.firestore.FieldValue.arrayUnion(obj.name)
+    })
+    await firestore.collection("users").doc(obj.name).update({
+        "friends": firebase.firestore.FieldValue.arrayUnion(obj.username)
+    })
+    await firestore.collection("users").doc(obj.username).update({
+        "friendRequests": firebase.firestore.FieldValue.arrayRemove(obj.name)
+    })
+}
+const deleteFriendRequest = async (obj) => {
+    await firestore.collection("users").doc(obj.username).update({
+        "friendRequests": firebase.firestore.FieldValue.arrayRemove(obj.name)
+    })
+}
 
-export { updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField, alterLinkZone }
+
+const retrieveUsers = (user) => {
+    return firestore.collection("users").where("username", ">=", user).get().then(function (querySnapshot) {
+        let data = []
+        querySnapshot.forEach(function (doc) {
+            data.push(doc.data())
+        });
+        return data
+    })
+        .catch(function (error) {
+            console.log("Error getting documents: ", error);
+        });
+}
+const returnAvailableDuels = async (requestId) => {
+    const snapshot = await firebase.firestore().collection('rooms').get()
+    const docsWithRequestIdFiltered = snapshot.docs.filter(doc => doc.id != requestId).map(d => d.data()).filter(c => c.opponent === "").map(d => d.host)
+    console.log("docs", docsWithRequestIdFiltered)
+    let requests = []
+    for (friend of docsWithRequestIdFiltered) {
+        console.log("friend", friend)
+        let info = await retrieveDeckInfo(friend)
+        requests.push(info)
+    }
+    return requests
+}
+const retrieveFriendInfo = async (user) => {
+    let r = []
+    let f = []
+    let { friendRequests, friends } = await firestore.collection("users").doc(user).get().then(info => info.data())
+    for (request of friendRequests) {
+        let info = await retrieveDeckInfo(request)
+        r.push(info)
+    }
+    for (friend of friends) {
+        let info = await retrieveDeckInfo(friend)
+        f.push(info)
+    }
+    return { requests: r, friends: f }
+
+}
+
+const sendFriendRequest = async (obj) => {
+    await firestore.collection("users").doc(obj.item.username).update({
+        "friendRequests": firebase.firestore.FieldValue.arrayUnion(obj.username)
+    })
+
+    //add the current user's username to the passed in item's friend request array in db
+
+}
+
+const updateUser = (username, obj) => {
+    firestore.collection("users").doc(username).update(obj)
+        .then(function () {
+            return true
+        }).catch(function (error) {
+            return false
+        });
+}
+
+export { updateUser, updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField, alterLinkZone, addFriend, retrieveFriendInfo, deleteFriendRequest, retrieveUsers, sendFriendRequest }

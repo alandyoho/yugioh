@@ -1,6 +1,6 @@
 import { StyleSheet, View, Dimensions, Image, Text, ScrollView, Animated, ImageBackground, TouchableOpacity } from 'react-native';
 import React, { Component } from "react"
-import FadeScaleImage from "../FadeScaleImage"
+import FadeScaleImage from "../ComplexComponents/FadeScaleImage"
 
 
 const OpponentBoard = ({ boardsRetrieved, opponentBoard, toggleOpponentGraveyardPopup, examineOpponentCard }) => {

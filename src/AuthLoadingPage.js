@@ -9,8 +9,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { retrieveDeckInfo, retrieveCardsFromDeck } from "../Firebase/FireMethods"
 import { Asset } from 'expo-asset';
-import * as  Font from "expo-font"
-import FadeImage from "./FadeImage"
+import * as Font from "expo-font"
+import FadeImage from "./ComplexComponents/FadeImage"
 import MatrixRegularSmallCaps from "../assets/MatrixRegularSmallCaps.ttf"
 import { AsyncStorage } from 'react-native';
 
@@ -54,21 +54,22 @@ class AuthLoadingScreen extends Component {
             await firebase.auth().onAuthStateChanged(async (user) => {
                 if (user && user.displayName) {
                     try {
-                        this.props.createUser({ username: user.displayName, email: user.email })
+                        const userFromDB = await retrieveDeckInfo(user.displayName)
+                        this.props.createUser(userFromDB)
                         const preferences = await this._retrieveData()
                         this.props.updatePreferences(preferences)
-                        const { decks } = await retrieveDeckInfo(user.displayName)
+
                         let cardImgs = []
-                        for (let i = 0; i < decks.length; i++) {
-                            const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: user.displayName, deck: decks[i] })
-                            for (let j = 0; j < mainDeck.length; j++) {
-                                const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
-                                cardImgs.push(cardImg)
-                            }
-                        }
+                        // for (let i = 0; i < userFromDB.decks.length; i++) {
+                        //     const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
+                        //     for (let j = 0; j < mainDeck.length; j++) {
+                        //         const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
+                        //         cardImgs.push(cardImg)
+                        //     }
+                        // }
                         await this._loadAssetsAsync(cardImgs)
                         this.props.navigation.navigate("App")
-                        this.props.updateDeckList(decks)
+                        this.props.updateDeckList(userFromDB.decks)
                     } catch (err) {
                         console.error(err)
                     }
@@ -85,6 +86,7 @@ class AuthLoadingScreen extends Component {
         });
 
         const imageAssets = cacheImages([
+            require("../assets/friendRequestLoadingSmall.gif"),
             require("../assets/background-0.png"),
             require("../assets/background-1.png"),
             require("../assets/background-2.png"),
@@ -103,8 +105,8 @@ class AuthLoadingScreen extends Component {
             require("../assets/searchIcon.png"),
             require("../assets/skeletonscreen.gif"),
             require("../assets/upArrow.png"),
-            require("../assets/yugioh_gif1.gif"),
-            require("../assets/yugioh_gif2.gif"),
+            // require("../assets/yugioh_gif1.gif"),
+            // require("../assets/yugioh_gif2.gif"),
             require("../assets/returnToHand.gif"),
             ...images
         ]);

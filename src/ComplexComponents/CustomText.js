@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
 import {
     Text,
     StyleSheet,
 } from 'react-native';
 
-export default class CustomText extends React.Component {
+export default class CustomText extends Component {
     constructor(props) {
         super(props);
     }
@@ -19,7 +19,6 @@ export default class CustomText extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    // ... add your default style here
     defaultStyle: {
         fontFamily: "MatrixRegularSmallCaps"
     },

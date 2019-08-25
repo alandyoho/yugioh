@@ -17,12 +17,12 @@ export default class FadeScaleImage extends Component {
 
     // source={this.props.item.set ? require("../assets/default_card.png") : { uri: this.props.item.card_images[0].image_url_small }} resizeMode={"contain"} style={[{ transform: this.props.item.defensePosition ? [{ rotate: '90deg' }] : [{ rotate: '0deg' }] }
     render() {
-        
+
         return (
             <Animated.Image
                 onLoad={this.onLoad}
                 {...this.props}
-                source={(this.props.item && this.props.item.set) ? require("../assets/default_card.png") : this.props.source}
+                source={(this.props.item && this.props.item.set) ? require("../../assets/default_card.png") : this.props.source}
                 style={[
                     {
                         opacity: this.state.opacity,

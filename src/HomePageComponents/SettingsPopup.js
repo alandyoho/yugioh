@@ -62,13 +62,13 @@ export default class SettingsPopup extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Text style={{ fontSize: 30, alignSelf: "center" }}>Sound Preferences</Text>
+                <Text style={{ fontSize: 30, alignSelf: "center" }}>Preferences</Text>
                 <View style={{ alignSelf: "center", flex: 1, flexDirection: "row", justifyContent: "flex-end", alignItems: "center", width: "80%" }}>
                     <Text style={{ fontSize: 15, fontWeight: '900', position: "absolute", left: 20 }}>Music</Text>
                     <ToggleSwitch
                         isOn={this.state.musicEnabled}
                         onColor='green'
-                        offColor='red'
+                        offColor='#808080'
                         size='small'
 
                         onToggle={(isOn) => this.updateMusicEnabled(isOn)}
@@ -80,7 +80,7 @@ export default class SettingsPopup extends Component {
                     <ToggleSwitch
                         isOn={this.state.soundEffectsEnabled}
                         onColor='green'
-                        offColor='red'
+                        offColor='#808080'
                         labelStyle={{ color: 'black', fontWeight: '900' }}
                         size='small'
                         onToggle={(isOn) => this.updateSoundEffectsEnabled(isOn)}

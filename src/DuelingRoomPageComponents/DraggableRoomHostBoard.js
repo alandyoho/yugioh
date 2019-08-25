@@ -1,6 +1,5 @@
 import { View, Image, Text, ImageBackground } from 'react-native';
 import React, { Component } from "react"
-import FadeScaleImage from "../FadeScaleImage"
 
 class RoomHostBoard extends Component {
     constructor() {

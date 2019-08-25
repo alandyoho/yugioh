@@ -1,61 +1,31 @@
 import { GiftedForm, GiftedFormManager } from "react-native-gifted-form"
 import React, { Component } from "react"
-import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, ART } from 'react-native';
 import { TouchableWithoutFeedback, Keyboard } from 'react-native';
-import signUpFormValidators from "./SignUpFormValidators"
+// import { auth } from "../Firebase/Fire"
+import submitChangesFormValidators from "../LogInSignUpPageComponents/SignUpFormValidators"
 import defaultAvatarImage from "../../assets/default-image.jpg"
-import { updateUserInfo } from "../../Firebase/FireMethods"
+import { updateUserInfo, updateUser } from "../../Firebase/FireMethods"
+import firebase from "firebase"
+
+import Image from 'react-native-image-progress';
+import ProgressBar from 'react-native-progress/Pie'
+
+import { functions, auth, storage } from "../../Firebase/Fire"
+import { ImagePicker, Permissions } from 'expo';
+import uuid from 'uuid';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 
-import { functions, auth, storage } from "../../Firebase/Fire"
-import * as ImagePicker from 'expo-image-picker'
-import * as Permissions from 'expo-permissions'
-import uuid from 'uuid';
 
-
-
-export default class SignUpForm extends Component {
+export default class EditProfileForm extends Component {
     constructor() {
         super()
         this.state = {
-            dialogVisible: false,
             userId: "",
-            uploading: false,
             image: null
         }
         this.inputs = {};
-    }
-    focusNextField = (key) => {
-        this.inputs[key].focus();
-    }
-    signUp = async (user) => {
-        //create auth user in firebase
-        try {
-            await auth.createUserWithEmailAndPassword(user.email, user.password);
-            if (this.state.photoURL) {
-                auth.currentUser.updateProfile({
-                    photoURL: this.state.image
-                })
-            }
-            //update redux store with user info
-            this.props.createUser(user)
-        } catch (err) {
-            console.log(err)
-            return false
-        }
-        try {
-            await updateUserInfo(user)
-        } catch (err) {
-            console.log(err)
-            return false
-        }
-        return true
-
-        //create user info in firestore, update user object to contain displayName
-
-
-
     }
     _pickImage = async () => {
         await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -71,8 +41,33 @@ export default class SignUpForm extends Component {
             this.setState({ uploading: true });
 
             if (!pickerResult.cancelled) {
-                uploadUrl = await this.uploadImageAsync(pickerResult.uri);
+                let uploadUrl = await this.uploadImageAsync(pickerResult.uri);
+                const indexOfInsertion = uploadUrl.indexOf(".com/o/") + 7
+                const output = [uploadUrl.slice(0, indexOfInsertion), "thumb_", uploadUrl.slice(indexOfInsertion)].join('');
+                console.log("upload url", output)
+                auth.currentUser.updateProfile({
+                    photoURL: output
+                })
+
+                // "https://firebasestorage.googleapis.com/v0/b/yugioh-c720d.appspot.com/o/fbe07d24-3b5b-4a32-af4e-828fc4853b02?alt=media&token=5f253bd6-89e6-4c5d-98da-303bda4f851f"
+                this.props.updateUser({ "imageURL": uploadUrl })
+                setTimeout(() => {
+                    this.props.updateUser({ "imageURL": output })
+                }, 10000)
+                // this.props.updateUser({ "imageURL": output })
+                // this.props.createUser(user)
+                await updateUser(this.props.user.username, { "imageURL": output })
+
+                // //create user info in firestore, update user object to contain displayName
+                //     await updateUserInfo(user)
+
+
+
                 this.setState({ image: uploadUrl });
+
+
+
+
 
             }
         } catch (e) {
@@ -104,26 +99,76 @@ export default class SignUpForm extends Component {
         blob.close();
         return await snapshot.ref.getDownloadURL();
     }
+
+
+    focusNextField = (key) => {
+        this.inputs[key].focus();
+    }
+    submitChanges = async (user) => {
+        try {
+            await updateUserInfo(user)
+            return "successfully created account"
+        } catch (error) {
+            return false
+        }
+    }
+    componentDidMount() {
+        // console.log("user beans", this.props.user)
+    }
+
+    reauthenticate = (currentPassword) => {
+        var user = firebase.auth().currentUser;
+        var cred = firebase.auth.EmailAuthProvider.credential(
+            user.email, currentPassword);
+        return user.reauthenticateWithCredential(cred);
+    }
+    changePassword = (currentPassword, newPassword) => {
+        this.reauthenticate(currentPassword).then(() => {
+            var user = firebase.auth().currentUser;
+            user.updatePassword(newPassword).then(() => {
+                console.log("Password updated!");
+            }).catch((error) => { console.log(error); });
+        }).catch((error) => { console.log(error); });
+    }
+    changeEmail = (currentPassword, newEmail) => {
+        this.reauthenticate(currentPassword).then(() => {
+            var user = firebase.auth().currentUser;
+            user.updateEmail(newEmail).then(() => {
+                console.log("Email updated!");
+            }).catch((error) => { console.log(error); });
+        }).catch((error) => { console.log(error); });
+    }
+
+
+
     render() {
         return (
             <TouchableWithoutFeedback
-                onPress={() => Keyboard.dismiss()}>
-
+                onPress={Keyboard.dismiss}>
                 <View style={styles.container} >
                     <GiftedForm
-                        scrollEnabled={true}
+                        scrollEnabled={false}
                         style={{
                             backgroundColor: "#FFF",
                         }}
                         formName='signupForm' // GiftedForm instances that use the same name will also share the same states
                         openModal={() => { }}
                         clearOnClose={false} // delete the values of the form when unmounted
-                        validators={signUpFormValidators}
+                        validators={submitChangesFormValidators}
                     >
-                        <Text style={styles.welcomeDuelist}>Welcome, duelist</Text>
                         <GiftedForm.SeparatorWidget />
                         <TouchableOpacity style={styles.avatarContainer} onPress={this._pickImage}>
-                            <Image style={styles.avatar} source={defaultAvatarImage} source={this.state.uploading ? { uri: "https://ro-echs.sourceinfosys.com/resources/res_internal/img/loader.gif" } : (this.state.image ? { uri: this.state.image } : defaultAvatarImage)} />
+                            <Image
+                                source={this.state.image ? { uri: this.state.image } : (this.props.user.imageURL ? { uri: this.props.user.imageURL } : defaultAvatarImage)}
+                                indicator={ProgressBar}
+                                indicatorProps={{
+                                    size: 80,
+                                    borderWidth: 0,
+                                    color: 'rgb(130, 69, 91)',
+                                    unfilledColor: 'rgba(200, 200, 200, 0.2)'
+                                }}
+                                imageStyle={styles.avatar}
+                                style={{ ...styles.avatar, borderColor: "transparent" }} />
                         </TouchableOpacity>
                         <GiftedForm.TextInputWidget
                             keyboardType="default"
@@ -133,6 +178,8 @@ export default class SignUpForm extends Component {
                             autoFocus={false}
                             blurOnSubmit={false}
                             // image={require('../../assets/user.png')}
+                            defaultValue={this.props.user.name}
+                            editable={false}
                             placeholder='Yugi Muto'
                             clearButtonMode='while-editing'
                             ref={input => {
@@ -148,6 +195,8 @@ export default class SignUpForm extends Component {
                             placeholder='DarkMagicianGirlFan21'
                             clearButtonMode='while-editing'
                             blurOnSubmit={false}
+                            defaultValue={this.props.user.username}
+                            editable={false}
                             onSubmitEditing={() => { this.focusNextField('three'); }}
                             ref={input => { this.inputs['two'] = input }}
                         />
@@ -159,16 +208,19 @@ export default class SignUpForm extends Component {
                             clearButtonMode='while-editing'
                             secureTextEntry={true}
                             returnKeyType="next"
+                            defaultValue={"******"}
+                            editable={false}
                             // image={require('../../assets/lock.png')}
                             blurOnSubmit={false}
                             onSubmitEditing={() => { this.focusNextField('four') }}
                             ref={input => { this.inputs['three'] = input; }}
                         />
-
                         <GiftedForm.TextInputWidget
                             name='emailAddress' // mandatory
                             title='Email address'
                             placeholder='yugi@gmail.com'
+                            defaultValue={this.props.user.email}
+                            editable={false}
                             keyboardType='email-address'
                             returnKeyType="done"
                             clearButtonMode='while-editing'
@@ -179,11 +231,12 @@ export default class SignUpForm extends Component {
                         <GiftedForm.SeparatorWidget />
                         <GiftedForm.ErrorsWidget />
                         <GiftedForm.SubmitWidget
-                            title={"Sign Up"}
+                            title={"Submit Changes"}
                             widgetStyles={{
                                 submitButton: styles.submitButton,
                                 textSubmitButton: styles.textSubmitButton
                             }}
+                            disabled={true}
                             onSubmit={async (isValid, values, validationResults, postSubmit = null, modalNavigator = null) => {
                                 if (isValid === true) {
                                     //prepare user object
@@ -191,21 +244,18 @@ export default class SignUpForm extends Component {
                                         "email": values.emailAddress,
                                         "name": values.fullName,
                                         "password": values.password,
-                                        "username": values.username,
-                                        "imageURL": this.state.image || ""
+                                        "username": values.username
                                     }
-
                                     //check if user email exists as authenticated user
-                                    const signedUp = await this.signUp(user)
+                                    const signedUp = await this.submitChanges(user)
                                     //if exists => popup saying "user exists with email. Please log in"
-                                    if (signedUp === false) {
+                                    if (signedUp == false) {
                                         postSubmit("Email already taken!")
                                     } else {
                                         postSubmit()
-                                        GiftedFormManager.reset('signupForm')
-                                        this.props.navigateToHomePage()
+                                        // this.props.navigateToHomePage()
                                         // this.props.dismissPopup()
-
+                                        GiftedFormManager.reset('signupForm')
                                     }
                                     //else => create new authenticated user in firebase, store user info in redux, segue to home screen
 
@@ -219,11 +269,6 @@ export default class SignUpForm extends Component {
                                 }
                             }
                             }
-                        />
-
-                        <GiftedForm.NoticeWidget
-                            title={'By signing up, you agree to the Terms of Service and Privacy Policity.'}
-                            style={{ color: "black" }}
                         />
                         <GiftedForm.HiddenWidget name='tos' value={true} />
                     </GiftedForm >
@@ -248,9 +293,9 @@ const styles = StyleSheet.create({
         padding: 15
     },
     avatar: {
-        width: 130,
-        height: 130,
-        borderRadius: 63,
+        width: 110,
+        height: 110,
+        borderRadius: 55,
         borderWidth: 2,
         borderColor: 'rgb(130, 69, 91)',
         marginBottom: 10,

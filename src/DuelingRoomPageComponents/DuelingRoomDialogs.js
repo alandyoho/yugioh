@@ -4,7 +4,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import { addCardToBoard } from "../../Firebase/FireMethods";
 import LifePointsCalculator from "../LifePointsCalculator"
-import FadeScaleImage from "../FadeScaleImage"
+import FadeScaleImage from "../ComplexComponents/FadeScaleImage"
 
 const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedPopupVisible, dismissCardPopup, cardOptionsPresented, fadeOutHand, board, addCardToBoard, cardOnFieldPressedPopupVisible, manageCardOnBoard, cardType, toggleExaminePopup, examinePopupVisible, graveyardPopupVisible, toggleGraveyardPopup, graveyard = [], manageCardInGraveyard, cardInGraveyardPressed, presentCardInGraveyardOptions, toggleCardInGraveyardOptions, toggleOpponentGraveyardPopup, requestingAccessToGraveyardPopupVisible, opponentGraveyard, extraDeck, extraDeckPopupVisible, toggleExtraDeckPopup, toggleCardInExtraDeckOptions, cardInExtraDeckPressed, manageCardInExtraDeck, hostLifePoints, guestLifePoints, hostLifePointsSelected, calculatorVisible, toggleLifePointsCalculator, returnNewLifePointVal, toggleMainDeckOptions, mainDeckOptionsVisible, drawCard, deck, deckPopupVisible, toggleDeckPopup, toggleCardInDeckOptions, manageCardInDeck, cardInDeckPressed, shuffleDeck, banishedZone, banishedZonePopupVisible, toggleBanishedZonePopup, toggleCardInBanishedZoneOptions, cardInBanishedZonePressed, manageCardInBanishedZone }) => {
     const size = Dimensions.get('window').width / 3

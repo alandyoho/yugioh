@@ -7,12 +7,14 @@ import { createUser } from "./actions"
 import PhotoReel from './PhotoReel';
 import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
 import { DuelingRoomSelectPage, DeckSelectPage, DeckSelectPopup, SettingsPopup } from "./HomePageComponents"
-import { updateSelectedDeck, updatePreferences } from "./actions"
+import { updateSelectedDeck, updatePreferences, updateUser, updateFriendsList, addFriendToList } from "./actions"
 import SideMenu from "react-native-side-menu"
 import CustomSideMenu from "./SideMenu"
 import { Audio } from 'expo-av';
-import FadeImage from "./FadeImage"
-
+import FadeImage from "./ComplexComponents/FadeImage"
+import * as Haptics from 'expo-haptics';
+import EditProfileForm from "./HomePageComponents/EditProfileForm"
+import FriendsPopup from "./HomePageComponents/FriendsPopup"
 
 class HomePage extends Component {
     constructor() {
@@ -25,16 +27,16 @@ class HomePage extends Component {
             duelingRoomSelectPageZPosition: 3,
             deckSelectPopupZPosition: 2,
             type: "",
-            settingsPopupVisible: false
+            settingsPopupVisible: false,
+            profilePopupVisible: false,
+            friendsPopupVisible: false
         }
         this.soundObject = new Audio.Sound();
     }
     async componentDidMount() {
-
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }
-
     }
     loadAndEnableAudio = async () => {
         try {
@@ -81,11 +83,26 @@ class HomePage extends Component {
             await this.stopAudio()
         }
     }
+    handleLongPress = (type) => {
+        Haptics.impactAsync("heavy")
+        if (type === "DeckConstructor") {
+            this.setState({ deckSelectPageVisible: true })
+        } else {
+            this.setState({ duelingRoomSelectPageVisible: true })
+        }
+    }
+    toggleFriendsPopup = () => {
+
+        this.setState({ friendsPopupVisible: !this.state.friendsPopupVisible })
+    }
+    toggleProfilePopup = () => {
+        this.setState({ profilePopupVisible: !this.state.profilePopupVisible })
+    }
     render() {
         const { user, navigation, updateSelectedDeck } = this.props
-        const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible } = this.state
+        const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible, friendsPopupVisible, profilePopupVisible } = this.state
         return (
-            <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} />}>
+            <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} toggleFriendsPopup={this.toggleFriendsPopup} toggleProfilePopup={this.toggleProfilePopup} user={this.props.user} />}>
                 <View style={styles.container}>
                     <PhotoReel />
                     <View style={{ height: 100, marginBottom: 25, width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
@@ -108,6 +125,7 @@ class HomePage extends Component {
                         }}
                         loading={false}
                         onPress={() => this.setState({ deckSelectPageVisible: true })}
+                        onLongPress={() => this.handleLongPress("DeckConstructor")}
                     />
                     <Button
                         title="Dueling Room"
@@ -126,6 +144,8 @@ class HomePage extends Component {
                         }}
                         loading={false}
                         onPress={() => this.setState({ duelingRoomSelectPageVisible: true })}
+                        onLongPress={() => this.handleLongPress("DuelingRoom")}
+
                     />
                     <Dialog
                         visible={deckSelectPageVisible}
@@ -145,7 +165,7 @@ class HomePage extends Component {
                     </Dialog>
                     <Dialog
                         visible={duelingRoomSelectPageVisible}
-                        width={0.85}
+                        width={0.90}
                         height={0.40}
 
                         dialogAnimation={new ScaleAnimation({
@@ -156,12 +176,13 @@ class HomePage extends Component {
                             this.setState({ duelingRoomSelectPageVisible: false });
                             this.resetState()
                         }}
+                        dialogStyle={{ width: Dimensions.get('window').width, heigth: Dimensions.get("window").height * 0.40, backgroundColor: "transparent", borderRadius: 5 }}
                     >
-                        <DialogContent style={{ flex: 1 }}>
-                            <Animated.View style={{ flex: 1, zIndex: this.state.duelingRoomSelectPageZPosition, opacity: this.state.duelingRoomSelectPageOpacity }}>
+                        <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-start", backgroundColor: "transparent" }}>
+                            <Animated.View style={{ flex: 1, zIndex: this.state.duelingRoomSelectPageZPosition, opacity: this.state.duelingRoomSelectPageOpacity, width: Dimensions.get('window').width * 0.90, height: Dimensions.get("window").height * 0.40, backgroundColor: "rgb(255, 253, 255)", borderRadius: 5 }}>
                                 <DuelingRoomSelectPage user={user} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} fadeOutDuelingRoomSelectPage={this.fadeOutDuelingRoomSelectPage} />
                             </Animated.View>
-                            <Animated.View style={{ position: "absolute", left: 20, right: 20, top: 20, bottom: 20, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity }}>
+                            <Animated.View style={{ flex: 1, zIndex: this.state.deckSelectPopupZPosition, opacity: this.state.deckSelectPopupOpacity, width: Dimensions.get('window').width * 0.90, height: Dimensions.get("window").height * 0.40, backgroundColor: "rgb(255, 253, 255)", borderRadius: 5, position: "absolute" }}>
                                 <DeckSelectPopup user={user} navigation={navigation} dismissDuelingRoomSelectPage={() => this.setState({ duelingRoomSelectPageVisible: false })} updateSelectedDeck={this.props.updateSelectedDeck} resetState={this.resetState} type={this.state.type} disableAudio={this.stopAudio} enableAudio={this.enableAudio} preferences={this.props.preferences} />
                             </Animated.View>
                         </DialogContent>
@@ -175,14 +196,51 @@ class HomePage extends Component {
                             initialValue: 0, // optional
                             useNativeDriver: true, // optional
                         })}
-                        onTouchOutside={() => {
-                            this.dismissSettingsPopup()
-                        }}
+                        onTouchOutside={this.dismissSettingsPopup}
                     >
                         <DialogContent style={{ flex: 1 }}>
                             <SettingsPopup updatePreferences={this.props.updatePreferences} preferences={this.props.preferences} loadAndEnableAudio={this.loadAndEnableAudio} />
                         </DialogContent>
                     </Dialog>
+                    <Dialog
+                        // visible={profilePopupVisible}
+                        visible={friendsPopupVisible}
+
+                        children={[]}
+                        onTouchOutside={this.toggleFriendsPopup}
+                        dialogAnimation={new ScaleAnimation({
+                            initialValue: 0, // optional
+                            useNativeDriver: true, // optional
+                        })}
+                        width={0.90}
+                        height={0.60}
+                        dialogStyle={{ width: Dimensions.get('window').width, heigth: Dimensions.get("window").height * 0.60, backgroundColor: "transparent", borderRadius: 5 }}
+                    >
+                        <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-start", backgroundColor: "transparent" }}>
+                            <View style={{ width: Dimensions.get('window').width * 0.90, heigth: Dimensions.get("window").height * 0.60, backgroundColor: "rgb(255, 253, 255)", borderRadius: 5 }}>
+                                <FriendsPopup user={this.props.user} friendsList={this.props.friendsList} updateFriendsList={this.props.updateFriendsList} addFriendToList={this.props.addFriendToList} />
+                            </View>
+                        </DialogContent>
+                    </Dialog>
+                    <Dialog
+                        // visible={profilePopupVisible}
+                        visible={profilePopupVisible}
+
+                        children={[]}
+                        onTouchOutside={this.toggleProfilePopup}
+                        dialogAnimation={new ScaleAnimation({
+                            initialValue: 0, // optional
+                            useNativeDriver: true, // optional
+                        })}
+                        width={0.90}
+                        height={0.60}
+                    // dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width * 0.80, height: Dimensions.get("window").height * 0.80 }}
+                    >
+                        <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "flex-start", backgroundColor: "white" }}>
+                            <EditProfileForm user={this.props.user} updateUser={this.props.updateUser} />
+                        </DialogContent>
+                    </Dialog>
+
                 </View>
             </SideMenu>
         )
@@ -209,13 +267,14 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { user, cards, preferences } = state
-    return { user, cards, preferences }
+    const { user, cards, preferences, friendsList } = state
+    return { user, cards, preferences, friendsList }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({
         createUser,
-        updateSelectedDeck, updatePreferences
+        updateSelectedDeck, updatePreferences,
+        updateUser, updateFriendsList, addFriendToList
     }, dispatch)
 );
 

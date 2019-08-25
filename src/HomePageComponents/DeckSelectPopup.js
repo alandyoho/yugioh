@@ -49,15 +49,12 @@ export default class DeckSelectPopup extends Component {
                 enableAudio: this.props.enableAudio
             })
         }
-
-
-
     }
 
     renderItem = ({ item }) => {
         return (
-            <TouchableOpacity style={[styles.listItem, { alignSelf: "flex-start", backgroundColor: 'white' }]} onPress={() => this.onPressItem(item)}>
-                <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{`${item}`}</Text>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => this.onPressItem(item)}>
+                <Text style={{ fontSize: 20, marginLeft: 20 }}>{item}</Text>
             </TouchableOpacity>
         )
     }
@@ -78,7 +75,7 @@ export default class DeckSelectPopup extends Component {
         return (
             <View style={styles.container}>
                 {this.state.decks.length ?
-                    <React.Fragment>
+                    <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: 30, alignSelf: "center" }}>Select Deck</Text>
                         <FlatList
                             data={decks}
@@ -86,7 +83,7 @@ export default class DeckSelectPopup extends Component {
                             keyExtractor={(item, index) => index.toString()}
                             ItemSeparatorComponent={this.FlatListItemSeparator}
                         />
-                    </React.Fragment>
+                    </View>
                     : <Text style={{ fontSize: 30, alignSelf: "center" }}>No Saved Decks!</Text>}
             </View>
         )
@@ -106,6 +103,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
+        borderRadius: 5,
         backgroundColor: '#FFF',
     },
     listItem: {
