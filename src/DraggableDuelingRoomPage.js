@@ -771,7 +771,7 @@ class DraggableDuelingRoomPage extends Component {
                         scrollEnabled={true}
                         style={{ position: "absolute", top: -120, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }] }} />
                     <View style={{ flex: 12 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-start", transform: [{ rotate: '180deg' }] }}>
-                        <DraggableOpponentBoard boardsRetrieved={boardsRetrieved} thatBanishedZone={thatBanishedZone} thatBoard={this.state[thatBoard]} thatGraveyard={thatGraveyard} />
+                        <DraggableOpponentBoard examineCard={this.examineCard} boardsRetrieved={boardsRetrieved} thatBanishedZone={thatBanishedZone} thatBoard={this.state[thatBoard]} thatGraveyard={thatGraveyard} />
                     </View>
 
                     <View style={{ flex: 20 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-end" }}>

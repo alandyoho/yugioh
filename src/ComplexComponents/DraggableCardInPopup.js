@@ -121,7 +121,7 @@ export default class DraggableCardInPopup extends Component {
             <Animated.View
                 {...this.panResponder.panHandlers}
                 style={[this.state.pan.getLayout(), { height: Dimensions.get("window").height * 0.20, flexDirection: "column", justifyContent: "flex-end", alignItems: "center", opacity: (this.props.dragBegin) ? (this.state.selectedCard ? this.state.opacity : 0) : (this.props.inDreamState ? 0 : this.state.opacity) }]}>
-                <TouchableOpacity onLongPress={this.examineCard} onPressOut={this.props.dismissExaminePopup} activeOpacity={1} style={{ flexDirection: "column", justifyContent: "flex-end", alignItems: "center", width: 150 * 0.65, height: 300 * 0.65 }}>
+                <TouchableOpacity onLongPress={this.examineCard} activeOpacity={1} style={{ flexDirection: "column", justifyContent: "flex-end", alignItems: "center", width: 150 * 0.65, height: 300 * 0.65 }}>
                     <FadeScaleImage source={{ uri: this.props.item.card_images[0].image_url_small }} resizeMode={"contain"} style={((this.props.dragBegin && this.state.selectedCard && this.props.inDreamState && !this.state.overReturnToHand) ? { width: 75 * 0.65, height: 150 * 0.65, alignSelf: "center", bottom: -10, zIndex: 500 } : { width: 150 * 0.65, height: 300 * 0.65, alignSelf: "center", bottom: -20 })} />
                 </TouchableOpacity>
             </Animated.View>
