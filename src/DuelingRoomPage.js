@@ -111,7 +111,6 @@ class DuelingRoomPage extends Component {
             })
     }
     presentCardOnBoardOptions = (cardInfo) => {
-
         if (cardInfo[0] == "linkZones") {
             //handle opponent pressing your cards
             if (this.state.linkZones[cardInfo[1]]["card"].user != this.props.user.username) {
@@ -135,11 +134,9 @@ class DuelingRoomPage extends Component {
 
     toggleCardInExtraDeckOptions = (cardType = { type: "" }) => {
         this.setState({ cardInExtraDeckPressed: !this.state.cardInExtraDeckPressed, cardType })
-
     }
     toggleCardInDeckOptions = (cardType = { type: "" }) => {
         this.setState({ cardInDeckPressed: !this.state.cardInDeckPressed, cardType })
-
     }
     toggleCardInBanishedZoneOptions = (cardType = { type: "" }) => {
         this.setState({ cardInBanishedZonePressed: !this.state.cardInBanishedZonePressed, cardType })

@@ -118,7 +118,6 @@ const alterLinkZone = async (obj) => {
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}`]: obj.updates })
 }
 const requestAccessToGraveyard = async (obj) => {
-    //
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board}.requestingAccessToGraveyard`]: { popupVisible: true, approved: false } });
 }
 const dismissRequestAccessToGraveyard = async (obj) => {

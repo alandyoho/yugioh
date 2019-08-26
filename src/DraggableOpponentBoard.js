@@ -9,7 +9,7 @@ class DraggableOpponentBoard extends PureComponent {
         this.props.examineCard(item)
     }
     render() {
-        const { boardsRetrieved, thatBanishedZone, thatBoard, thatGraveyard, examineCard } = this.props
+        const { boardsRetrieved, thatBanishedZone, thatBoard, thatGraveyard, examineCard, requestAccessToOpponentGraveyard } = this.props
         return (
             <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-end" }}>
                 {[1, 2, 3, 4, 5, 6].map(cardIndex => (
@@ -28,12 +28,12 @@ class DraggableOpponentBoard extends PureComponent {
                     <TouchableOpacity key={cardIndex} style={styles.viewStyles} onLongPress={() => this.examineCard(thatBoard.m1[cardIndex])} >
                         {boardsRetrieved === true && thatBoard.m1[cardIndex].exists && <FadeScaleImage item={thatBoard.m1[cardIndex]} source={{ uri: thatBoard.m1[cardIndex].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                     </TouchableOpacity>))}
-                <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} >
+                <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={requestAccessToOpponentGraveyard} >
                     {boardsRetrieved === true && thatGraveyard.length > 0 && <FadeScaleImage source={{ uri: thatGraveyard[thatGraveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} >
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} >
+                <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }}  >
                     <FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />
                     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} >
                     </View>
