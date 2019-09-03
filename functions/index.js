@@ -2,9 +2,13 @@ const functions = require('firebase-functions');
 const axios = require("axios")
 const { dummyData } = require("./dummyData")
 const admin = require("firebase-admin");
+const uuid = require("uuid")
+global.XMLHttpRequest = require("xhr2")
+
 admin.initializeApp({
     credential: admin.credential.cert(require("./admin-cert.json")),
-    databaseURL: "https://yugioh-c720d.firebaseio.com"
+    databaseURL: "https://yugioh-c720d.firebaseio.com",
+
 });
 
 exports.searchResults = functions.https.onRequest(async (request, response) => {
@@ -118,6 +122,55 @@ exports.generateThumbnail = functions.storage.object().onFinalize(async (object)
     const thumbFileUrl = thumbResult[0];
     const fileUrl = originalResult[0];
     // Add the URLs to the Database
-    await admin.database().ref('images').push({ path: fileUrl, thumbnail: thumbFileUrl });
+    // await admin.database().ref('images').push({ path: fileUrl, thumbnail: thumbFileUrl });
     return console.log('Thumbnail URLs saved to database.');
 });
+exports.observeCreate = functions.firestore.document('/cards/{id}').onCreate((snapshot, context) => {
+    const uploadData = snapshot.data()
+    const uri = uploadData.card_images[0].image_url
+    console.log(context.params);
+    console.log(context.params.id);
+
+    storeImage(uri)
+
+})
+const storeImage = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+            console.log(e);
+            reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', uri, true);
+        xhr.send(null);
+    });
+    const bucket = admin.storage().bucket("yugioh-c720d.appspot.com");
+
+    // const snapshot = await bucket.upload(blob);
+    bucket.upload(uri, function (err, file, apiResponse) {
+        // Your bucket now contains:
+        // - "image.png" (with the contents of `/local/path/image.png')
+        console.log("in the bucket")
+        // `file` is an instance of a File object that refers to your new file.
+    });
+    // bucket.upload(blob, function (err, file, apiResponse) {
+    //     // Your bucket now contains:
+    //     // - "image.png" (with the contents of `/local/path/image.png')
+
+    //     // `file` is an instance of a File object that refers to your new file.
+    // });
+
+    // bucket.upload(uri, function (err, file, apiResponse) {
+    //     // Your bucket now contains:
+    //     // - "image.png" (with the contents of `/local/path/image.png')
+    //     console.log("in the bucket")
+    //     // `file` is an instance of a File object that refers to your new file.
+    // });
+
+    // const downloadUrl = await snapshot.ref.getDownloadURL();
+    // console.log("asdfasdf", downloadUrl)
+}
