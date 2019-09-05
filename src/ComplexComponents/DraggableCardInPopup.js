@@ -24,12 +24,12 @@ export default class DraggableCardInPopup extends Component {
                 this.setState({ selectedCard: true })
             },
             onMoveShouldSetPanResponder: (evt, gestureState) => {
-                return !(gestureState.dx < 2 && gestureState.dy < 2 && Math.abs(gestureState.vx) < 5)
+                // return !(gestureState.dx < 2 && gestureState.dy < 2 && Math.abs(gestureState.vx) < 5)
+                return Math.abs(gestureState.dy) > 50
             },
             onPanResponderMove: (evt, gestureState) => {
                 const closestSpot = this.closestSpot(gestureState)
                 if (closestSpot) {
-                    console.log("closest spot!", closestSpot)
                     if (closestSpot.coords.y < this.state.popupZoneHeight * 0.40) {
                         this.props.dispelInfiniteTsukuyomi()
                         this.props.highlightClosestZone(closestSpot.location)

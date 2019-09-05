@@ -192,6 +192,7 @@ class DeckConstructorPage extends Component {
 
     refreshCards = async () => {
         const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
+        console.log("mainDeck", mainDeck, "extraDeck", extraDeck)
         const deck = mainDeck.sort((a, b) => {
             if (a.name < b.name) return -1;
             else if (a.name > b.name) return 1;

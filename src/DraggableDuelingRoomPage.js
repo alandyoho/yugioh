@@ -55,7 +55,6 @@ class DraggableDuelingRoomPage extends Component {
     }
     extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
     async componentDidMount() {
-        console.log(this.extraDeckTypes)
         const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png"), require("../assets/background-7.png"), , require("../assets/background-8.png"), require("../assets/background-9.png")]
         const randomNum = this.getRandomInt()
         this.setState({ backgroundImageUrl: backgroundImages[randomNum], waitingForOpponentPopupVisible: true })
@@ -78,13 +77,15 @@ class DraggableDuelingRoomPage extends Component {
                     const { guestBoard, hostBoard, opponent, host, linkZones } = doc.data()
                     this.setState({ guestBoard, hostBoard, opponent, host, linkZones, boardsRetrieved: true })
 
-                    if (this.state.initializeNewGame) {
+                    if (this.state.initializeNewGame && opponent) {
                         const opponentData = await retrieveDeckInfo(host === this.props.user.username ? opponent : host)
                         this.setState({ initializeNewGame: false, opponentData })
-
                         this.initialDraw()
-                        this.setState({ initializeNewGame: false })
                     }
+                } else {
+                    console.log("time to leave duel")
+                    this.props.navigation.navigate("HomePage")
+
                 }
             })
     }
@@ -113,7 +114,6 @@ class DraggableDuelingRoomPage extends Component {
         this.setState({ popupZoneCoords: zones })
     }
     clearPopupZoneBackgrounds = () => {
-
         this[`_SendToBanishedZone0`].setNativeProps({
             backgroundColor: "transparent"
         });
@@ -123,8 +123,6 @@ class DraggableDuelingRoomPage extends Component {
         this[`_MainDeckView0`].setNativeProps({
             backgroundColor: "transparent"
         });
-
-
     }
     storeZoneLocations = () => {
         console.log("storeZoneLocations triggered")
@@ -140,37 +138,27 @@ class DraggableDuelingRoomPage extends Component {
         this[`_cancel0`].measure((x, y, width, height, pageX, pageY) => {
             zones.push({ location: ["cancel", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
-
         this[`_banishedZone0`].measure((x, y, width, height, pageX, pageY) => {
             zones.push({ location: ["banishedZone", 0], coords: { x: pageX, y: pageY + height } })
         })
         this[`_graveyard0`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["graveyard", 0], coords: { x: pageX, y: pageY + height } })
         })
-
         this[`_st6`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["st", 6], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
-
         this[`_mainDeck0`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["mainDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
         this[`_extraDeck0`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["extraDeck", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
         this[`_linkZone0`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["linkZone", 0], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
         this[`_linkZone1`].measure((x, y, width, height, pageX, pageY) => {
-
             zones.push({ location: ["linkZone", 1], coords: { x: pageX + width / 2, y: pageY + height / 2 } })
         })
-
         this.setState({ coords: zones })
     }
     toggleHandZone = () => {
@@ -257,6 +245,28 @@ class DraggableDuelingRoomPage extends Component {
         })
     }
     manageCardInPopup = async (startLocation, endLocation, card) => {
+        let { thisBoard, thatBoard } = this.state
+        console.log(card)
+        let boardCopy = { ...this.state[thisBoard] }
+
+        let startBoardCopy;
+        let endBoardCopy;
+        let startBoard;
+        let endBoard;
+        if (this.state[thisBoard].requestingAccessToGraveyard.approved) {
+            startBoardCopy = { ...this.state[thatBoard] }
+            endBoardCopy = { ...this.state[thisBoard] }
+            startBoard = thatBoard
+            endBoard = thisBoard
+        } else {
+            startBoardCopy = { ...this.state[thisBoard] }
+            endBoardCopy = startBoardCopy
+            startBoard = thisBoard
+            endBoard = startBoard
+        }
+
+
+
         let types = { "SendToBanishedZone": "banishedZone", "SendToGraveyard": "graveyard", "MainDeckView": "mainDeck", "ExtraDeckView": "extraDeck" }
         let [startCardZone, startCardIndex] = startLocation
         let [endCardZone, endCardIndex] = endLocation
@@ -266,67 +276,58 @@ class DraggableDuelingRoomPage extends Component {
             return this.toggleExtraDeckPopup()
         }
         if (startCardZone === endCardZone) return
+        if (this.props.user.username !== card.user && (endCardZone === "graveyard" || endCardZone === "mainDeck" || endCardZone === "extraDeck" || endCardZone === "banishedZone")) {
+            return this.toggleAppropriateZone(startCardZone)
+        }
         if (startCardZone in types) {
             if (types[startCardZone] === endCardZone) {
-                this.toggleAppropriateZone(startCardZone)
-                return
+                return this.toggleAppropriateZone(startCardZone)
             }
         }
         if (endCardZone in types) {
             if (endCardZone === types[endCardZone]) {
-                this.toggleAppropriateZone(startCardZone)
-                return
+                return this.toggleAppropriateZone(startCardZone)
             }
         }
-
         //attempt to escape fuction if end card zone is invalid 
         if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
             this.toggleAppropriateZone(startCardZone)
             return console.log("bad request!")
         }
-        let { thisBoard, thatBoard } = this.state
-        console.log(card)
-        let boardCopy;
-        let properBoard;
-        if (this.state[thisBoard].requestingAccessToGraveyard.approved) {
-            boardCopy = { ...this.state[thatBoard] }
-            properBoard = thatBoard
-        } else {
-            boardCopy = { ...this.state[thisBoard] }
-            properBoard = thisBoard
-        }
+
         if (startCardZone === "MainDeckView") {
             let filteredDeck = [...this.state.mainDeck]
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === card.id), 1)
             this.setState({ mainDeck: filteredDeck })
         } else if (startCardZone === "SendToGraveyard") {
-            let graveyard = boardCopy["graveyard"]
+            let graveyard = startBoardCopy["graveyard"]
             graveyard.splice(graveyard.findIndex(e => e.id === card.id), 1);
-            await alterBoard({ location: [properBoard, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
+            await alterBoard({ location: [startBoard, "graveyard"], zone: graveyard, hostUsername: this.state.hostedBy })
         } else if (startCardZone === "SendToBanishedZone") {
-            let banishedZone = boardCopy["banishedZone"]
+            let banishedZone = startBoardCopy["banishedZone"]
             banishedZone.splice(banishedZone.findIndex(e => e.id === card.id), 1);
-            await alterBoard({ location: [thisBoard, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
+            await alterBoard({ location: [startBoard, "banishedZone"], zone: banishedZone, hostUsername: this.state.hostedBy })
         } else if (startCardZone === "ExtraDeckView") {
             let filteredDeck = [...this.state.extraDeck]
             filteredDeck.splice(filteredDeck.findIndex(e => e.id === card.id), 1)
             this.setState({ extraDeck: filteredDeck })
         }
         if (endCardZone === "SendToBanishedZone" || endCardZone === "SendToGraveyard") {
-            boardCopy[types[endCardZone]] = [...boardCopy[types[endCardZone]], card] //update Locally
-            await alterBoard({ location: [properBoard, types[endCardZone]], zone: boardCopy[types[endCardZone]], hostUsername: this.state.hostedBy })
+            startBoardCopy[types[endCardZone]] = [...startBoardCopy[types[endCardZone]], card] //update Locally
+            await alterBoard({ location: [startBoard, types[endCardZone]], zone: startBoardCopy[types[endCardZone]], hostUsername: this.state.hostedBy })
         } else if (endCardZone === "m1" || endCardZone === "st") {
+            console.log("end card zone === m1 or st")
             card.exists = true
-            if (boardCopy[endCardZone][endCardIndex].exists) {
-                let existingCard = boardCopy[endCardZone][endCardIndex]
+            if (endBoardCopy[endCardZone][endCardIndex].exists) {
+                let existingCard = endBoardCopy[endCardZone][endCardIndex]
                 existingCard.exists = false
                 existingCard.set = false
                 existingCard.defensePosition = false
-                boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
-                await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                endBoardCopy["graveyard"] = [...endBoardCopy["graveyard"], existingCard]
+                await alterBoard({ location: [endBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: endBoardCopy["graveyard"] })
             }
-            boardCopy[endCardZone][endCardIndex] = card
-            await alterBoard({ location: [thisBoard, endCardZone], hostUsername: this.state.hostedBy, zone: boardCopy[endCardZone] })
+            endBoardCopy[endCardZone][endCardIndex] = card
+            await alterBoard({ location: [endBoard, endCardZone], hostUsername: this.state.hostedBy, zone: endBoardCopy[endCardZone] })
             this.toggleAppropriateZone(startCardZone)
         } else if (endCardZone === "graveyard" || endCardZone === "banishedZone" || endCardZone === "cancel") {
             card.exists = false
@@ -336,11 +337,12 @@ class DraggableDuelingRoomPage extends Component {
             if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
-                boardCopy[endCardZone] = [...boardCopy[endCardZone], card] //update Locally
-                await alterBoard({ location: [thisBoard, endCardZone], zone: boardCopy[endCardZone], hostUsername: this.state.hostedBy })
+                endBoardCopy[endCardZone] = [...endBoardCopy[endCardZone], card] //update Locally
+                await alterBoard({ location: [endBoard, endCardZone], zone: endBoardCopy[endCardZone], hostUsername: this.state.hostedBy })
             }
             this.toggleAppropriateZone(startCardZone)
         } else if (endCardZone === "MainDeckView" || endCardZone === "mainDeck") {
+
             if (this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
@@ -361,8 +363,8 @@ class DraggableDuelingRoomPage extends Component {
                 existingCard.exists = false
                 existingCard.set = false
                 existingCard.defensePosition = false
-                boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
-                await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                endBoardCopy["graveyard"] = [...endBoardCopy["graveyard"], existingCard]
+                await alterBoard({ location: [endBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: endBoardCopy["graveyard"] })
             }
             let linkZoneCopy = [...this.state.linkZones]
             card.exists = true
@@ -370,7 +372,7 @@ class DraggableDuelingRoomPage extends Component {
             await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
             this.toggleAppropriateZone(startCardZone)
         }
-        this.setState({ [properBoard]: boardCopy })
+        this.setState({ [endBoard]: boardCopy })
         if (startCardZone === "MainDeckView") {
             if (!this.state.mainDeck.length) this.toggleMainDeckPopup()
         } else if (startCardZone === "SendToGraveyard") {
@@ -391,11 +393,12 @@ class DraggableDuelingRoomPage extends Component {
         }
     }
     manageCardOnField = async (startLocation, endLocation, card) => {
-        const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
         let { thisBoard } = this.state
         let [startCardZone, startCardIndex] = startLocation
         let [endCardZone, endCardIndex] = endLocation
+
         let boardCopy = { ...this.state[thisBoard] }
+
 
         console.log(startCardZone, "=>", endCardZone)
         if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
@@ -403,6 +406,10 @@ class DraggableDuelingRoomPage extends Component {
             return console.log("bad request!")
         }
         if ((endCardZone === "mainDeck" || endCardZone === "extraDeck") && startCardZone !== "linkZone") {
+            if (card.user !== this.props.user.username) {
+                //prevent user from putting opponent's cards in his own deck
+                return
+            }
             card.exists = false
             card.set = false
             card.defensePosition = false
@@ -410,6 +417,12 @@ class DraggableDuelingRoomPage extends Component {
             boardCopy[startCardZone][startCardIndex] = { card: { defenseMode: false, exists: false } }
             return await alterBoard({ location: [thisBoard, startCardZone], hostUsername: this.state.hostedBy, zone: boardCopy[startCardZone] })
         } else if ((endCardZone === "mainDeck" || endCardZone === "extraDeck") && startCardZone === "linkZone") {
+            if (card.user !== this.props.user.username) {
+                //prevent user from putting opponent's cards in his own deck
+                return
+            }
+
+
             let linkZones = [...this.state.linkZones]
             card.exists = false
             card.set = false
@@ -420,6 +433,10 @@ class DraggableDuelingRoomPage extends Component {
             card.exists = true
             return await alterLinkZone({ location: ["linkZones"], updates: linkZones, hostUsername: this.state.hostedBy })
         } else if ((endCardZone === "graveyard" || endCardZone === "banishedZone" || endCardZone === "cancel") && startCardZone !== "linkZone") {
+            if (card.user !== this.props.user.username) {
+                //prevent user from putting opponent's cards in his own deck
+                return
+            }
             card.exists = false
             card.set = false
             card.defensePosition = false
@@ -431,6 +448,10 @@ class DraggableDuelingRoomPage extends Component {
                 boardCopy[endCardZone].push(card)
             }
         } else if ((endCardZone === "graveyard" || endCardZone === "banishedZone" || endCardZone === "cancel") && startCardZone === "linkZone") {
+            if (card.user !== this.props.user.username) {
+                //prevent user from putting opponent's cards in his own deck
+                return
+            }
             card.exists = false
             card.set = false
             card.defensePosition = false
@@ -573,9 +594,7 @@ class DraggableDuelingRoomPage extends Component {
             st: ["Cancel", "Activate", "Set"],
         }
         if (location[0] === "graveyard" || location[0] === "banishedZone" || location[0] === "mainDeck") {
-
             const type = `Send To ${location[0].charAt(0).toUpperCase() + location[0].slice(1)}`
-
             this.manageCardInHand(type, location, card)
         } else if (location[0] === "extraDeck") {
 
@@ -633,10 +652,11 @@ class DraggableDuelingRoomPage extends Component {
         this.setState({ mainDeckPopupVisible: false })
     }
     toggleGraveyardPopup = async () => {
-        this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
         if (this.state[this.state.thisBoard].requestingAccessToGraveyard.approved) {
             await this.dismissRequestAccessToGraveyard()
             this.setState({ graveyardPopupVisible: false })
+        } else {
+            this.setState({ graveyardPopupVisible: !this.state.graveyardPopupVisible })
         }
     }
     millCard = async () => {
@@ -734,19 +754,11 @@ class DraggableDuelingRoomPage extends Component {
             if (this.props.preferences.musicEnabled) {
                 await enableAudio()
             }
-
         } catch (error) {
             console.log(error)
         }
         this.props.navigation.navigate("HomePage")
     }
-    freezeHand = () => {
-        this["hand"].setNativeProps({ scrollEnabled: false })
-    }
-    unFreezeHand = () => {
-        this["hand"].setNativeProps({ scrollEnabled: true })
-    }
-
     requestAccessToOpponentGraveyard = async () => {
         this.setState({ requestAccessToOpponentGraveyardPopupVisible: !this.state.requestAccessToOpponentGraveyardPopupVisible })
         await requestAccessToGraveyard({ hostUsername: this.state.hostedBy, board: this.state.thatBoard })
@@ -765,9 +777,7 @@ class DraggableDuelingRoomPage extends Component {
         const thatHandLength = boardsRetrieved && Array(thatHand.length).fill("")
 
         const draggableCardOnFieldProps = { manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
-        const size = Dimensions.get('window').width / 3
         const HALFWIDTH = Dimensions.get("window").width / 2
-
         return (
             <SideMenu openMenuOffset={HALFWIDTH} menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={{ flex: 1, backgroundColor: "#FFF" }}>
@@ -784,7 +794,6 @@ class DraggableDuelingRoomPage extends Component {
                     <View style={{ flex: 12 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-start", transform: [{ rotate: '180deg' }] }}>
                         <DraggableOpponentBoard examineCard={this.examineCard} boardsRetrieved={boardsRetrieved} thatBanishedZone={thatBanishedZone} thatBoard={this.state[thatBoard]} thatGraveyard={thatGraveyard} requestAccessToOpponentGraveyard={this.requestAccessToOpponentGraveyard} />
                     </View>
-
                     <View style={{ flex: 20 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-end" }}>
                         {[1, 2].map(cardIndex => (
                             <View key={cardIndex} style={{ ...styles.viewStyles, borderColor: "transparent" }}>
@@ -793,6 +802,7 @@ class DraggableDuelingRoomPage extends Component {
                         <View key={0} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_linkZone0`] = view }}>
                             {boardsRetrieved === true && this.state.linkZones[0].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["linkZone", 0]} item={this.state.linkZones[0]} user={this.props.user.username} host={this.state.host} />}
                         </View>
+
                         <View style={{ ...styles.viewStyles, borderColor: "transparent" }}>
                         </View>
                         <View key={1} style={{ ...styles.viewStyles }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_linkZone1`] = view }}>
@@ -895,10 +905,9 @@ class DraggableDuelingRoomPage extends Component {
                         <FlatList
                             data={thisHand}
                             ref={list => { this["hand"] = list; }}
-                            renderItem={({ item }) => <DraggableCardInHand freezeHand={this.freezeHand} unFreezeHand={this.unFreezeHand} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                            renderItem={({ item }) => <DraggableCardInHand item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                             keyExtractor={(item, index) => index.toString()}
                             horizontal={true}
-                            // scrollEnabled={!dragBegin}
                             style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: this.state.handZoneHeight, zIndex: 2 }}
                         />
                         <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 150, zIndex: 1, width: "100%" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_cancel0`] = view; }}>
@@ -971,7 +980,7 @@ class DraggableDuelingRoomPage extends Component {
                         </DialogContent>
                     </Dialog>
                     <Dialog
-                        visible={(boardsRetrieved && this.state[thisBoard].requestingAccessToGraveyard.approved) || graveyardPopupVisible}
+                        visible={graveyardPopupVisible}
                         rounded={false}
                         children={[]}
                         onTouchOutside={this.toggleGraveyardPopup}
@@ -1014,6 +1023,55 @@ class DraggableDuelingRoomPage extends Component {
                             </View>
                         </DialogContent>
                     </Dialog>
+
+
+
+                    <Dialog
+                        visible={(boardsRetrieved && this.state[thisBoard].requestingAccessToGraveyard.approved)}
+                        rounded={false}
+                        children={[]}
+                        onTouchOutside={this.toggleGraveyardPopup}
+                        dialogAnimation={new SlideAnimation({
+                            slideFrom: 'top',
+                            useNativeDriver: true
+                        })}
+                        overlayBackgroundColor={this.state.overlayBackgroundColor}
+                        overlayOpacity={this.state.popupOverlayOpacity}
+
+                        top={0}
+                        bottom={Dimensions.get("window").height * 0.10}
+                        width={1.0}
+                        height={0.9}
+                        dialogStyle={{ backgroundColor: "transparent", width: Dimensions.get("window").width, height: this.state.inDreamState ? Dimensions.get("window").height : Dimensions.get("window").height * 0.50, position: "absolute", top: 0 }}
+                    >
+                        <DialogContent style={{ width: Dimensions.get("window").width, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "transparent", height: Dimensions.get("window").height * 0.50, zIndex: 31 }}>
+                            <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
+                                <FlatList
+                                    data={(boardsRetrieved && this.state[thisBoard].requestingAccessToGraveyard.approved) && thatGraveyard}
+                                    renderItem={({ item }) => <DraggableCardInPopup location={"SendToGraveyard"} inDreamState={this.state.inDreamState} toggleGraveyardPopup={this.toggleGraveyardPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
+                                    contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
+                                    horizontal={true}
+                                />
+                            </View>
+                            <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
+                                <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
+                                    <Text style={{ color: this.state.popupFontColor }}>Send to Banished Zone</Text>
+                                </View>
+                                <View style={{ height: 0, width: 0 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_MainDeckView0`] = view; }}>
+                                </View>
+                                <View style={{ height: Dimensions.get("window").height * 0.40, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderWidth: 1, borderColor: "transparent", borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToGraveyard0`] = view; }}>
+
+                                </View>
+
+
+                            </View>
+                        </DialogContent>
+                    </Dialog>
+
+
+
 
                     <Dialog
                         visible={banishedZonePopupVisible}

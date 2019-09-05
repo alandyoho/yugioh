@@ -12,15 +12,17 @@ export default class DraggableCardInHand extends Component {
             overReturnToHand: false  //Step 1
         };
         this.panResponder = PanResponder.create({    //Step 2
-            onStartShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponder: (evt, g) => {
+                return true
+            },
             onPanResponderTerminationRequest: () => false,
             onPanResponderGrant: (evt, gestureState) => {
-                this.props.freezeHand()
                 this.props.toggleHandZone()
                 this.setState({ selectedCard: true })
             },
             onMoveShouldSetPanResponder: (evt, gestureState) => {
-                return !(gestureState.dx < 2 && gestureState.dy < 2 && Math.abs(gestureState.vx) < 5)
+                // return !(gestureState.dx < 2 && gestureState.dy < 2 && Math.abs(gestureState.vx) < 5)
+                return Math.abs(gestureState.dy) > 50
             },
             onPanResponderMove: (evt, gestureState) => {
                 // do whatever you need here
@@ -45,7 +47,6 @@ export default class DraggableCardInHand extends Component {
             }
             ,
             onPanResponderRelease: (evt, gestureState) => {
-                this.props.unFreezeHand()
                 this.props.toggleHandZone()
                 this.props.clearZoneBackgrounds()
                 Animated.spring(            //Step 1

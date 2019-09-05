@@ -1,6 +1,7 @@
 import { firestore, firebaseApp, auth, functions } from "./Fire"
 import firebase from 'firebase';
 import NumericInput from 'react-native-numeric-input'
+import uuid from 'uuid';
 
 const updateLifePointsField = (val) => {
 
@@ -144,6 +145,18 @@ const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 
     //else add card to deck model and set quantity property to 1
+    console.log("beans, toast", obj)
+    const cardRef = firestore.collection('cards').doc(obj.card.id)
+    cardRef.get().then((docSnapshot) => {
+        if (!docSnapshot.exists) {
+            console.log("card doesn't exist")
+            cardRef.set(obj.card)
+        }
+    });
+
+
+
+
 
     const extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
 
@@ -162,6 +175,8 @@ const addCardsToDeck = async (obj) => {
             }
         }
         if (filt.length && filt[0].quantity <= maxQuant) {
+            console.log("old card", filt[0])
+
             if (filt[0].quantity === maxQuant) return "max quantity reached"
             // const quant = filt[0].quantity
             firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
@@ -174,6 +189,7 @@ const addCardsToDeck = async (obj) => {
         } else {
             obj.card.set = false
             obj.card.quantity = 1
+            console.log("new card", obj.card)
             return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "extraDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
             })
@@ -213,6 +229,7 @@ const addCardsToDeck = async (obj) => {
     }
 }
 
+
 const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
@@ -234,6 +251,9 @@ const joinDuel = (obj) => {
 const leaveDuel = async (obj) => {
     const username = obj[0]
     const hostedBy = obj[1]
+    if (obj.length > 2) {
+        return firestore.collection("users").doc(username).set({ hostedBy: "", hosting: false }, { merge: true })
+    }
     if (username == hostedBy) {
         //request is being made by room host
         //delete room from database

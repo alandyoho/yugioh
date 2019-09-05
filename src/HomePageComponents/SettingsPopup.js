@@ -91,7 +91,7 @@ export default class SettingsPopup extends Component {
                     <ToggleSwitch
                         isOn={this.state.dragAndDropEnabled}
                         onColor='green'
-                        offColor='red'
+                        offColor='#808080'
                         labelStyle={{ color: 'black', fontWeight: '900' }}
                         size='small'
                         onToggle={(isOn) => this.updateDragAndDropEnabled(isOn)}

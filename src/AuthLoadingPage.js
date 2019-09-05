@@ -55,25 +55,40 @@ class AuthLoadingScreen extends Component {
                 if (user && user.displayName) {
                     try {
                         const userFromDB = await retrieveDeckInfo(user.displayName)
+
                         this.props.createUser(userFromDB)
+
+
                         const preferences = await this._retrieveData()
+
+
                         this.props.updatePreferences(preferences)
 
+
+
                         let cardImgs = []
-                        // for (let i = 0; i < userFromDB.decks.length; i++) {
-                        //     const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
-                        //     for (let j = 0; j < mainDeck.length; j++) {
-                        //         const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
-                        //         cardImgs.push(cardImg)
-                        //     }
-                        // }
+                        for (let i = 0; i < userFromDB.decks.length; i++) {
+                            const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
+                            for (let j = 0; j < mainDeck.length; j++) {
+                                const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
+                                cardImgs.push(cardImg)
+                            }
+                        }
                         await this._loadAssetsAsync(cardImgs)
+
+
                         this.props.navigation.navigate("App")
+
+
                         this.props.updateDeckList(userFromDB.decks)
+
+
                     } catch (err) {
+                        console.log("beans!")
                         console.error(err)
                     }
                 } else {
+
                     await this._loadAssetsAsync()
                     this.props.navigation.navigate("Auth")
                 }
@@ -131,5 +146,8 @@ const mapDispatchToProps = dispatch => (
         createUser, updateDeckList, updatePreferences
     }, dispatch)
 );
+
+
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuthLoadingScreen);

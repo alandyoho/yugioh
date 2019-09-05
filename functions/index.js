@@ -15,11 +15,11 @@ exports.searchResults = functions.https.onRequest(async (request, response) => {
     const cardType = request.body.data.type
 
     const cardParser = (cardType) => {
-        if (cardType == 'Open') {
+        if (cardType == 'monsters') {
             return ``
-        } else if (cardType == 'In Progress') {
+        } else if (cardType == 'spells') {
             return `type=spell%20card`
-        } else if (cardType == "Complete") {
+        } else if (cardType == "traps") {
             return `type=trap%20card`
         }
     }

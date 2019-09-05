@@ -34,6 +34,8 @@ class HomePage extends Component {
         this.soundObject = new Audio.Sound();
     }
     async componentDidMount() {
+        console.log("(7)")
+
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }

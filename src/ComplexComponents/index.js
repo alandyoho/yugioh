@@ -8,4 +8,5 @@ import FadeScaleText from "./FadeScaleText"
 import SwipeableRow from "./SwipeableComponent"
 import MultiSwitch from "./rn-slider-switch"
 import RequestAccessToOpponentGraveyardPopup from "./RequestAccessToOpponentGraveyardPopup"
-export { CustomText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, FadeImage, FadeScaleImage, FadeScaleText, SwipeableRow, MultiSwitch, RequestAccessToOpponentGraveyardPopup }
+import ShakingImage from "./ShakingImage"
+export { ShakingImage, CustomText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, FadeImage, FadeScaleImage, FadeScaleText, SwipeableRow, MultiSwitch, RequestAccessToOpponentGraveyardPopup }
