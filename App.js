@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { LogInSignUpPage, HomePage, DeckConstructorPage, DuelingRoomPage } from "./src"
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
+
 import userReducer from './src/reducer';
 import { Platform } from 'react-native'
 import AuthLoadingScreen from "./src/AuthLoadingPage"
@@ -13,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MultiBar, MultiBarToggle } from 'react-native-multibar';
 import MainDeckDeckConstructor from "./src/MainDeckDeckConstructor"
 import ExtraDeckDeckConstructor from "./src/ExtraDeckDeckConstructor"
+import * as FileSystem from 'expo-file-system';
 
 const DeckConstructorPageTabsNavigator = createBottomTabNavigator({
   MainDeckDeckConstructor: {
@@ -189,7 +191,12 @@ export default class App extends Component {
   componentDidMount() {
     StatusBar.setHidden(true);
 
+
   }
+
+
+
+
   render() {
     return (
       <Provider store={store}>

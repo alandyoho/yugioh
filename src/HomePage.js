@@ -34,7 +34,8 @@ class HomePage extends Component {
         this.soundObject = new Audio.Sound();
     }
     async componentDidMount() {
-        console.log("(7)")
+        console.log("(7)", this.props.storedCards)
+        //now we have the cards in redux, all we need to do, when rendering image, check if exists in redux, if it does, render from file system, otherwise, render from card's url
 
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
@@ -269,8 +270,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { user, cards, preferences, friendsList } = state
-    return { user, cards, preferences, friendsList }
+    const { user, cards, preferences, friendsList, storedCards } = state
+    return { user, cards, preferences, friendsList, storedCards }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({

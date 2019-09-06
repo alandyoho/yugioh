@@ -32,3 +32,7 @@ export const addFriendToList = friend => ({
     type: "ADD_FRIEND_TO_LIST",
     friend
 })
+export const updateStoredCardsList = storedCards => ({
+    type: "UPDATE_STORED_CARDS_LIST",
+    storedCards
+})
