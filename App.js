@@ -104,11 +104,14 @@ const DeckConstructorPageTabsNavigator = createBottomTabNavigator({
     initialRouteName: "MainDeckDeckConstructor",
     tabBarComponent: MultiBar,
     tabBarOptions: {
-      showLabel: false,
-      activeTintColor: '#F8F8F8',
-      inactiveTintColor: '#586589',
+      showLabel: true,
+      // activeTintColor: '#F8F8F8',
+      // activeBackgroundColor: "#586589",
+      // activeBackgroundColor: "blue",
+      // inactiveBackgroundColor: "#F8F8F8",
+      // inactiveTintColor: '#586589',
       style: {
-        backgroundColor: '#171F33'
+        backgroundColor: 'transparent'
       },
       tabStyle: {
 

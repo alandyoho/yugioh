@@ -1,7 +1,8 @@
-import { firestore, firebaseApp, auth, functions } from "./Fire"
+import { firestore, firebaseApp, auth, functions, storage } from "./Fire"
 import firebase from 'firebase';
 import NumericInput from 'react-native-numeric-input'
 import uuid from 'uuid';
+
 
 const updateLifePointsField = (val) => {
 
@@ -140,19 +141,58 @@ const doubleAlterBoard = async (obj) => {
 // const manageCardOnBoard = async (obj) => {
 //     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.cardInfo[0]}.${obj.cardInfo[1]}`]: obj.zone })
 // }
+const uploadImageAsync = async (imageUrl, id) => {
+    console.log("uploadURL, beans", imageUrl, id)
 
+    const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+            console.log(e);
+            reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', imageUrl, true);
+        xhr.send(null);
+    });
+    const ref = storage
+        .ref()
+        .child(id);
+    const snapshot = await ref.put(blob);
+    blob.close();
+    return await snapshot.ref.getDownloadURL();
+}
 const addCardsToDeck = async (obj) => {
     //check if card exists in "deck" model
     //if exists, increase quantity property by one 
     //else add card to deck model and set quantity property to 1
     console.log("beans, toast", obj)
     const cardRef = firestore.collection('cards').doc(obj.card.id)
-    cardRef.get().then((docSnapshot) => {
+    let oldImgs = obj.card.card_images[0]
+    let cardImgUrlSmall;
+    let cardImgUrl;
+    await cardRef.get().then(async (docSnapshot) => {
         if (!docSnapshot.exists) {
             console.log("card doesn't exist")
+
+            const uploadURL = await uploadImageAsync(oldImgs['image_url'], oldImgs.id)
+            const uploadURLSmall = await uploadImageAsync(oldImgs['image_url_small'], `${oldImgs.id}_small`)
+            obj.card.card_images[0].image_url = uploadURL
+            obj.card.card_images[0].image_url_small = uploadURLSmall
+            cardImgUrl = uploadURL
+            cardImgUrlSmall = uploadURLSmall
+
             cardRef.set(obj.card)
+        } else {
+            let storedCard = docSnapshot.data()
+
+            cardImgUrlSmall = storedCard.card_images[0].image_url_small
+            cardImgUrl = storedCard.card_images[0].image_url
         }
     });
+
 
 
 
@@ -189,6 +229,8 @@ const addCardsToDeck = async (obj) => {
         } else {
             obj.card.set = false
             obj.card.quantity = 1
+            obj.card.card_images[0].image_url_small = cardImgUrlSmall
+            obj.card.card_images[0].image_url = cardImgUrl
             console.log("new card", obj.card)
             return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "extraDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
@@ -222,6 +264,9 @@ const addCardsToDeck = async (obj) => {
         } else {
             obj.card.set = false
             obj.card.quantity = 1
+            obj.card.card_images[0].image_url_small = cardImgUrlSmall
+            obj.card.card_images[0].image_url = cardImgUrl
+            console.log("card!!!", obj.card)
             return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "mainDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
             })
@@ -233,7 +278,7 @@ const addCardsToDeck = async (obj) => {
 const retrieveDeckInfo = (username) => {
     return firestore.collection("users").doc(username).get().then(info => info.data())
 }
-const retrieveCardsFromDeck = (obj) => {
+const retrieveCardsFromDeck = async (obj) => {
     return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).get().then(info => info.data())
 }
 

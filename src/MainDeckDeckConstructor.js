@@ -108,6 +108,7 @@ class MainDeckDeckConstructor extends Component {
         await this.refreshCards()
     }
     updateCardQuantity = async (obj) => {
+        console.log("inside updateCardQuant, here's what we're passing through", obj)
         if (obj.value > obj.card.quantity) {
             await addCardsToDeck({ ...obj, val: obj.value })
         } else if (obj.value < obj.card.quantity) {
@@ -148,7 +149,7 @@ class MainDeckDeckConstructor extends Component {
                 alignItems: "center",
             }}>
                 <View style={{ width: size, height: 100 }}>
-                    <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4 }} onLongPress={this.toggleDeleteMode}>
+                    <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4 }} onLongPress={this.toggleDeleteMode} onPress={() => this.expandCard(item)}>
                         {item["card_images"] && <ShakingImage deleteCard={this.deleteCard} item={item} shaking={this.state.shaking} source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
                             width: size * 0.90, height: 100
                         }} />}
@@ -186,6 +187,7 @@ class MainDeckDeckConstructor extends Component {
             this.setState({ searchPopupVisible: true, cardType: this.props.navigation.state.params.type, shaking: false })
         }
     }
+
     getCards() {
         const res = [];
         const exists = Object.keys(this.state.cards).length
@@ -212,21 +214,36 @@ class MainDeckDeckConstructor extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <FadeScaleImage resizeMode={"contain"} source={require("../assets/yugiohGif.gif")} style={{ width: Dimensions.get("window").width * 1.1, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0 }} />
+
                 <Text style={{
                     fontWeight: "800",
                     fontSize: 25,
+                    backgroundColor: "transparent",
+                    paddingHorizontal: 20,
+                    paddingVertical: 20,
                 }}>{this.props.selectedDeck}</Text>
+                <Text style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    backgroundColor: "transparent",
+                    fontWeight: "800",
+                    fontSize: 20,
+                    backgroundColor: "#FFF"
+                }}>Main Deck: {this.state.quantities.monstersQuant + this.state.quantities.spellsQuant + this.state.quantities.trapsQuant} cards</Text>
+
                 <SectionList
                     refreshing={this.state.refreshing}
                     onRefresh={this.handleRefresh}
                     renderItem={({ item }) => this.renderItem(item)}
-                    stickySectionHeadersEnabled={true}
+                    stickySectionHeadersEnabled={false}
                     renderSectionHeader={({ section: { title } }) => (
                         <Text style={{
                             paddingVertical: 10,
                             fontWeight: "800",
                             fontSize: 20,
-                            backgroundColor: "#FFF"
+                            paddingHorizontal: 20,
+                            backgroundColor: "transparent"
                         }}>{title}: {this.state.quantities[`${title.toLowerCase()}Quant`]} cards</Text>
                     )}
                     sections={[
@@ -275,6 +292,59 @@ class MainDeckDeckConstructor extends Component {
                                 <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} autoCorrect={false} autoCapitalize={"none"} />
                                 <FadeScaleImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                             </View>
+                        </View>
+                    </DialogContent>
+                </Dialog>
+                <Dialog
+                    visible={this.state.popUpVisible}
+                    width={0.90}
+                    height={0.90}
+
+                    dialogAnimation={new ScaleAnimation({
+                        initialValue: 0, // optional
+                        useNativeDriver: true, // optional
+                    })}
+                    onTouchOutside={() => {
+                        this.setState({ popUpVisible: false })
+                    }}
+                >
+                    <DialogContent style={{ flex: 1 }}>
+                        <View style={{ flex: 8 / 10 }}>
+                            {this.state.selectedCard && <FadeScaleImage resizeMode={"contain"} source={{ uri: this.state.selectedCard.card_images[0].image_url }} style={{ width: "100%", height: "100%" }} />}
+                        </View>
+                        <View style={{ flex: 2 / 10, justifyContent: "center", alignItems: "center" }}>
+                            <Text style={{
+                                fontWeight: "800",
+                                fontSize: 25,
+                                backgroundColor: "transparent",
+                                paddingHorizontal: 20,
+                                paddingVertical: 20,
+                            }}>Quantity</Text>
+                            <FlatList
+                                data={[1, 2, 3]}
+                                horizontal={true}
+                                contentContainerStyle={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                                style={{ flex: 1, width: "100%" }}
+                                keyExtractor={(item) => `${item}`}
+                                renderItem={({ item, index }) => {
+                                    let selectedCard = this.state.selectedCard
+                                    let maxQuant = 3
+                                    if ('banlist_info' in selectedCard) {
+                                        if (selectedCard["banlist_info"]["ban_tcg"] == "Limited") {
+                                            maxQuant = 1
+                                        } else if (selectedCard["banlist_info"]["ban_tcg"] == "Semi-Limited") {
+                                            maxQuant = 2
+                                        }
+                                    }
+                                    return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: 40, borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
+                                        this.updateCardQuantity({ value: item, card: selectedCard, username: this.props.user.username, deck: this.props.selectedDeck })
+                                        selectedCard.quantity = item
+
+                                    }}>
+                                        <Text style={{ fontSize: 30, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>
+                                    </TouchableOpacity>)
+                                }}
+                            />
                         </View>
                     </DialogContent>
                 </Dialog>

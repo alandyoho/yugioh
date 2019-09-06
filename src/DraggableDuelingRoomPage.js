@@ -84,6 +84,7 @@ class DraggableDuelingRoomPage extends Component {
                     }
                 } else {
                     console.log("time to leave duel")
+                    firestore.collection("users").doc(this.props.user.username).update({ hostedBy: "", hosting: false })
                     this.props.navigation.navigate("HomePage")
 
                 }
