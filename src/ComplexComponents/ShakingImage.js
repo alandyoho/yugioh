@@ -1,5 +1,7 @@
 import { View, StyleSheet, Animated, Easing, Text, TouchableOpacity } from 'react-native';
 import React, { Component } from "react"
+import * as FileSystem from "expo-file-system"
+
 
 export default class ShakingImage extends Component {
     constructor() {
@@ -10,6 +12,10 @@ export default class ShakingImage extends Component {
     state = {
         opacity: new Animated.Value(0),
     }
+    async componentDidMount() {
+        FileSystem.documentDirectory + "CARD_IMAGES"
+    }
+
 
     onLoad = () => {
         Animated.timing(this.state.opacity, {
@@ -61,7 +67,7 @@ export default class ShakingImage extends Component {
                 <Animated.Image
                     onLoad={this.onLoad}
                     {...this.props}
-                    source={this.props.source}
+                    source={{ uri: this.props.storedCards[this.props.item.id] ? this.props.storedCards[this.props.item.id] : this.props.source }}
                 />
                 {this.props.shaking ?
                     <TouchableOpacity style={{ width: 30, height: 30, position: "absolute", top: 0, right: 0, borderRadius: 15, zIndex: 5, borderColor: "black", borderWidth: 2, backgroundColor: "red", justifyContent: "center", alignItems: "center" }} onPress={() => this.props.deleteCard(this.props.item)}>

@@ -42,6 +42,7 @@ class MainDeckDeckConstructor extends Component {
 
     componentDidMount = async () => {
         await this.refreshCards()
+        console.log("storedCards", this.props.storedCards)
         await setTimeout(() => {
             this.setState({ deckRetrieved: true })
         }, 3000)
@@ -150,7 +151,7 @@ class MainDeckDeckConstructor extends Component {
             }}>
                 <View style={{ width: size, height: 100 }}>
                     <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4 }} onLongPress={this.toggleDeleteMode} onPress={() => this.expandCard(item)}>
-                        {item["card_images"] && <ShakingImage deleteCard={this.deleteCard} item={item} shaking={this.state.shaking} source={{ uri: item["card_images"][0]["image_url_small"] }} resizeMode={"contain"} style={{
+                        {item["card_images"] && <ShakingImage storedCards={this.props.storedCards} deleteCard={this.deleteCard} item={item} shaking={this.state.shaking} source={item["card_images"][0]["image_url_small"]} resizeMode={"contain"} style={{
                             width: size * 0.90, height: 100
                         }} />}
                     </TouchableOpacity>
@@ -356,8 +357,8 @@ class MainDeckDeckConstructor extends Component {
 
 
 const mapStateToProps = (state) => {
-    const { user, cards, selectedDeck, preferences } = state
-    return { user, cards, selectedDeck, preferences }
+    const { user, cards, selectedDeck, preferences, storedCards } = state
+    return { user, cards, selectedDeck, preferences, storedCards }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({

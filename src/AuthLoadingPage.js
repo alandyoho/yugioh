@@ -52,13 +52,19 @@ class AuthLoadingScreen extends Component {
             }
         } else {
             console.log("directory present")
-            try {
-                const storedCards = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "CARD_IMAGES")
-                console.log("stored cards", storedCards)
-                this.props.updateStoredCardsList(storedCards)
-            } catch (e) {
-                console.info("ERROR,", e)
-            }
+            // try {
+            //     const storedCards = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "CARD_IMAGES")
+            //     console.log("stored cards {1}", storedCards)
+            //     storedCardsAsObj = storedCards.reduce(function (result, item, index, array) {
+            //         result[item] = true; //a, b, c
+            //         return result;
+            //     }, {})
+            //     console.log("stored cards {2}", storedCardsAsObj)
+
+            //     this.props.updateStoredCardsList(storedCardsAsObj)
+            // } catch (e) {
+            //     console.info("ERROR,", e)
+            // }
         }
     }
     _retrieveData = async () => {
@@ -134,6 +140,7 @@ class AuthLoadingScreen extends Component {
 
 
                         let cardImgs = []
+                        let storedCards = {}
                         for (let i = 0; i < userFromDB.decks.length; i++) {
                             const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
                             for (let j = 0; j < mainDeck.length; j++) {
@@ -145,10 +152,25 @@ class AuthLoadingScreen extends Component {
                                     cardImgs.push(cardImg)
                                 } else {
                                     console.log("card image info", info.uri)
+                                    storedCards[mainDeck[j].id] = info.uri
+                                    cardImgs.push(info.uri)
+                                }
+                            }
+                            for (let j = 0; j < extraDeck.length; j++) {
+                                const cardImg = extraDeck[j]["card_images"][0]["image_url_small"]
+                                const info = await this.retrieveEntry(cardImg)
+                                if (!info.exists) {
+                                    console.log("card is not in file system")
+                                    this.createEntry(cardImg)
+                                    cardImgs.push(cardImg)
+                                } else {
+                                    console.log("card image info", info.uri)
+                                    storedCards[extraDeck[j].id] = info.uri
                                     cardImgs.push(info.uri)
                                 }
                             }
                         }
+                        this.props.updateStoredCardsList(storedCards)
                         await this._loadAssetsAsync(cardImgs)
 
 
@@ -201,8 +223,6 @@ class AuthLoadingScreen extends Component {
             ...images
         ]);
         await Promise.all([...imageAssets]);
-
-
     }
     render() {
         return (

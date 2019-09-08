@@ -1,5 +1,5 @@
 
-const INITIAL_STATE = { user: {}, decks: [], selectedDeck: "", hostName: "", preferences: {}, storedCards: [] };
+const INITIAL_STATE = { user: {}, decks: [], selectedDeck: "", hostName: "", preferences: {}, storedCards: {} };
 
 export default reducer = (state = INITIAL_STATE, action) => {
     const newState = { ...state }
