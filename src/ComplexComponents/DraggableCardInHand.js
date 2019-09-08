@@ -94,13 +94,18 @@ export default class DraggableCardInHand extends Component {
         Haptics.impactAsync("heavy")
         this.props.examineCard(this.props.item)
     }
+    componentDidMount() {
+        console.log("in draggable card in hand...stored cards list", this.props.storedCards)
+    }
     render() {
         return (
             <Animated.View
                 {...this.panResponder.panHandlers}
                 style={[this.state.pan.getLayout(), { flex: 1, flexDirection: "column", justifyContent: "flex-end", alignItems: "center", opacity: (this.props.dragBegin) ? (this.state.selectedCard ? 1 : 0) : 1 }]}>
                 <TouchableOpacity onLongPress={this.examineCard} activeOpacity={1} style={{ flexDirection: "column", justifyContent: "flex-start", alignItems: "center", width: 100, height: 200 }}>
-                    <FadeScaleImage source={{ uri: this.props.item.card_images[0].image_url_small }} resizeMode={"contain"} style={(this.props.dragBegin && !this.state.overReturnToHand) ? { width: 50, height: 100, alignSelf: "center" } : { width: 100, height: 200, alignSelf: "center" }} />
+                    <FadeScaleImage
+                        source={{ uri: this.props.storedCards[this.props.item.id] ? this.props.storedCards[this.props.item.id] : this.props.item.card_images[0].image_url_small }}
+                        resizeMode={"contain"} style={(this.props.dragBegin && !this.state.overReturnToHand) ? { width: 50, height: 100, alignSelf: "center" } : { width: 100, height: 200, alignSelf: "center" }} />
                 </TouchableOpacity>
             </Animated.View>
         );

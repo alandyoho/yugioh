@@ -777,7 +777,7 @@ class DraggableDuelingRoomPage extends Component {
         const { hand: thatHand, graveyard: thatGraveyard, banishedZone: thatBanishedZone } = boardsRetrieved && this.state[thatBoard]
         const thatHandLength = boardsRetrieved && Array(thatHand.length).fill("")
 
-        const draggableCardOnFieldProps = { manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
+        const draggableCardOnFieldProps = { storedCards: this.props.storedCards, manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
         const HALFWIDTH = Dimensions.get("window").width / 2
         return (
             <SideMenu openMenuOffset={HALFWIDTH} menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
@@ -827,7 +827,8 @@ class DraggableDuelingRoomPage extends Component {
                                 // borderWidth: 2,
                                 borderColor: "#000000",
                                 marginBottom: 10,
-                            }} source={{ uri: this.props.user.imageURL }}
+                            }}
+                                source={{ uri: this.props.user.imageURL }}
                             />
                             <FadeScaleText style={{
                                 fontWeight: 'bold',
@@ -863,19 +864,19 @@ class DraggableDuelingRoomPage extends Component {
                             }
                         </View>
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.toggleBanishedZonePopup} onLongPress={this.handleBanishedZoneLongPress} disabled={boardsRetrieved && this.state[this.state.thisBoard].banishedZone.length === 0}>
-                            {boardsRetrieved === true && thisBanishedZone.length > 0 && <FadeScaleImage source={{ uri: thisBanishedZone[thisBanishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                            {boardsRetrieved === true && thisBanishedZone.length > 0 && <FadeScaleImage storedCards={this.props.storedCards} source={{ uri: thisBanishedZone[thisBanishedZone.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_banishedZone0`] = view; }}>
                             </View>
                         </TouchableOpacity>
                         <View style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st6`] = view; }}>
-                            {boardsRetrieved === true && this.state[thisBoard].st[6].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["st", 6]} item={this.state[thisBoard].st[6]} />}
+                            {boardsRetrieved === true && this.state[thisBoard].st[6].exists && <DraggableCardOnField  {...draggableCardOnFieldProps} zoneLocation={["st", 6]} item={this.state[thisBoard].st[6]} />}
                         </View>
                         {[1, 2, 3, 4, 5].map(cardIndex => (
                             <View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_m1${cardIndex}`] = view }}>
-                                {boardsRetrieved === true && this.state[thisBoard].m1[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["m1", cardIndex]} item={this.state[thisBoard].m1[cardIndex]} />}
+                                {boardsRetrieved === true && this.state[thisBoard].m1[cardIndex].exists && <DraggableCardOnField  {...draggableCardOnFieldProps} zoneLocation={["m1", cardIndex]} item={this.state[thisBoard].m1[cardIndex]} />}
                             </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.toggleGraveyardPopup} onLongPress={this.handleGraveyardLongPress} disabled={boardsRetrieved && this.state[this.state.thisBoard].graveyard.length === 0}>
-                            {boardsRetrieved === true && thisGraveyard.length > 0 && <FadeScaleImage source={{ uri: thisGraveyard[thisGraveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
+                            {boardsRetrieved === true && thisGraveyard.length > 0 && <FadeScaleImage storedCards={this.props.storedCards} source={{ uri: thisGraveyard[thisGraveyard.length - 1].card_images[0].image_url_small }} resizeMode={"contain"} style={{ flex: 1, width: null, height: null }} />}
                             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_graveyard0`] = view; }}>
                             </View>
                         </TouchableOpacity>
@@ -886,7 +887,7 @@ class DraggableDuelingRoomPage extends Component {
                             </View>
                         </TouchableOpacity>
                         {[1, 2, 3, 4, 5].map(cardIndex => (<View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st${cardIndex}`] = view; }}>
-                            {boardsRetrieved && this.state[thisBoard].st[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} zoneLocation={["st", cardIndex]} item={this.state[thisBoard].st[cardIndex]} />}
+                            {boardsRetrieved && this.state[thisBoard].st[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} storedCards={this.props.storedCards} zoneLocation={["st", cardIndex]} item={this.state[thisBoard].st[cardIndex]} />}
                         </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.presentDeckOptions} onLongPress={this.handleDeckLongPress} disabled={boardsRetrieved && this.state.mainDeck.length === 0}>
                             {boardsRetrieved && mainDeck.length > 0 &&
@@ -906,7 +907,7 @@ class DraggableDuelingRoomPage extends Component {
                         <FlatList
                             data={thisHand}
                             ref={list => { this["hand"] = list; }}
-                            renderItem={({ item }) => <DraggableCardInHand item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                            renderItem={({ item }) => <DraggableCardInHand storedCards={this.props.storedCards} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                             keyExtractor={(item, index) => index.toString()}
                             horizontal={true}
                             style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: this.state.handZoneHeight, zIndex: 2 }}
@@ -935,7 +936,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
                                     data={extraDeck}
-                                    renderItem={({ item }) => <DraggableCardInPopup location={"ExtraDeckView"} inDreamState={this.state.inDreamState} toggleExtraDeckPopup={this.toggleExtraDeckPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"ExtraDeckView"} inDreamState={this.state.inDreamState} toggleExtraDeckPopup={this.toggleExtraDeckPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
@@ -1002,7 +1003,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
                                     data={(boardsRetrieved && this.state[thisBoard].requestingAccessToGraveyard.approved) ? thatGraveyard : thisGraveyard}
-                                    renderItem={({ item }) => <DraggableCardInPopup location={"SendToGraveyard"} inDreamState={this.state.inDreamState} toggleGraveyardPopup={this.toggleGraveyardPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"SendToGraveyard"} inDreamState={this.state.inDreamState} toggleGraveyardPopup={this.toggleGraveyardPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
@@ -1049,7 +1050,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
                                     data={(boardsRetrieved && this.state[thisBoard].requestingAccessToGraveyard.approved) && thatGraveyard}
-                                    renderItem={({ item }) => <DraggableCardInPopup location={"SendToGraveyard"} inDreamState={this.state.inDreamState} toggleGraveyardPopup={this.toggleGraveyardPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"SendToGraveyard"} inDreamState={this.state.inDreamState} toggleGraveyardPopup={this.toggleGraveyardPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
@@ -1096,7 +1097,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
                                     data={thisBanishedZone}
-                                    renderItem={({ item }) => <DraggableCardInPopup location={"SendToBanishedZone"} inDreamState={this.state.inDreamState} toggleBanishedZonePopup={this.toggleBanishedZonePopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"SendToBanishedZone"} inDreamState={this.state.inDreamState} toggleBanishedZonePopup={this.toggleBanishedZonePopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
@@ -1137,7 +1138,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
                                     data={mainDeck}
-                                    renderItem={({ item }) => <DraggableCardInPopup location={"MainDeckView"} inDreamState={this.state.inDreamState} toggleMainDeckPopup={this.toggleMainDeckPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
+                                    renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"MainDeckView"} inDreamState={this.state.inDreamState} toggleMainDeckPopup={this.toggleMainDeckPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
@@ -1206,8 +1207,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => {
-    const { user, cards, selectedDeck, preferences } = state
-    return { user, cards, selectedDeck, preferences }
+    const { user, cards, selectedDeck, preferences, storedCards } = state
+    return { user, cards, selectedDeck, preferences, storedCards }
 };
 const mapDispatchToProps = dispatch => (
     bindActionCreators({

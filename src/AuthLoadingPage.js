@@ -148,8 +148,10 @@ class AuthLoadingScreen extends Component {
                                 const info = await this.retrieveEntry(cardImg)
                                 if (!info.exists) {
                                     console.log("card is not in file system")
-                                    this.createEntry(cardImg)
-                                    cardImgs.push(cardImg)
+                                    const createdEntry = await this.createEntry(cardImg)
+                                    console.log("here's the juice", createdEntry)
+                                    storedCards[mainDeck[j].id] = createdEntry.uri
+                                    cardImgs.push(createdEntry.uri)
                                 } else {
                                     console.log("card image info", info.uri)
                                     storedCards[mainDeck[j].id] = info.uri
@@ -161,8 +163,10 @@ class AuthLoadingScreen extends Component {
                                 const info = await this.retrieveEntry(cardImg)
                                 if (!info.exists) {
                                     console.log("card is not in file system")
-                                    this.createEntry(cardImg)
-                                    cardImgs.push(cardImg)
+                                    const createdEntry = await this.createEntry(cardImg)
+                                    console.log("here's the juice", createdEntry)
+                                    storedCards[extraDeck[j].id] = createdEntry.uri
+                                    cardImgs.push(createdEntry.uri)
                                 } else {
                                     console.log("card image info", info.uri)
                                     storedCards[extraDeck[j].id] = info.uri
