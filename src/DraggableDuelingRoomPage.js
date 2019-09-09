@@ -690,10 +690,21 @@ class DraggableDuelingRoomPage extends Component {
         }
     }
     flipCardPosition = async (location) => {
+        console.log("location", location)
+
         let [cardZone, cardZoneIndex] = location
         let board = this.state.thisBoard
         let boardCopy = { ...this.state[board] }
-        let pertinentCard = boardCopy[cardZone][cardZoneIndex]
+        let linkZoneCopy = [...this.state.linkZones]
+
+        let pertinentCard;
+        if (cardZone === "linkZone") {
+            pertinentCard = linkZoneCopy[cardZoneIndex]
+        } else {
+            pertinentCard = boardCopy[cardZone][cardZoneIndex]
+        }
+
+
         if (cardZone !== "st") {
             if (pertinentCard.set) {
                 pertinentCard.set = !pertinentCard.set
@@ -706,9 +717,19 @@ class DraggableDuelingRoomPage extends Component {
         } else {
             pertinentCard.set = !pertinentCard.set
         }
-        console.log(pertinentCard)
-        boardCopy[cardZone][cardZoneIndex] = pertinentCard
-        await alterBoard({ location: [board, cardZone], zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        console.log("changed position", pertinentCard)
+        if (cardZone === "linkZone") {
+            linkZoneCopy[cardZoneIndex] = pertinentCard
+            await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+        } else {
+            boardCopy[cardZone][cardZoneIndex] = pertinentCard
+            await alterBoard({ location: [board, cardZone], zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+        }
+
+
+
+
+
     }
     createInfiniteTsukuyomi = () => {
         if (!this.state.inDreamState) {

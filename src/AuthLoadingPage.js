@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
     View,
-    Image, Dimensions
+    Image, Dimensions, Animated
 } from 'react-native';
 import * as firebase from "firebase"
 import { createUser, updateDeckList, updatePreferences, updateStoredCardsList } from "./actions"
@@ -32,10 +32,17 @@ class AuthLoadingScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loaded: false
+            loaded: false,
+            animatedValue: new Animated.Value(0)
         }
         this.ifNecessaryCreateDirectory()
         this.authSubscription()
+    }
+    componentDidMount() {
+        Animated.timing(this.state.animatedValue, {
+            toValue: 150,
+            duration: 1500
+        }).start();
     }
     ifNecessaryCreateDirectory = async () => {
         const metaDataDir = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "CARD_IMAGES");
@@ -182,8 +189,6 @@ class AuthLoadingScreen extends Component {
 
 
                         this.props.updateDeckList(userFromDB.decks)
-
-
                     } catch (err) {
                         console.log("beans!")
                         console.error(err)
@@ -224,15 +229,25 @@ class AuthLoadingScreen extends Component {
             // require("../assets/yugioh_gif1.gif"),
             // require("../assets/yugioh_gif2.gif"),
             require("../assets/returnToHand.gif"),
+            require("../assets/loadingScreen-1.gif"),
             ...images
         ]);
         await Promise.all([...imageAssets]);
     }
+
+
     render() {
+        const interpolateColor = this.state.animatedValue.interpolate({
+            inputRange: [0, 150],
+            outputRange: ['rgb(0,0,0)', 'rgb(230, 77, 61)']
+        })
+
+
         return (
-            <View style={{ backgroundColor: "black", flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <FadeImage source={require('../assets/yugioh_gif2.gif')} style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} />
-            </View>
+            <Animated.View style={{ backgroundColor: interpolateColor, flex: 1, justifyContent: "center", alignItems: "center" }}>
+                {/* <FadeImage source={require('../assets/textLoading.gif')} style={{ height: 200, width: Dimensions.get("window").width, zIndex: 0, position: "absolute", left: 0, right: 0, bottom: 0, top: 0 }} /> */}
+                <FadeImage source={require('../assets/loadingGifAdvanced.gif')} style={{ height: 100, width: 100, zIndex: 0 }} />
+            </Animated.View>
         );
     }
 }

@@ -29,7 +29,9 @@ class HomePage extends Component {
             type: "",
             settingsPopupVisible: false,
             profilePopupVisible: false,
-            friendsPopupVisible: false
+            friendsPopupVisible: false,
+            animatedValue: new Animated.Value(0),
+            FadeViewZIndex: 20
         }
         this.soundObject = new Audio.Sound();
     }
@@ -40,6 +42,11 @@ class HomePage extends Component {
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }
+        Animated.timing(this.state.animatedValue, {
+            toValue: 150,
+            duration: 1500,
+        }).start();
+        this.setState({ FadeViewZIndex: -1 })
     }
     loadAndEnableAudio = async () => {
         try {
@@ -102,11 +109,20 @@ class HomePage extends Component {
         this.setState({ profilePopupVisible: !this.state.profilePopupVisible })
     }
     render() {
+        const interpolateColor = this.state.animatedValue.interpolate({
+            inputRange: [0, 150],
+            outputRange: ['rgb(230, 77, 61)', 'transparent']
+        })
         const { user, navigation, updateSelectedDeck } = this.props
         const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible, friendsPopupVisible, profilePopupVisible } = this.state
         return (
             <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} toggleFriendsPopup={this.toggleFriendsPopup} toggleProfilePopup={this.toggleProfilePopup} user={this.props.user} />}>
+
+
                 <View style={styles.container}>
+                    <Animated.View style={{ position: "absolute", backgroundColor: interpolateColor, flex: 1, justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, zIndex: this.state.FadeViewZIndex }}>
+
+                    </Animated.View>
                     <PhotoReel />
                     <View style={{ height: 100, marginBottom: 25, width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                         <FadeImage source={require("../assets/yugiohLogo.png")} resizeMode="contain" style={{ width: "80%" }} />
