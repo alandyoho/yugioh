@@ -11,14 +11,16 @@ export default class DraggableCardOnField extends Component {
             overReturnToHand: false
         };
         this.panResponder = PanResponder.create({    //Step 2
-            onStartShouldSetPanResponder: () => this.props.user ? (this.props.user === this.props.item.user) : true,
+            // onStartShouldSetPanResponder: () => this.props.user ? (this.props.user === this.props.item.user) : true,
+            onStartShouldSetPanResponder: () => true,
+
             onPanResponderTerminationRequest: () => false,
             onPanResponderGrant: (evt, gestureState) => {
                 this.props.raiseSelectedZone(this.props.zoneLocation)
                 this.props.toggleHandZone()
             },
             onMoveShouldSetPanResponder: (evt, gestureState) => {
-                return this.props.user ? this.props.user === this.props.item.user : !((gestureState.dx < 2 && gestureState.dy < 2 && Math.abs(gestureState.vx) < 5))
+                return this.props.user ? (this.props.user === this.props.item.user && (Math.abs(gestureState.dy) > 20 || Math.abs(gestureState.dx) > 20)) : (Math.abs(gestureState.dy) > 20 || Math.abs(gestureState.dx) > 20)
             },
             onPanResponderMove: (evt, gestureState) => {
                 // do whatever you need here
