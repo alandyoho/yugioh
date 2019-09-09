@@ -14,8 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { MultiBar, MultiBarToggle } from 'react-native-multibar';
 import MainDeckDeckConstructor from "./src/MainDeckDeckConstructor"
 import ExtraDeckDeckConstructor from "./src/ExtraDeckDeckConstructor"
-import * as FileSystem from 'expo-file-system';
-
+import CircleSliderContainer from "./src/LifePointsCircle"
 const DeckConstructorPageTabsNavigator = createBottomTabNavigator({
   MainDeckDeckConstructor: {
     screen: MainDeckDeckConstructor,
@@ -103,24 +102,24 @@ const DeckConstructorPageTabsNavigator = createBottomTabNavigator({
     })
   }
 }, {
-    initialRouteName: "MainDeckDeckConstructor",
-    tabBarComponent: MultiBar,
-    tabBarOptions: {
-      showLabel: true,
-      // activeTintColor: '#F8F8F8',
-      // activeBackgroundColor: "#586589",
-      // activeBackgroundColor: "blue",
-      // inactiveBackgroundColor: "#F8F8F8",
-      // inactiveTintColor: '#586589',
-      style: {
-        backgroundColor: 'transparent'
-      },
-      tabStyle: {
-
-      }
+  initialRouteName: "MainDeckDeckConstructor",
+  tabBarComponent: MultiBar,
+  tabBarOptions: {
+    showLabel: true,
+    // activeTintColor: '#F8F8F8',
+    // activeBackgroundColor: "#586589",
+    // activeBackgroundColor: "blue",
+    // inactiveBackgroundColor: "#F8F8F8",
+    // inactiveTintColor: '#586589',
+    style: {
+      backgroundColor: 'transparent'
     },
+    tabStyle: {
 
-  });
+    }
+  },
+
+});
 
 
 

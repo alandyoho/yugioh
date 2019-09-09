@@ -13,7 +13,6 @@ export default class DraggableCardOnField extends Component {
         this.panResponder = PanResponder.create({    //Step 2
             // onStartShouldSetPanResponder: () => this.props.user ? (this.props.user === this.props.item.user) : true,
             onStartShouldSetPanResponder: () => true,
-
             onPanResponderTerminationRequest: () => false,
             onPanResponderGrant: (evt, gestureState) => {
                 this.props.raiseSelectedZone(this.props.zoneLocation)

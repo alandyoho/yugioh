@@ -23,6 +23,7 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-actionsheet": "^2.4.2",
     "react-native-circle-slider": "^1.1.1",
+    "react-native-circular-slider": "^1.0.1",
     "react-native-coverflow": "^0.1.7",
     "react-native-draggable": "^1.0.15",
     "react-native-draggable-flatlist": "^1.1.7",

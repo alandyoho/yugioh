@@ -13,6 +13,7 @@ import CustomSideMenu from "./SideMenu"
 import Dialog, { DialogContent, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
+import LifePointsCircle from "./LifePointsCircle"
 
 class DraggableDuelingRoomPage extends Component {
     constructor() {
@@ -839,8 +840,19 @@ class DraggableDuelingRoomPage extends Component {
                             </View>
                         ))}
                         <View style={{ position: "absolute", bottom: Dimensions.get("window").height * 0.46, left: 0, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-
-                            <FadeScaleImage style={{
+                            <LifePointsCircle imageUrl={this.props.user.imageURL} styles={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: 40,
+                                // marginLeft: 10,
+                                // backgroundColor: "red",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                // borderWidth: 2,
+                                borderColor: "#000000",
+                                // marginBottom: 10,
+                            }} />
+                            {/* <FadeScaleImage style={{
                                 width: 60,
                                 height: 60,
                                 borderRadius: 30,
@@ -850,7 +862,7 @@ class DraggableDuelingRoomPage extends Component {
                                 marginBottom: 10,
                             }}
                                 source={{ uri: this.props.user.imageURL }}
-                            />
+                            /> */}
                             <FadeScaleText style={{
                                 fontWeight: 'bold',
                                 backgroundColor: 'transparent',
@@ -861,19 +873,20 @@ class DraggableDuelingRoomPage extends Component {
                         </View>
 
                         <View style={{ position: "absolute", bottom: Dimensions.get("window").height * 0.55, right: 0, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-
                             {this.state.opponentData &&
                                 <React.Fragment>
-                                    <FadeScaleImage style={{
-                                        width: 60,
-                                        height: 60,
-                                        borderRadius: 30,
-                                        marginRight: 10,
+                                    <LifePointsCircle imageUrl={this.state.opponentData.imageURL} styles={{
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: 40,
+                                        // marginLeft: 10,
+                                        // backgroundColor: "red",
+                                        justifyContent: "center",
+                                        alignItems: "center",
                                         // borderWidth: 2,
                                         borderColor: "#000000",
-                                        marginBottom: 10,
-                                    }} source={{ uri: this.state.opponentData.imageURL }}
-                                    />
+                                        // marginBottom: 10,
+                                    }} />
                                     <FadeScaleText style={{
                                         fontWeight: 'bold',
                                         backgroundColor: 'transparent',
