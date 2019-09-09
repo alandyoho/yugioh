@@ -230,6 +230,8 @@ class AuthLoadingScreen extends Component {
             // require("../assets/yugioh_gif2.gif"),
             require("../assets/returnToHand.gif"),
             require("../assets/loadingScreen-1.gif"),
+            require("../assets/loadingGifAdvanced1.png"),
+            require("../assets/loadingGifAdvanced2.png"),
             ...images
         ]);
         await Promise.all([...imageAssets]);
