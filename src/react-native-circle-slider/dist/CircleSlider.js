@@ -147,7 +147,7 @@ class CircleSlider extends React.Component {
             throw new Error("Prop 'arcDirection' only supports 'CW' or 'CCW', for Clockwise or Counterclockwise");
         }
         this.panResponder = PanResponder.create({
-            onMoveShouldSetPanResponder: (e, gs) => true,
+            onMoveShouldSetPanResponder: (e, gs) => this.props.user ? false : true,
             onMoveShouldSetPanResponderCapture: (e, gs) => true,
             onPanResponderMove: (e, gs) => {
                 const angles = this.getOnPressAngle(gs.moveX, gs.moveY);
@@ -207,13 +207,14 @@ class CircleSlider extends React.Component {
                     }} />
 
                     <Circle r={dR + ((dR * 25) / 100)} cx={width / 2} cy={width / 2} stroke="none" fill="none" onPressIn={(e) => {
-                        const p = e.nativeEvent;
-                        const angles = this.getOnPressAngle(p.pageX, p.pageY);
-                        this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
-                            const currentValue = this.getCurrentValue();
-                            this.outerCirclePressed(currentValue);
-                            this.onValueChanged(currentValue);
-                        });
+                        this.props.expandLifePoints()
+                        // const p = e.nativeEvent;
+                        // const angles = this.getOnPressAngle(p.pageX, p.pageY);
+                        // this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
+                        //     const currentValue = this.getCurrentValue();
+                        //     this.outerCirclePressed(currentValue);
+                        //     this.onValueChanged(currentValue);
+                        // });
                     }} />
 
                     <G x={endCoord.x - bR} y={endCoord.y - bR}>

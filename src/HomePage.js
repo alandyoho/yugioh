@@ -34,6 +34,7 @@ class HomePage extends Component {
             FadeViewZIndex: 20
         }
         this.soundObject = new Audio.Sound();
+        this.animatedValue = new Animated.Value(0)
     }
     async componentDidMount() {
         console.log("(7)", this.props.storedCards)
@@ -42,13 +43,14 @@ class HomePage extends Component {
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }
-        Animated.timing(this.state.animatedValue, {
-            toValue: 150,
-            duration: 1500,
+
+        Animated.spring(this.animatedValue, {
+            toValue: -200,
+            duration: 250,
         }).start();
         setTimeout(() => {
             this.setState({ FadeViewZIndex: -1 })
-        }, 1500)
+        }, 500)
     }
     loadAndEnableAudio = async () => {
         try {
@@ -111,9 +113,9 @@ class HomePage extends Component {
         this.setState({ profilePopupVisible: !this.state.profilePopupVisible })
     }
     render() {
-        const interpolatePosition = this.state.animatedValue.interpolate({
-            inputRange: [0, 150],
-            outputRange: [0, -200]
+        const interpolatePosition = this.animatedValue.interpolate({
+            inputRange: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+            outputRange: [0, -20, -40, -60, -80, -100, -120, -140, -160, -180, -200]
         })
         const { user, navigation, updateSelectedDeck } = this.props
         const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible, friendsPopupVisible, profilePopupVisible } = this.state
@@ -123,10 +125,10 @@ class HomePage extends Component {
                     <Animated.View style={{ position: "absolute", flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "transparent", zIndex: this.state.FadeViewZIndex }}>
 
                         {/* <Animated.View style={{ position: "absolute", backgroundColor: interpolateColor, flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, zIndex: this.state.FadeViewZIndex }}> */}
-                        <Animated.View style={{ position: "absolute", left: interpolatePosition, top: 0, bottom: 0, width: Dimensions.get("window").width / 2, backgroundColor: 'rgb(230, 77, 61)', justifyContent: "center", alignItems: 'flex-end' }}>
+                        <Animated.View style={{ position: "absolute", left: this.animatedValue, top: 0, bottom: 0, width: Dimensions.get("window").width / 2, backgroundColor: 'rgb(230, 77, 61)', justifyContent: "center", alignItems: 'flex-end' }}>
                             <Image source={require("../assets/loadingGifAdvanced1.png")} style={{ height: 100, width: 50 }} />
                         </Animated.View>
-                        <Animated.View style={{ position: "absolute", right: interpolatePosition, top: 0, bottom: 0, width: Dimensions.get("window").width / 2, backgroundColor: 'rgb(230, 77, 61)', justifyContent: "center", alignItems: 'flex-start' }}>
+                        <Animated.View style={{ position: "absolute", right: this.animatedValue, top: 0, bottom: 0, width: Dimensions.get("window").width / 2, backgroundColor: 'rgb(230, 77, 61)', justifyContent: "center", alignItems: 'flex-start' }}>
                             <Image source={require("../assets/loadingGifAdvanced2.png")} style={{ height: 100, width: 50 }} />
                         </Animated.View>
 

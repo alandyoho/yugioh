@@ -4,7 +4,7 @@ import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopu
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser, updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePoints } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { GameLogic } from "./DuelingRoomPageComponents"
@@ -51,7 +51,8 @@ class DraggableDuelingRoomPage extends Component {
             extraDeckPopupVisible: false,
             banishedZonePopupVisible: false,
             requestAccessToOpponentGraveyardPopupVisible: true,
-            backgroundImageUrl: null
+            backgroundImageUrl: null,
+            lifePointsCircleExpanded: false
         }
     }
     extraDeckTypes = ["XYZ Monster", "Synchro Monster", "Fusion Monster", "Link Monster", "Synchro Tuner Monster"]
@@ -793,6 +794,21 @@ class DraggableDuelingRoomPage extends Component {
         await approveAccessToGraveyard({ hostUsername: this.state.hostedBy, board1: this.state.thisBoard, board2: this.state.thatBoard })
     }
 
+    toggleLifePoints = (lifePoints) => {
+        console.log("user has ", lifePoints, " life points")
+        let { thisBoard } = this.state
+
+        updateLifePoints({ hostUsername: this.state.hostedBy, location: [thisBoard, "lifePoints"], lifePoints })
+        if (this.state.lifePointsCircleExpanded) {
+            this.userInfoView.setNativeProps({ right: null })
+            this.setState({ lifePointsCircleExpanded: false })
+        } else {
+            this.userInfoView.setNativeProps({ right: 0 })
+            this.setState({ lifePointsCircleExpanded: true })
+
+        }
+    }
+
     render() {
         const { thisBoard, thatBoard, boardsRetrieved, mainDeck, extraDeck, mainDeckPopupVisible, extraDeckPopupVisible, coords, graveyardPopupVisible, dragBegin, banishedZonePopupVisible, overlayBackgroundColor, popupOverlayOpacity, backgroundImageUrl, requestAccessToOpponentGraveyardPopupVisible } = this.state
         const { hand: thisHand, graveyard: thisGraveyard, banishedZone: thisBanishedZone } = boardsRetrieved && this.state[thisBoard]
@@ -839,19 +855,22 @@ class DraggableDuelingRoomPage extends Component {
                             <View key={cardIndex} style={{ ...styles.viewStyles, borderColor: "transparent" }}>
                             </View>
                         ))}
-                        <View style={{ position: "absolute", bottom: Dimensions.get("window").height * 0.46, left: 0, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                            <LifePointsCircle imageUrl={this.props.user.imageURL} styles={{
-                                width: 80,
-                                height: 80,
-                                borderRadius: 40,
-                                // marginLeft: 10,
-                                // backgroundColor: "red",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                // borderWidth: 2,
-                                borderColor: "#000000",
-                                // marginBottom: 10,
-                            }} />
+                        <View ref={view => this.userInfoView = view} style={{ position: "absolute", bottom: Dimensions.get("window").height * 0.46, left: 0, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: "transparent", right: null, zIndex: 50 }}>
+                            <LifePointsCircle
+                                toggleLifePoints={this.toggleLifePoints}
+                                imageUrl={this.props.user.imageURL}
+                                styles={{
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: 40,
+                                    // marginLeft: 10,
+                                    // backgroundColor: "red",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    // borderWidth: 2,
+                                    borderColor: "#000000",
+                                    // marginBottom: 10,
+                                }} />
                             {/* <FadeScaleImage style={{
                                 width: 60,
                                 height: 60,
@@ -875,18 +894,21 @@ class DraggableDuelingRoomPage extends Component {
                         <View style={{ position: "absolute", bottom: Dimensions.get("window").height * 0.55, right: 0, flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
                             {this.state.opponentData &&
                                 <React.Fragment>
-                                    <LifePointsCircle imageUrl={this.state.opponentData.imageURL} styles={{
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 40,
-                                        // marginLeft: 10,
-                                        // backgroundColor: "red",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        // borderWidth: 2,
-                                        borderColor: "#000000",
-                                        // marginBottom: 10,
-                                    }} />
+                                    <LifePointsCircle
+                                        user={this.state.opponentData}
+                                        lifePoints={boardsRetrieved && this.state[thatBoard].lifePoints}
+                                        imageUrl={this.state.opponentData.imageURL} styles={{
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 40,
+                                            // marginLeft: 10,
+                                            // backgroundColor: "red",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            // borderWidth: 2,
+                                            borderColor: "#000000",
+                                            // marginBottom: 10,
+                                        }} />
                                     <FadeScaleText style={{
                                         fontWeight: 'bold',
                                         backgroundColor: 'transparent',

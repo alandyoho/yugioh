@@ -178,6 +178,7 @@ export default class App extends Component {
     Yugioh = createAppContainer(createSwitchNavigator(
       {
         AuthLoading: AuthLoadingScreen,
+        // AuthLoading: CircleSliderContainer,
         App: AppStack,
         Auth: AuthStack,
       },
