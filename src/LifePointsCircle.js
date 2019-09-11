@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Image, Dimensions, Text } from 'react-native';
 import CircleSlider from './react-native-circle-slider';
+import FadeImage from "./ComplexComponents/FadeImage"
+import * as Haptics from 'expo-haptics';
 
 export default class CircleSliderContainer extends Component {
     constructor() {
@@ -29,6 +31,9 @@ export default class CircleSliderContainer extends Component {
     onValueChange = (value) => {
         if (value !== 0) {
             const updatedValue = Math.ceil(((value / 360) * 8000) / 10) * 10
+            if (updatedValue % 20 === 0) {
+                Haptics.impactAsync("light")
+            }
             this.setState(() => {
                 return { value: updatedValue }
             })
@@ -41,7 +46,7 @@ export default class CircleSliderContainer extends Component {
                 <CircleSlider
                     user={this.props.user}
                     btnColor={"black"}
-                    value={359}
+                    value={this.props.value || 359}
                     backgroundColor={"#FFF"}
                     btnRadius={btnRadius}
                     sliderWidth={sliderWidth}
@@ -56,7 +61,7 @@ export default class CircleSliderContainer extends Component {
                         <View style={{ borderRadius: 25, width: 50, height: 20, position: "absolute", zIndex: 1, backgroundColor: "#FFF", justifyContent: "center", alignItems: "center" }}>
                             <Text >{(this.props.lifePoints || value) || 8000}</Text>
                         </View>
-                        <Image source={{ uri: this.props.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: (sliderRadius * 2 + sliderWidth) / 2 * 0.80 }} />
+                        {this.state.btnRadius === 3 && <FadeImage source={{ uri: this.props.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: (sliderRadius * 2 + sliderWidth) / 2 * 0.80 }} />}
                     </View>}
                 />
             </View>

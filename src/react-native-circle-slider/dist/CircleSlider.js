@@ -1,4 +1,6 @@
 "use strict";
+
+
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -150,17 +152,21 @@ class CircleSlider extends React.Component {
             onMoveShouldSetPanResponder: (e, gs) => this.props.user ? false : true,
             onMoveShouldSetPanResponderCapture: (e, gs) => true,
             onPanResponderMove: (e, gs) => {
-                const angles = this.getOnPressAngle(gs.moveX, gs.moveY);
-                /*
-                if (this.state.relativeAngle <= 0) {
-                    if (this.props.startDegree ? this.props.startDegree : 0 < angles.angle) {   // TODO: Fix: Value can't go below 0 or higher than max value
-                        return;
+                if (!this.props.user) {
+                    const angles = this.getOnPressAngle(gs.moveX, gs.moveY);
+                    /*
+                    if (this.state.relativeAngle <= 0) {
+                        if (this.props.startDegree ? this.props.startDegree : 0 < angles.angle) {   // TODO: Fix: Value can't go below 0 or higher than max value
+                            return;
+                        }
                     }
+                    */
+                    this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
+                        this.onValueChanged(this.getCurrentValue());
+                    });
                 }
-                */
-                this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
-                    this.onValueChanged(this.getCurrentValue());
-                });
+
+
             },
             onStartShouldSetPanResponder: (e, gs) => true,
             onStartShouldSetPanResponderCapture: (e, gs) => true,

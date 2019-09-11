@@ -895,6 +895,7 @@ class DraggableDuelingRoomPage extends Component {
                             {this.state.opponentData &&
                                 <React.Fragment>
                                     <LifePointsCircle
+                                        value={boardsRetrieved && ((this.state[thatBoard].lifePoints) / 8000) * 359}
                                         user={this.state.opponentData}
                                         lifePoints={boardsRetrieved && this.state[thatBoard].lifePoints}
                                         imageUrl={this.state.opponentData.imageURL} styles={{
