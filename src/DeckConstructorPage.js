@@ -222,6 +222,8 @@ class DeckConstructorPage extends Component {
     addCard = async (cardInfo) => {
         this.setState({ popUpVisible: false })
         await addCardsToDeck({ username: this.props.user.username, deck: this.props.selectedDeck, card: cardInfo })
+
+
         await this.refreshCards()
     }
     getCards() {

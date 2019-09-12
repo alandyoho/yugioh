@@ -7,7 +7,7 @@ import * as firebase from "firebase"
 import { createUser, updateDeckList, updatePreferences, updateStoredCardsList } from "./actions"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { retrieveDeckInfo, retrieveCardsFromDeck } from "../Firebase/FireMethods"
+import { retrieveDeckInfo, retrieveCardsFromDeck, updateUser } from "../Firebase/FireMethods"
 import { Asset } from 'expo-asset';
 import * as Font from "expo-font"
 import { FadeImage } from "./ComplexComponents"
@@ -87,7 +87,27 @@ class AuthLoadingScreen extends Component {
 
         }
     };
+    _retrieveCardHash = async () => {
+        try {
+            const value = await AsyncStorage.getItem('card-hash');
+            if (value !== null) {
+                // We have data!!
+                const valueAsObj = JSON.parse(value)
 
+                return valueAsObj
+            }
+        } catch (error) {
+
+        }
+    };
+    _storeCardHash = async (obj) => {
+        try {
+            await AsyncStorage.setItem('card-hash', JSON.stringify(obj));
+        } catch (error) {
+            console.error(error)
+            // Error saving data
+        }
+    };
     createEntry = async (uri) => {
         let parsedURI;
         if (!uri.includes("ygoprodeck.com")) {
@@ -124,7 +144,6 @@ class AuthLoadingScreen extends Component {
     retrieveDocumentInfo = async () => {
         try {
             const info = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "CARD_IMAGES")
-            console.log("CARD IMAGES INFO", info)
         } catch (e) {
             console.log("error :(", e)
         }
@@ -144,45 +163,52 @@ class AuthLoadingScreen extends Component {
 
                         this.props.updatePreferences(preferences)
 
-
-
                         let cardImgs = []
-                        let storedCards = {}
-                        for (let i = 0; i < userFromDB.decks.length; i++) {
-                            const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
-                            for (let j = 0; j < mainDeck.length; j++) {
-                                const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
-                                const info = await this.retrieveEntry(cardImg)
-                                if (!info.exists) {
-                                    console.log("card is not in file system")
-                                    const createdEntry = await this.createEntry(cardImg)
-                                    console.log("here's the juice", createdEntry)
-                                    storedCards[mainDeck[j].id] = createdEntry.uri
-                                    cardImgs.push(createdEntry.uri)
-                                } else {
-                                    console.log("card image info", info.uri)
-                                    storedCards[mainDeck[j].id] = info.uri
-                                    cardImgs.push(info.uri)
+                        if (userFromDB.hasUpdates) {
+                            let storedCards = {}
+                            for (let i = 0; i < userFromDB.decks.length; i++) {
+                                const { mainDeck, extraDeck } = await retrieveCardsFromDeck({ username: userFromDB.username, deck: userFromDB.decks[i] })
+                                for (let j = 0; j < mainDeck.length; j++) {
+                                    const cardImg = mainDeck[j]["card_images"][0]["image_url_small"]
+                                    const info = await this.retrieveEntry(cardImg)
+
+                                    if (!info.exists) {
+                                        console.log("card is not in file system")
+                                        const createdEntry = await this.createEntry(cardImg)
+
+                                        storedCards[mainDeck[j].id] = createdEntry.uri
+                                        cardImgs.push(createdEntry.uri)
+                                    } else {
+                                        storedCards[mainDeck[j].id] = info.uri
+                                        cardImgs.push(info.uri)
+                                    }
+                                }
+                                for (let j = 0; j < extraDeck.length; j++) {
+                                    const cardImg = extraDeck[j]["card_images"][0]["image_url_small"]
+
+                                    const info = await this.retrieveEntry(cardImg)
+                                    if (!info.exists) {
+                                        console.log("card is not in file system")
+                                        const createdEntry = await this.createEntry(cardImg)
+                                        storedCards[extraDeck[j].id] = createdEntry.uri
+                                        cardImgs.push(createdEntry.uri)
+                                    } else {
+                                        storedCards[extraDeck[j].id] = info.uri
+                                        cardImgs.push(info.uri)
+                                    }
                                 }
                             }
-                            for (let j = 0; j < extraDeck.length; j++) {
-                                const cardImg = extraDeck[j]["card_images"][0]["image_url_small"]
-                                const info = await this.retrieveEntry(cardImg)
-                                if (!info.exists) {
-                                    console.log("card is not in file system")
-                                    const createdEntry = await this.createEntry(cardImg)
-                                    console.log("here's the juice", createdEntry)
-                                    storedCards[extraDeck[j].id] = createdEntry.uri
-                                    cardImgs.push(createdEntry.uri)
-                                } else {
-                                    console.log("card image info", info.uri)
-                                    storedCards[extraDeck[j].id] = info.uri
-                                    cardImgs.push(info.uri)
-                                }
-                            }
+                            this.props.updateStoredCardsList(storedCards)
+                            await this._storeCardHash(storedCards)
+                            await updateUser(user.displayName, { hasUpdates: false })
+                        } else {
+                            const storedMap = await this._retrieveCardHash()
+                            this.props.updateStoredCardsList(storedMap)
+                            cardImgs = Object.values(storedMap)
                         }
-                        this.props.updateStoredCardsList(storedCards)
+                        // await this._loadAssetsAsync(cardImgs)
                         await this._loadAssetsAsync(cardImgs)
+
 
 
                         this.props.navigation.navigate("App")
@@ -190,7 +216,6 @@ class AuthLoadingScreen extends Component {
 
                         this.props.updateDeckList(userFromDB.decks)
                     } catch (err) {
-                        console.log("beans!")
                         console.error(err)
                     }
                 } else {

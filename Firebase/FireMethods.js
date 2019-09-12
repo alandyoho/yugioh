@@ -183,8 +183,8 @@ const addCardsToDeck = async (obj) => {
             obj.card.card_images[0].image_url_small = uploadURLSmall
             cardImgUrl = uploadURL
             cardImgUrlSmall = uploadURLSmall
-
             cardRef.set(obj.card)
+
         } else {
             let storedCard = docSnapshot.data()
 
@@ -232,6 +232,7 @@ const addCardsToDeck = async (obj) => {
             obj.card.card_images[0].image_url_small = cardImgUrlSmall
             obj.card.card_images[0].image_url = cardImgUrl
             console.log("new card", obj.card)
+            firestore.collection("users").doc(obj.username).set({ hasUpdates: true }, { merge: true })
             return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "extraDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
             })
@@ -267,6 +268,7 @@ const addCardsToDeck = async (obj) => {
             obj.card.card_images[0].image_url_small = cardImgUrlSmall
             obj.card.card_images[0].image_url = cardImgUrl
             console.log("card!!!", obj.card)
+            firestore.collection("users").doc(obj.username).set({ hasUpdates: true }, { merge: true })
             return firestore.collection("decks").doc(`${obj.username}-${obj.deck}`).update({
                 "mainDeck": firebase.firestore.FieldValue.arrayUnion(obj.card)
             })
@@ -397,5 +399,6 @@ const updateUser = (username, obj) => {
             return false
         });
 }
+
 
 export { updateUser, updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField, alterLinkZone, addFriend, retrieveFriendInfo, deleteFriendRequest, retrieveUsers, sendFriendRequest, updateLifePoints }
