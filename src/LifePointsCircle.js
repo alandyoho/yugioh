@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Image, Dimensions, Text } from 'react-native';
+import { View, Image, Dimensions, Text, TextInput, } from 'react-native';
 import CircleSlider from './react-native-circle-slider';
 import FadeImage from "./ComplexComponents/FadeImage"
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,8 @@ export default class CircleSliderContainer extends Component {
             btnRadius: 3,
             sliderWidth: 5,
             sliderRadius: 30,
+            textInputWidth: 50,
+            textInputHeight: 20,
             value: null
         }
     }
@@ -23,6 +25,9 @@ export default class CircleSliderContainer extends Component {
             state.btnRadius === 3 ? updatedState.btnRadius = width / 2 / 10 : updatedState.btnRadius = 3
             state.sliderWidth === 5 ? updatedState.sliderWidth = width / 2 / 6 : updatedState.sliderWidth = 5
             state.sliderRadius === 30 ? updatedState.sliderRadius = width / 2 : updatedState.sliderRadius = 30
+            state.textInputWidth === 50 ? updatedState.textInputWidth = 200 : updatedState.textInputWidth = 50
+            state.textInputHeight === 20 ? updatedState.textInputHeight = 80 : updatedState.textInputHeight = 20
+
             updatedState.value = state.value
             return updatedState
         })
@@ -40,14 +45,15 @@ export default class CircleSliderContainer extends Component {
         }
     }
     render() {
-        const { btnRadius, sliderWidth, sliderRadius, value } = this.state
+
+        const { btnRadius, sliderWidth, sliderRadius, textInputWidth, textInputHeight, value } = this.state
         return (
             <View style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: "red", width: sliderRadius * 2 + sliderWidth, height: sliderRadius * 2 + sliderWidth }, { ...this.props.styles }}>
                 <CircleSlider
                     user={this.props.user}
                     btnColor={"black"}
                     value={this.props.value || 359}
-                    backgroundColor={"#FFF"}
+                    backgroundColor={"transparent"}
                     btnRadius={btnRadius}
                     sliderWidth={sliderWidth}
                     sliderRadius={sliderRadius}
@@ -58,8 +64,8 @@ export default class CircleSliderContainer extends Component {
                     onValueChange={this.onValueChange}
                     // component={<Image source={{ uri: this.props.imageUrl }} style={{ width: "80%", height: "80%", borderRadius: 32.5 * 0.80 }} />}
                     component={<View style={{ width: "80%", height: "80%", justifyContent: "center", alignItems: "center" }}>
-                        <View style={{ borderRadius: 25, width: 50, height: 20, position: "absolute", zIndex: 1, backgroundColor: "#FFF", justifyContent: "center", alignItems: "center" }}>
-                            <Text >{(this.props.lifePoints || value) || 8000}</Text>
+                        <View style={{ borderRadius: textInputWidth / 2, width: textInputWidth, height: textInputHeight, position: "absolute", zIndex: 1, backgroundColor: "#FFF", justifyContent: "center", alignItems: "center" }}>
+                            <TextInput style={{ fontSize: textInputHeight * 0.80 }} keyboardType={"numeric"} value={String((this.props.lifePoints || value) || 8000)} />
                         </View>
                         {this.state.btnRadius === 3 && <FadeImage source={{ uri: this.props.imageUrl }} style={{ width: "100%", height: "100%", borderRadius: (sliderRadius * 2 + sliderWidth) / 2 * 0.80 }} />}
                     </View>}

@@ -154,13 +154,14 @@ class CircleSlider extends React.Component {
             onPanResponderMove: (e, gs) => {
                 if (!this.props.user) {
                     const angles = this.getOnPressAngle(gs.moveX, gs.moveY);
-                    /*
+
                     if (this.state.relativeAngle <= 0) {
                         if (this.props.startDegree ? this.props.startDegree : 0 < angles.angle) {   // TODO: Fix: Value can't go below 0 or higher than max value
-                            return;
+                            console.log("beans")
+
                         }
                     }
-                    */
+
                     this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
                         this.onValueChanged(this.getCurrentValue());
                     });
@@ -203,6 +204,7 @@ class CircleSlider extends React.Component {
                     <Circle r={dR} cx={width / 2} cy={width / 2} stroke={this.props.backgroundColor} strokeWidth={this.props.sliderWidth} fill="none" />
 
                     <Path stroke={"url(#gradient1)"} strokeWidth={this.props.sliderWidth} fill="none" strokeLinecap="round" strokeLinejoin="round" d={`M${startCoord.x} ${startCoord.y} A ${radiusX} ${radiusY} ${xAxisRotation} ${largeArc} ${sweepFlag} ${endCoord.x} ${endCoord.y}`} onPressIn={(e) => {
+                        console.log("path pressed")
                         const p = e.nativeEvent;
                         const angles = this.getOnPressAngle(p.locationX, p.locationY);
                         this.setState({ angle: angles.angle, relativeAngle: angles.relativeAngle }, () => {
@@ -213,6 +215,8 @@ class CircleSlider extends React.Component {
                     }} />
 
                     <Circle r={dR + ((dR * 25) / 100)} cx={width / 2} cy={width / 2} stroke="none" fill="none" onPressIn={(e) => {
+                        console.log("circle pressed")
+
                         this.props.expandLifePoints()
                         // const p = e.nativeEvent;
                         // const angles = this.getOnPressAngle(p.pageX, p.pageY);
@@ -228,7 +232,7 @@ class CircleSlider extends React.Component {
                     </G>
 
                     {this.state.measuredBox && this.state.measuredBox.length > 2 && this.state.measuredBox[2].y ?
-                        <View style={{ justifyContent: "center", alignItems: "center", backgroundColor: "transparent" }} overflow="visible" position="absolute" top={0} left={0} right={0} bottom={0} width={width} height={width}>
+                        <View style={{ justifyContent: "center", alignItems: "center", backgroundColor: "transparent" }} overflow="visible" position="absolute" top={0} left={0} right={0} bottom={0} width={width} height={width} zIndex={20}>
                             {this.props.component}
                         </View>
                         :
