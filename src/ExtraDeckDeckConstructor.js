@@ -8,7 +8,7 @@ import { bindActionCreators } from 'redux';
 import { retrieveCardsFromDeck, addCardsToDeck, deleteCard, removeCardsFromDeck } from "../Firebase/FireMethods"
 import { FadeScaleImage, SwipeableRow, ShakingImage } from './ComplexComponents';
 import CARDS from "./cards.js"
-import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
+import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
 
 
 class ExtraDeckDeckConstructor extends Component {
@@ -202,20 +202,21 @@ class ExtraDeckDeckConstructor extends Component {
                 />
                 <Dialog
                     visible={this.state.popUpVisible}
-                    width={0.90}
-                    height={0.90}
+                    width={1.0}
+                    height={0.80}
 
-                    dialogAnimation={new ScaleAnimation({
-                        initialValue: 0, // optional
-                        useNativeDriver: true, // optional
+                    dialogAnimation={new SlideAnimation({
+                        slideFrom: 'bottom',
+                        useNativeDriver: true
                     })}
+                    dialogStyle={{ position: 'absolute', bottom: 0 }}
                     onTouchOutside={() => {
                         this.setState({ popUpVisible: false })
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
                         <View style={{ flex: 8 / 10 }}>
-                            {this.state.selectedCard && <FadeScaleImage resizeMode={"contain"} source={{ uri: this.state.selectedCard.card_images[0].image_url }} style={{ width: "100%", height: "100%" }} />}
+                            {this.state.selectedCard && <FadeScaleImage resizeMode={"contain"} source={{ uri: this.state.selectedCard.card_images[0].image_url }} style={{ width: "100%", height: "100%", marginTop: 20 }} />}
                         </View>
                         <View style={{ flex: 2 / 10, justifyContent: "center", alignItems: "center" }}>
                             <Text style={{
@@ -241,12 +242,11 @@ class ExtraDeckDeckConstructor extends Component {
                                             maxQuant = 2
                                         }
                                     }
-                                    return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: 40, borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
+                                    return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: "100%", borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
                                         this.updateCardQuantity({ value: item, card: selectedCard, username: this.props.user.username, deck: this.props.selectedDeck })
                                         selectedCard.quantity = item
-
                                     }}>
-                                        <Text style={{ fontSize: 30, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>
+                                        <Text style={{ fontSize: 25, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>
                                     </TouchableOpacity>)
                                 }}
                             />
