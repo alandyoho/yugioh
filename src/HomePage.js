@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Dimensions, Image, Text, Animated } from 'react-native';
+import { StyleSheet, View, Dimensions, Image, Text, Animated, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -15,6 +15,9 @@ import { FadeImage } from "./ComplexComponents"
 import * as Haptics from 'expo-haptics';
 import EditProfileForm from "./HomePageComponents/EditProfileForm"
 import FriendsPopup from "./HomePageComponents/FriendsPopup"
+import TouchableScale from 'react-native-touchable-scale';
+
+
 
 class HomePage extends Component {
     constructor() {
@@ -35,6 +38,9 @@ class HomePage extends Component {
         }
         this.soundObject = new Audio.Sound();
         this.animatedValue = new Animated.Value(0)
+        this.duelingRoomButtonAnimatedValue = new Animated.Value(1)
+        this.deckConstructorButtonAnimatedValue = new Animated.Value(1)
+
     }
     async componentDidMount() {
         console.log("(7)", this.props.storedCards)
@@ -117,11 +123,27 @@ class HomePage extends Component {
     toggleProfilePopup = () => {
         this.setState({ profilePopupVisible: !this.state.profilePopupVisible })
     }
+    handlePressIn = (type) => {
+        Animated.timing(this[type + "ButtonAnimatedValue"], {
+            toValue: 0.90,
+            duration: 250
+        }).start()
+    }
+    handlePressOut = (type) => {
+        Animated.timing(this[type + "ButtonAnimatedValue"], {
+            toValue: 1,
+            friction: 3,
+            tension: 40,
+            duration: 250
+        }).start()
+    }
     render() {
-        const interpolatePosition = this.animatedValue.interpolate({
-            inputRange: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
-            outputRange: [0, -20, -40, -60, -80, -100, -120, -140, -160, -180, -200]
-        })
+        const deckConstructorAnimatedStyle = {
+            transform: [{ scale: this.deckConstructorButtonAnimatedValue }]
+        }
+        const duelingRoomAnimatedStyle = {
+            transform: [{ scale: this.duelingRoomButtonAnimatedValue }]
+        }
         const { user, navigation, updateSelectedDeck } = this.props
         const { duelingRoomSelectPageVisible, deckSelectPageVisible, settingsPopupVisible, friendsPopupVisible, profilePopupVisible } = this.state
         return (
@@ -142,26 +164,54 @@ class HomePage extends Component {
                     <View style={{ height: 100, marginBottom: 25, width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
                         <FadeImage source={require("../assets/yugiohLogo.png")} resizeMode="contain" style={{ width: "80%" }} />
                     </View>
-                    <Button
-                        title="Deck Constructor"
-                        titleStyle={{
-                            color: 'white',
-                            fontWeight: '800',
-                            fontSize: 18,
-                        }}
-                        buttonStyle={{
+                    <TouchableWithoutFeedback
+                        onPressIn={() => this.handlePressIn("deckConstructor")}
+                        onPressOut={() => this.handlePressOut("deckConstructor")}
+                        onLongPress={() => this.handleLongPress("DeckConstructor")}
+                        onPress={() => this.setState({ deckSelectPageVisible: true })}
+                    >
+                        <Animated.View style={[{
                             backgroundColor: 'rgb(130, 69, 91)',
                             marginTop: 10,
                             borderRadius: 10,
                             width: Dimensions.get("window").width - 64,
                             height: 50,
-                            alignSelf: "center"
-                        }}
-                        loading={false}
-                        onPress={() => this.setState({ deckSelectPageVisible: true })}
-                        onLongPress={() => this.handleLongPress("DeckConstructor")}
-                    />
-                    <Button
+                            alignSelf: "center",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }, deckConstructorAnimatedStyle]}>
+                            <Text style={{
+                                color: 'white',
+                                fontWeight: '800',
+                                fontSize: 18,
+                            }}>Deck Constructor</Text>
+                        </Animated.View>
+                    </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback
+                        onPressIn={() => this.handlePressIn("duelingRoom")}
+                        onPressOut={() => this.handlePressOut("duelingRoom")}
+                        onPress={() => this.setState({ duelingRoomSelectPageVisible: true })}
+                        onLongPress={() => this.handleLongPress("DuelingRoom")}
+                    >
+                        <Animated.View style={[{
+                            backgroundColor: 'rgb(130, 69, 91)',
+                            marginTop: 10,
+                            borderRadius: 10,
+                            width: Dimensions.get("window").width - 64,
+                            height: 50,
+                            alignSelf: "center",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }, duelingRoomAnimatedStyle]}>
+                            <Text style={{
+                                color: 'white',
+                                fontWeight: '800',
+                                fontSize: 18,
+                            }}>Dueling Room</Text>
+                        </Animated.View>
+                    </TouchableWithoutFeedback>
+
+                    {/* <Button
                         title="Dueling Room"
                         titleStyle={{
                             color: 'white',
@@ -180,7 +230,7 @@ class HomePage extends Component {
                         onPress={() => this.setState({ duelingRoomSelectPageVisible: true })}
                         onLongPress={() => this.handleLongPress("DuelingRoom")}
 
-                    />
+                    /> */}
                     <Dialog
                         visible={deckSelectPageVisible}
                         width={0.85}

@@ -35,21 +35,17 @@ class MainDeckDeckConstructor extends Component {
             selectedCard: "",
             expanded: false,
             loading: false,
-            deckRetrieved: false,
             overviewPopupVisible: false,
             quantities: { monstersQuant: 0, spellsQuant: 0, trapsQuant: 0 },
             shaking: false,
             searchPopupVisible: false,
+
         }
     }
 
 
-    componentDidMount = async () => {
-        await this.refreshCards()
-        console.log("storedCards", this.props.storedCards)
-        await setTimeout(() => {
-            this.setState({ deckRetrieved: true })
-        }, 3000)
+    componentDidMount = () => {
+        this.refreshCards()
     }
     animateIcon = () => {
         this.largeAnimatedIcon.stopAnimation()
@@ -61,8 +57,6 @@ class MainDeckDeckConstructor extends Component {
 
 
     refreshCards = async () => {
-        // const { mainDeck } = await retrieveCardsFromDeck({ username: "YOHO", deck: "Frog" })
-
         const { mainDeck } = await retrieveCardsFromDeck({ username: this.props.user.username, deck: this.props.selectedDeck })
         let monsters = []
         let spells = []
@@ -149,6 +143,9 @@ class MainDeckDeckConstructor extends Component {
     toggleDeleteMode = () => {
         this.setState({ shaking: !this.state.shaking })
     }
+    presentImage = () => {
+
+    }
     renderSubItem = ({ item }) => {
         const size = Dimensions.get('window').width / 6
         return (
@@ -159,14 +156,15 @@ class MainDeckDeckConstructor extends Component {
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
+
             }}>
-                <View style={{ width: size, height: 100 }}>
-                    <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4 }} onLongPress={this.toggleDeleteMode} onPress={() => this.expandCard(item)}>
-                        {item["card_images"] && <ShakingImage storedCards={this.props.storedCards} deleteCard={this.deleteCard} item={item} shaking={this.state.shaking} source={item["card_images"][0]["image_url_small"]} resizeMode={"contain"} style={{
+                <Animated.View style={{ width: size * 0.90, height: 100, backgroundColor: "transparent", borderRadius: 10 }}>
+                    <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4, opacity: 1 }} onLongPress={this.toggleDeleteMode} onPress={() => this.expandCard(item)}>
+                        {item["card_images"] && <ShakingImage presentImage={this.presentImage} storedCards={this.props.storedCards} deleteCard={this.deleteCard} item={item} shaking={this.state.shaking} source={item["card_images"][0]["image_url_small"]} style={{
                             width: size * 0.90, height: 100
                         }} />}
                     </TouchableOpacity>
-                </View>
+                </Animated.View>
 
             </View>
         )
@@ -207,7 +205,7 @@ class MainDeckDeckConstructor extends Component {
         for (let i = 0; i < keys.length; i++) {
             const card = keys[i];
             res.push(
-                <TouchableOpacity disabled={!exists} onPress={() => exists && this.addCard(this.state.cards[card])} key={card}>
+                <TouchableWithoutFeedback disabled={!exists} onPress={() => exists && this.addCard(this.state.cards[card])} key={card}>
                     <FadeScaleImage
                         key={card}
                         source={exists ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
@@ -217,7 +215,7 @@ class MainDeckDeckConstructor extends Component {
                             width: Dimensions.get("window").width * 0.60
                         }}
                     />
-                </TouchableOpacity>
+                </TouchableWithoutFeedback>
             )
         }
         return res;
@@ -287,9 +285,9 @@ class MainDeckDeckConstructor extends Component {
                         <AnimatedIcon
                             ref={v => this.largeAnimatedIcon = v}
                             name="check-circle"
-                            color={"#FFF"}
-                            size={70}
-                            style={{ position: "absolute", zIndex: 5, left: Dimensions.get("window").width / 2 - 25, top: Dimensions.get("window").height * 0.60 / 2 - 25, opacity: 0 }}
+                            color={"rgb(130, 69, 91)"}
+                            size={150}
+                            style={{ position: "absolute", zIndex: 5, left: Dimensions.get("window").width / 2 - 75, top: Dimensions.get("window").height * 0.60 / 2 - 75, opacity: 0 }}
                             duration={500}
                             delay={200}
                         />
