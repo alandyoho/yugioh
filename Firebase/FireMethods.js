@@ -21,7 +21,7 @@ const updateUserInfo = (obj) => {
     obj = clean(obj)
     console.log("obj after", obj)
 
-    firestore.collection("users").doc(obj.username).set({ hostedBy: "", hosting: false, decks: [], friends: [], friendRequests: [], ...obj }, { merge: true })
+    firestore.collection("users").doc(obj.username).set({ hasUpdates: true, hostedBy: "", hosting: false, decks: [], friends: [], friendRequests: [], ...obj }, { merge: true })
     var authUser = auth.currentUser;
     return authUser.updateProfile({
         displayName: obj.username,

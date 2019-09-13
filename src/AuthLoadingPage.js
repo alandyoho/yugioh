@@ -208,12 +208,7 @@ class AuthLoadingScreen extends Component {
                         }
                         // await this._loadAssetsAsync(cardImgs)
                         await this._loadAssetsAsync(cardImgs)
-
-
-
                         this.props.navigation.navigate("App")
-
-
                         this.props.updateDeckList(userFromDB.decks)
                     } catch (err) {
                         console.error(err)

@@ -8,8 +8,12 @@ import { bindActionCreators } from 'redux';
 import { retrieveCardsFromDeck, addCardsToDeck, deleteCard, removeCardsFromDeck } from "../Firebase/FireMethods"
 import { FadeScaleImage, SwipeableRow, ShakingImage } from './ComplexComponents';
 import CARDS from "./cards.js"
-import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation } from 'react-native-popup-dialog';
-
+import Dialog, { DialogContent, DialogTitle, DialogFooter, DialogButton, ScaleAnimation, SlideAnimation } from 'react-native-popup-dialog';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
+// import Icon from 'react-native-vector-icons/Feather';
+import * as Animatable from 'react-native-animatable'
+import Icon from 'react-native-vector-icons/Feather'
+const AnimatedIcon = Animatable.createAnimatableComponent(Icon)
 
 class MainDeckDeckConstructor extends Component {
     constructor(props) {
@@ -35,7 +39,7 @@ class MainDeckDeckConstructor extends Component {
             overviewPopupVisible: false,
             quantities: { monstersQuant: 0, spellsQuant: 0, trapsQuant: 0 },
             shaking: false,
-            searchPopupVisible: false
+            searchPopupVisible: false,
         }
     }
 
@@ -47,6 +51,12 @@ class MainDeckDeckConstructor extends Component {
             this.setState({ deckRetrieved: true })
         }, 3000)
     }
+    animateIcon = () => {
+        this.largeAnimatedIcon.stopAnimation()
+        this.largeAnimatedIcon.bounceIn()
+            .then(() => this.largeAnimatedIcon.bounceOut())
+    }
+
 
 
 
@@ -95,6 +105,7 @@ class MainDeckDeckConstructor extends Component {
         this.setState({ selectedCard: cardInfo, popUpVisible: true })
     }
     addCard = async (card) => {
+        this.animateIcon()
         await addCardsToDeck({ username: this.props.user.username, deck: this.props.selectedDeck, card })
         await this.refreshCards()
     }
@@ -200,7 +211,6 @@ class MainDeckDeckConstructor extends Component {
                     <FadeScaleImage
                         key={card}
                         source={exists ? { uri: this.state.cards[card]["card_images"][0]["image_url"] } : CARDS[card]}
-
                         resizeMode="contain"
                         style={{
                             height: "90%",
@@ -259,21 +269,33 @@ class MainDeckDeckConstructor extends Component {
                 />
                 <Dialog
                     visible={this.state.searchPopupVisible}
-                    width={0.90}
-                    height={0.90}
+                    width={1.0}
+                    height={0.80}
 
-                    dialogAnimation={new ScaleAnimation({
-                        initialValue: 0, // optional
-                        useNativeDriver: true, // optional
+                    dialogAnimation={new SlideAnimation({
+                        slideFrom: 'bottom',
+                        useNativeDriver: true
                     })}
+                    dialogStyle={{ position: 'absolute', bottom: 0 }}
+
                     onTouchOutside={() => {
                         this.setState({ searchPopupVisible: false })
                         this.props.navigation.setParams({ requestingSearch: false, type: "" });
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
+                        <AnimatedIcon
+                            ref={v => this.largeAnimatedIcon = v}
+                            name="check-circle"
+                            color={"#FFF"}
+                            size={70}
+                            style={{ position: "absolute", zIndex: 5, left: Dimensions.get("window").width / 2 - 25, top: Dimensions.get("window").height * 0.60 / 2 - 25, opacity: 0 }}
+                            duration={500}
+                            delay={200}
+                        />
+
                         {!this.state.loading ? <CoverFlow
-                            style={{ flex: 6 / 10 }}
+                            style={{ flex: 1 }}
                             onChange={() => true}
                             spacing={100}
                             wingSpan={80}
@@ -288,30 +310,32 @@ class MainDeckDeckConstructor extends Component {
                         </CoverFlow> : <ActivityIndicator color={"rgb(130, 69, 91)"} size={"large"} style={{ flex: 1 }} />}
 
 
-                        <View style={{ flex: 4 / 10 }}>
-                            <View style={{ ...styles.deckSearchContainer, marginBottom: 15 }}>
-                                <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} autoCorrect={false} autoCapitalize={"none"} />
-                                <FadeScaleImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
-                            </View>
+                        {/* <View style={{ flex: 1 / 10 }}> */}
+                        <View style={{ ...styles.deckSearchContainer, marginBottom: 5 }}>
+                            <TextInput placeholderTextColor={"black"} placeholder={"Search..."} style={styles.deckSearchTextInput} onChangeText={(search) => this.setState({ search })} onSubmitEditing={this.onSubmit} onFocus={this.resetViewsToDefault} returnKeyType={"search"} autoCorrect={false} autoCapitalize={"none"} />
+                            <FadeScaleImage source={require("../assets/searchIcon.png")} style={styles.searchIcon} />
                         </View>
+                        <KeyboardSpacer />
+                        {/* </View> */}
                     </DialogContent>
                 </Dialog>
                 <Dialog
                     visible={this.state.popUpVisible}
-                    width={0.90}
-                    height={0.90}
+                    width={1.0}
+                    height={0.80}
 
-                    dialogAnimation={new ScaleAnimation({
-                        initialValue: 0, // optional
-                        useNativeDriver: true, // optional
+                    dialogAnimation={new SlideAnimation({
+                        slideFrom: 'bottom',
+                        useNativeDriver: true
                     })}
+                    dialogStyle={{ position: 'absolute', bottom: 0 }}
                     onTouchOutside={() => {
                         this.setState({ popUpVisible: false })
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
                         <View style={{ flex: 8 / 10 }}>
-                            {this.state.selectedCard && <FadeScaleImage resizeMode={"contain"} source={{ uri: this.state.selectedCard.card_images[0].image_url }} style={{ width: "100%", height: "100%" }} />}
+                            {this.state.selectedCard && <FadeScaleImage resizeMode={"contain"} source={{ uri: this.state.selectedCard.card_images[0].image_url }} style={{ width: "100%", height: "100%", marginTop: 20 }} />}
                         </View>
                         <View style={{ flex: 2 / 10, justifyContent: "center", alignItems: "center" }}>
                             <Text style={{
@@ -337,12 +361,11 @@ class MainDeckDeckConstructor extends Component {
                                             maxQuant = 2
                                         }
                                     }
-                                    return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: 40, borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
+                                    return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: "100%", borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
                                         this.updateCardQuantity({ value: item, card: selectedCard, username: this.props.user.username, deck: this.props.selectedDeck })
                                         selectedCard.quantity = item
-
                                     }}>
-                                        <Text style={{ fontSize: 30, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>
+                                        <Text style={{ fontSize: 25, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>
                                     </TouchableOpacity>)
                                 }}
                             />
@@ -382,10 +405,10 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         width: "95%",
         height: 41,
-        alignSelf: "center",
         // top: 94,
         justifyContent: "center",
         // zIndex: 10,
+        alignSelf: "center"
     },
 
     item: {
