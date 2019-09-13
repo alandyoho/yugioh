@@ -72,7 +72,7 @@ class ExaminePopupContent extends Component {
                                 }
                             }
                             return index + 1 <= maxQuant && (<TouchableOpacity style={{ width: 80, height: "100%", borderRadius: 10, borderColor: "black", borderWidth: 2, justifyContent: "center", alignItems: "center", margin: 10, backgroundColor: index + 1 == selectedCard.quantity ? "black" : "white" }} onPress={() => {
-                                this.updateCardQuantity({ value: item, card: selectedCard, username: this.props.user.username, deck: this.props.selectedDeck })
+                                this.props.updateCardQuantity({ value: item, card: selectedCard, username: this.props.user.username, deck: this.props.selectedDeck })
                                 selectedCard.quantity = item
                             }}>
                                 <Text style={{ fontSize: 25, color: index + 1 == selectedCard.quantity ? "white" : "black" }}>{item}</Text>

@@ -157,7 +157,6 @@ class MainDeckDeckConstructor extends Component {
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
-
             }}>
                 <Animated.View style={{ width: size * 0.90, height: 100, backgroundColor: "transparent", borderRadius: 10 }}>
                     <TouchableOpacity style={{ width: size * 0.90, height: 100, flexDirection: "row", justifyContent: "center", alignItems: "flex-end", zIndex: 4, opacity: 1 }} onLongPress={this.toggleDeleteMode} onPress={() => this.expandCard(item)}>
@@ -334,7 +333,7 @@ class MainDeckDeckConstructor extends Component {
                     }}
                 >
                     <DialogContent style={{ flex: 1 }}>
-                        <ExaminePopupContent dismissExaminePopup={() => this.setState({ popUpVisible: false })} selectedCard={this.state.selectedCard} selectedCard={this.state.selectedCard} />
+                        <ExaminePopupContent updateCardQuantity={this.updateCardQuantity} dismissExaminePopup={() => this.setState({ popUpVisible: false })} selectedCard={this.state.selectedCard} selectedCard={this.state.selectedCard} user={this.props.user} selectedDeck={this.props.selectedDeck} />
                     </DialogContent>
                 </Dialog>
             </View >
