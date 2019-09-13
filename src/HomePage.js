@@ -43,14 +43,19 @@ class HomePage extends Component {
         if (this.props.preferences.musicEnabled) {
             await this.loadAndEnableAudio()
         }
-
-        Animated.spring(this.animatedValue, {
-            toValue: -200,
-            duration: 250,
-        }).start();
         setTimeout(() => {
-            this.setState({ FadeViewZIndex: -1 })
-        }, 500)
+            Animated.spring(this.animatedValue, {
+                toValue: -400,
+                duration: 400,
+            }).start();
+            setTimeout(() => {
+                this.fadeView.setNativeProps({ zIndex: -1 })
+            }, 400)
+        }, 1000)
+
+
+
+
     }
     loadAndEnableAudio = async () => {
         try {
@@ -122,7 +127,7 @@ class HomePage extends Component {
         return (
             <SideMenu openMenuOffset={Dimensions.get("window").width / 2} menu={<CustomSideMenu screen={"HomePage"} navigation={navigation} CustomSideMenu={Dimensions.get("window").width / 3} toggleSettingsPopup={() => this.setState({ settingsPopupVisible: true })} toggleFriendsPopup={this.toggleFriendsPopup} toggleProfilePopup={this.toggleProfilePopup} user={this.props.user} />}>
                 <View style={styles.container}>
-                    <Animated.View style={{ position: "absolute", flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "transparent", zIndex: this.state.FadeViewZIndex }}>
+                    <Animated.View style={{ position: "absolute", flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "transparent", zIndex: 20 }} ref={v => this.fadeView = v}>
 
                         {/* <Animated.View style={{ position: "absolute", backgroundColor: interpolateColor, flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", left: 0, right: 0, top: 0, bottom: 0, zIndex: this.state.FadeViewZIndex }}> */}
                         <Animated.View style={{ position: "absolute", left: this.animatedValue, top: 0, bottom: 0, width: Dimensions.get("window").width / 2, backgroundColor: 'rgb(230, 77, 61)', justifyContent: "center", alignItems: 'flex-end' }}>
