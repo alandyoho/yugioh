@@ -51,14 +51,24 @@ export default class DeckSelectPopup extends Component {
         }
     }
 
+    // renderItem = ({ item }) => {
+    //     return (
+    //         <TouchableOpacity style={{ flex: 1 }} onPress={() => this.onPressItem(item)}>
+    //             <Text style={{ fontSize: 20, marginLeft: 20 }}>{item}</Text>
+    //         </TouchableOpacity>
+    //     )
+    // }
     renderItem = ({ item }) => {
         return (
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => this.onPressItem(item)}>
-                <Text style={{ fontSize: 20, marginLeft: 20 }}>{item}</Text>
-            </TouchableOpacity>
+            <View
+                style={{ height: 75 }}
+            >
+                <TouchableOpacity style={[styles.listItem, { alignSelf: "flex-start", backgroundColor: 'white' }]} onPress={() => this.onPressItem(item)}>
+                    <Text style={{ fontSize: 20, alignSelf: "flex-start" }}>{item}</Text>
+                </TouchableOpacity>
+            </View>
         )
     }
-
     FlatListItemSeparator = () => {
         return (
             <View
@@ -105,6 +115,8 @@ const styles = StyleSheet.create({
         flex: 1,
         borderRadius: 5,
         backgroundColor: '#FFF',
+        paddingLeft: 20,
+        paddingRight: 20
     },
     listItem: {
         height: 75,
