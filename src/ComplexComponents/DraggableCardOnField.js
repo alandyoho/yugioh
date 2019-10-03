@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, PanResponder, Animated, Image, TouchableOpacity } from "react-native";
 import * as Haptics from 'expo-haptics';
 import FadeScaleImage from "./FadeScaleImage"
+import CardFlip from 'react-native-card-flip';
 
 export default class DraggableCardOnField extends Component {
     constructor(props) {
@@ -107,9 +108,12 @@ export default class DraggableCardOnField extends Component {
                 {...this.panResponder.panHandlers}
                 style={[this.state.pan.getLayout(), { flexDirection: "column", justifyContent: "center", alignItems: "center", zIndex: 10, transform: this.props.user ? (this.props.user === this.props.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }]) : [{ rotate: "0deg" }] }]}>
                 <TouchableOpacity onLongPress={this.examineCard} onPress={this.handleDoubleTap} style={{ flexDirection: "column", justifyContent: "center", alignItems: "center", transform: this.props.user ? (this.props.item.user && this.props.user === this.props.item.user ? [{ rotate: "0deg" }] : [{ rotate: '180deg' }]) : [{ rotate: '180deg' }] }}>
+
                     <FadeScaleImage
                         source={this.props.item.set ? require("../../assets/default_card.png") : { uri: this.props.storedCards[this.props.item.id] ? this.props.storedCards[this.props.item.id] : this.props.item.card_images[0].image_url_small }} resizeMode={"contain"}
                         style={[{ transform: (this.props.user && !this.props.item.defensePosition) ? (this.props.user === this.props.host ? [{ rotate: '180deg' }] : [{ rotate: "0deg" }]) : (this.props.item.defensePosition ? [{ rotate: '270deg' }] : [{ rotate: '180deg' }]) }, this.state.overReturnToHand ? { width: 150 * 0.65, height: 300 * 0.65 } : { flex: 1, width: 50, height: 100 }]} />
+
+
                 </TouchableOpacity>
             </Animated.View>
         );

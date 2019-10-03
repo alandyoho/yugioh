@@ -87,10 +87,8 @@ class MainDeckDeckConstructor extends Component {
         try {
             console.log("type,(1) ", this.state.cardType)
             console.log("type, (2)", this.props.navigation.state.params.type)
-
-
-            const { data } = await functions.httpsCallable("searchResults")({ name: cardName, type: this.props.navigation.state.params.type })
-            data && this.setState({ cards: data })
+            const { data: cards } = await functions.httpsCallable("searchResults")({ name: cardName, type: this.props.navigation.state.params.type })
+            cards && this.setState({ cards })
         } catch (err) {
             console.error(err)
         }
@@ -286,7 +284,7 @@ class MainDeckDeckConstructor extends Component {
                         <AnimatedIcon
                             ref={v => this.largeAnimatedIcon = v}
                             name="check-circle"
-                            color={"rgb(130, 69, 91)"}
+                            color={"#FFF"}
                             size={150}
                             style={{ position: "absolute", zIndex: 5, left: Dimensions.get("window").width / 2 - 75, top: Dimensions.get("window").height * 0.60 / 2 - 75, opacity: 0 }}
                             duration={500}

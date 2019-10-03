@@ -82,6 +82,8 @@ class AuthLoadingScreen extends Component {
                 const valueAsObj = JSON.parse(value)
 
                 return valueAsObj
+            } else {
+                return { musicEnabled: true, soundEffectsEnabled: false, dragAndDropEnabled: true }
             }
         } catch (error) {
 
@@ -151,6 +153,8 @@ class AuthLoadingScreen extends Component {
     authSubscription = async () => {
         await setTimeout(async () => {
             await firebase.auth().onAuthStateChanged(async (user) => {
+                console.log("auth listener firing")
+                console.log("user!!", user)
                 if (user && user.displayName) {
                     try {
                         const userFromDB = await retrieveDeckInfo(user.displayName)
@@ -252,6 +256,9 @@ class AuthLoadingScreen extends Component {
             require("../assets/loadingScreen-1.gif"),
             require("../assets/loadingGifAdvanced1.png"),
             require("../assets/loadingGifAdvanced2.png"),
+            require('../assets/images/deckConstructor.png'),
+            require('../assets/images/cardSearch.jpeg'),
+            require('../assets/images/duelingRoom.png'),
             ...images
         ]);
         await Promise.all([...imageAssets]);

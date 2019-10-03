@@ -21,6 +21,10 @@ export default class ShakingImage extends Component {
                 toValue: 1,
                 duration: 250
             }).start()
+            Animated.timing(this.state.imageBackground, {
+                toValue: 1,
+                duration: 250,
+            }).start()
         })
 
         // this.imageFadeAnimation().stop()
@@ -61,7 +65,7 @@ export default class ShakingImage extends Component {
     render() {
         const imageBackground = this.state.imageBackground.interpolate({
             inputRange: [0, 1],
-            outputRange: ["rgb(249, 249, 249)", "#FFF"]
+            outputRange: ["rgb(237, 235, 239)", "#FFF"]
 
         })
         if (this.props.shaking) {

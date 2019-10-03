@@ -35,7 +35,7 @@ export default class CircleSliderContainer extends Component {
     }
     onValueChange = (value) => {
         if (value !== 0) {
-            const updatedValue = Math.ceil(((value / 360) * 8000) / 10) * 10
+            const updatedValue = Math.ceil(((value / 360) * 8000) / 5) * 5
             if (updatedValue % 20 === 0) {
                 Haptics.impactAsync("light")
             }

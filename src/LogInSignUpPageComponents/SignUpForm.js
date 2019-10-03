@@ -29,6 +29,7 @@ export default class SignUpForm extends Component {
     focusNextField = (key) => {
         this.inputs[key].focus();
     }
+
     signUp = async (user) => {
         //create auth user in firebase
         try {

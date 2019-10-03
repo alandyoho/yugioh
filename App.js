@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
 import userReducer from './src/reducer';
-import { Platform } from 'react-native'
+import { Platform, Image } from 'react-native'
 import AuthLoadingScreen from "./src/AuthLoadingPage"
 import { createSwitchNavigator, createStackNavigator, createAppContainer, createBottomTabNavigator } from 'react-navigation';
 import { StatusBar } from 'react-native';
@@ -15,6 +15,28 @@ import { MultiBar, MultiBarToggle } from 'react-native-multibar';
 import MainDeckDeckConstructor from "./src/MainDeckDeckConstructor"
 import ExtraDeckDeckConstructor from "./src/ExtraDeckDeckConstructor"
 import CircleSliderContainer from "./src/LifePointsCircle"
+
+
+
+import Welcome from './src/screens/Welcome';
+import Login from './src/screens/Login';
+import SignUp from './src/screens/SignUp';
+import Forgot from './src/screens/Forgot';
+import Explore from './src/screens/Explore';
+import Browse from './src/screens/Browse';
+import Product from './src/screens/Product';
+import Settings from './src/screens/Settings';
+import { theme } from './src/constants';
+
+
+
+
+
+
+
+
+
+
 const DeckConstructorPageTabsNavigator = createBottomTabNavigator({
   MainDeckDeckConstructor: {
     screen: MainDeckDeckConstructor,
@@ -158,12 +180,42 @@ const AppStack = createStackNavigator({
 });
 
 
+// const AuthStack = createStackNavigator({
+//   LogInSignUpPage: {
+//     screen: LogInSignUpPage,
+//     navigationOptions: {
+//       header: null
+//     }
+//   }
+// });
 const AuthStack = createStackNavigator({
-  LogInSignUpPage: {
-    screen: LogInSignUpPage,
-    navigationOptions: {
-      header: null
-    }
+  Welcome,
+  Login,
+  SignUp,
+  Forgot,
+  Explore,
+  Browse,
+  Product,
+  Settings,
+}, {
+  defaultNavigationOptions: {
+    headerStyle: {
+      height: theme.sizes.base * 4,
+      backgroundColor: theme.colors.white, // or 'white
+      borderBottomColor: "transparent",
+      elevation: 0, // for android
+    },
+    headerBackImage: <Image source={require('./assets/icons/back.png')} />,
+    headerBackTitle: null,
+    headerLeftContainerStyle: {
+      alignItems: 'center',
+      marginLeft: theme.sizes.base * 2,
+      paddingRight: theme.sizes.base,
+    },
+    headerRightContainerStyle: {
+      alignItems: 'center',
+      paddingRight: theme.sizes.base,
+    },
   }
 });
 

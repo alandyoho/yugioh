@@ -6,7 +6,6 @@ export default reducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
         case "UPDATE_USER":
             newState.user = { ...newState.user, ...action.val }
-            console.log("updated store", newState)
             return newState
         case "CREATE_USER":
             newState.user = action.user

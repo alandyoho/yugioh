@@ -112,16 +112,27 @@ const removeCardsFromDeck = async (obj) => {
 }
 
 const alterBoard = async (obj) => {
-    // 
+    console.log("ummm", obj)
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
 }
 const alterLinkZone = async (obj) => {
-    //
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}`]: obj.updates })
 }
 const requestAccessToGraveyard = async (obj) => {
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board}.requestingAccessToGraveyard`]: { popupVisible: true, approved: false } });
 }
+const requestAccessToHand = async (obj) => {
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board}.requestingAccessToHand`]: { popupVisible: true, approved: false } });
+}
+const dismissRequestAccessToHand = async (obj) => {
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board1}.requestingAccessToHand`]: { popupVisible: false, approved: false } });
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board2}.requestingAccessToHand`]: { popupVisible: false, approved: false } });
+}
+const approveAccessToHand = (obj) => {
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board1}.requestingAccessToHand`]: { popupVisible: false, approved: false } });
+    firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board2}.requestingAccessToHand`]: { popupVisible: false, approved: true } });
+}
+
 const dismissRequestAccessToGraveyard = async (obj) => {
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board1}.requestingAccessToGraveyard`]: { popupVisible: false, approved: false } });
     firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.board2}.requestingAccessToGraveyard`]: { popupVisible: false, approved: false } });
@@ -285,7 +296,7 @@ const retrieveCardsFromDeck = async (obj) => {
 }
 
 const hostDuel = (obj) => {
-    firestore.collection("rooms").doc(obj).set({ host: obj, opponent: "", linkZones: [{ card: { exists: false, defensePosition: false, user: "" } }, { card: { exists: false, defensePosition: false, user: "" } }], hostBoard: { lifePoints: 8000, requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] }, guestBoard: { lifePoints: 8000, requestingAccessToGraveyard: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] } })
+    firestore.collection("rooms").doc(obj).set({ host: obj, opponent: "", linkZones: [{ card: { exists: false, defensePosition: false, user: "" } }, { card: { exists: false, defensePosition: false, user: "" } }], hostBoard: { lifePoints: 8000, requestingAccessToGraveyard: { popupVisible: false, approved: false }, requestingAccessToHand: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] }, guestBoard: { lifePoints: 8000, requestingAccessToGraveyard: { popupVisible: false, approved: false }, requestingAccessToHand: { popupVisible: false, approved: false }, hand: [], link: [{ card: { exists: false } }, { card: { exists: false } }], st: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m1: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], m2: [{ card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }, { card: { exists: false, defenseMode: false } }], graveyard: [], extraDeck: [], banishedZone: [] } })
     firestore.collection("users").doc(obj).set({ hosting: true }, { merge: true })
 }
 
@@ -399,6 +410,12 @@ const updateUser = (username, obj) => {
             return false
         });
 }
+const highlightCard = ({ location, hostUsername }) => {
+    // firestore.collection("rooms").doc(hostUsername).update({})
+    // firestore.collection("rooms").doc(obj.hostUsername).update({ [`${obj.location[0]}.${obj.location[1]}`]: obj.zone });
+
+    console.log("highlight the card at", location, "on the board hosted by", hostUsername)
+}
 
 
-export { updateUser, updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField, alterLinkZone, addFriend, retrieveFriendInfo, deleteFriendRequest, retrieveUsers, sendFriendRequest, updateLifePoints }
+export { updateUser, updateUserInfo, updateMainDeckInfo, retrieveDeckInfo, retrieveCardsFromDeck, addCardsToDeck, deleteDeck, deleteCard, removeCardsFromDeck, hostDuel, returnAvailableDuels, joinDuel, listenForBoardUpdates, leaveDuel, alterBoard, doubleAlterBoard, requestAccessToGraveyard, approveAccessToGraveyard, dismissRequestAccessToGraveyard, updateLifePointsField, alterLinkZone, addFriend, retrieveFriendInfo, deleteFriendRequest, retrieveUsers, sendFriendRequest, updateLifePoints, highlightCard, requestAccessToHand, dismissRequestAccessToHand, approveAccessToHand }

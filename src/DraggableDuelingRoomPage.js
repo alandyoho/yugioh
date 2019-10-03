@@ -1,10 +1,10 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, LayoutAnimation, ActionSheetIOS } from 'react-native';
+import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, LayoutAnimation, ActionSheetIOS, ActivityIndicator } from 'react-native';
 import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, RequestAccessToOpponentGraveyardPopup } from "./ComplexComponents"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser, updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePoints } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePoints, highlightCard, requestAccessToHand, dismissRequestAccessToHand } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { GameLogic } from "./DuelingRoomPageComponents"
@@ -14,6 +14,8 @@ import Dialog, { DialogContent, ScaleAnimation, SlideAnimation } from 'react-nat
 import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
 import LifePointsCircle from "./LifePointsCircle"
+import CardFlip from 'react-native-card-flip';
+
 
 class DraggableDuelingRoomPage extends Component {
     constructor() {
@@ -55,6 +57,7 @@ class DraggableDuelingRoomPage extends Component {
             lifePointsCircleExpanded: false
         }
         this.popupBackgroundColor = new Animated.Value(0)
+        this.waitingForOpponentViewOpacity = new Animated.Value(0.50)
         this.popupBackgroundColorOpacity = "#FFF"
         this.popupOpacity = 1
     }
@@ -83,10 +86,22 @@ class DraggableDuelingRoomPage extends Component {
                     this.setState({ guestBoard, hostBoard, opponent, host, linkZones, boardsRetrieved: true })
 
                     if (this.state.initializeNewGame && opponent) {
+                        this.onOpponentJoin()
                         const opponentData = await retrieveDeckInfo(host === this.props.user.username ? opponent : host)
                         this.setState({ initializeNewGame: false, opponentData })
                         this.initialDraw()
                     }
+                    if (this.state[thisBoard].requestingAccessToHand.popupVisible) {
+                        ActionSheetIOS.showActionSheetWithOptions(
+                            {
+                                options: ["Deny", "Approve"],
+                                cancelButtonIndex: 0,
+                                tintColor: "black"
+                            },
+                            index => index !== 0 && this.manageCardInDeck("Deny")
+                        );
+                    }
+
                 } else {
                     console.log("time to leave duel")
                     firestore.collection("users").doc(this.props.user.username).update({ hostedBy: "", hosting: false })
@@ -404,9 +419,8 @@ class DraggableDuelingRoomPage extends Component {
         let [endCardZone, endCardIndex] = endLocation
 
         let boardCopy = { ...this.state[thisBoard] }
-
-
         console.log(startCardZone, "=>", endCardZone)
+        console.log("card user", card.user, "device user", this.props.user.username)
         if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
             this.toggleAppropriateZone(startCardZone)
             return console.log("bad request!")
@@ -695,6 +709,7 @@ class DraggableDuelingRoomPage extends Component {
         }
     }
     flipCardPosition = async (location) => {
+
         console.log("location", location)
 
         let [cardZone, cardZoneIndex] = location
@@ -707,6 +722,9 @@ class DraggableDuelingRoomPage extends Component {
             pertinentCard = linkZoneCopy[cardZoneIndex]
         } else {
             pertinentCard = boardCopy[cardZone][cardZoneIndex]
+        }
+        if (pertinentCard.user !== this.props.user.username) {
+            return
         }
 
 
@@ -756,6 +774,15 @@ class DraggableDuelingRoomPage extends Component {
         }).start();
         console.log(this.popupBackgroundColor)
     }
+    onOpponentJoin = () => {
+        Animated.timing(this.waitingForOpponentViewOpacity, {
+            toValue: 0,
+            duration: 1000
+        }).start();
+        this.waitingForOpponentView.setNativeProps({
+            zIndex: -100
+        })
+    }
     handleDeckLongPress = () => {
         if (this.state.mainDeck.length > 0) {
             Haptics.impactAsync("heavy")
@@ -796,6 +823,7 @@ class DraggableDuelingRoomPage extends Component {
         this.props.navigation.navigate("HomePage")
     }
     requestAccessToOpponentGraveyard = async () => {
+        Haptics.impactAsync("heavy")
         this.setState({ requestAccessToOpponentGraveyardPopupVisible: !this.state.requestAccessToOpponentGraveyardPopupVisible })
         await requestAccessToGraveyard({ hostUsername: this.state.hostedBy, board: this.state.thatBoard })
     }
@@ -820,6 +848,26 @@ class DraggableDuelingRoomPage extends Component {
 
         }
     }
+    highlightCard = async (location) => {
+        //make copy of pertinent zone
+        //update particular index's highlighted property to true
+        //update rest of index's highlighted properties to false
+        let zoneCopy = [...this.state[this.state.thatBoard][location[1]]]
+        for (let zone of zoneCopy) {
+            zone.highlighted = false
+        }
+        zoneCopy[location[2]].highlighted = true
+        console.log(zoneCopy)
+        await alterBoard({ hostUsername: this.state.hostedBy, location: [this.state.thatBoard, location[1]], zone: zoneCopy })
+        setTimeout(async () => {
+            zoneCopy[location[2]].highlighted = false
+            await alterBoard({ hostUsername: this.state.hostedBy, location: [this.state.thatBoard, location[1]], zone: zoneCopy })
+        }, 3000)
+    }
+    handleCardFlip = (card) => {
+        requestAccessToHand({ hostUsername: this.state.hostedBy, board: this.state.thatBoard })
+        // this[card].flip()
+    }
 
     render() {
         this.popupBackgroundColorOpacity = this.popupBackgroundColor.interpolate({
@@ -834,24 +882,34 @@ class DraggableDuelingRoomPage extends Component {
         const { hand: thisHand, graveyard: thisGraveyard, banishedZone: thisBanishedZone } = boardsRetrieved && this.state[thisBoard]
         const { hand: thatHand, graveyard: thatGraveyard, banishedZone: thatBanishedZone } = boardsRetrieved && this.state[thatBoard]
         const thatHandLength = boardsRetrieved && Array(thatHand.length).fill("")
-
+        console.log("let's see here", thatHand)
         const draggableCardOnFieldProps = { storedCards: this.props.storedCards, manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
         const HALFWIDTH = Dimensions.get("window").width / 2
         return (
             <SideMenu openMenuOffset={HALFWIDTH} menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+                    <Animated.View ref={v => this.waitingForOpponentView = v} style={{ backgroundColor: 'black', opacity: this.waitingForOpponentViewOpacity, position: 'absolute', left: 0, top: 0, right: 0, height: Dimensions.get("window").height * 12 / 32, zIndex: 20, justifyContent: "center", alignItems: "center" }}>
+                        <ActivityIndicator color={"#FFF"} size={"large"} />
+                        <Text style={{ color: "#FFF", fontSize: 30 }}>Waiting for opponent...</Text>
+                    </Animated.View>
                     <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, top: 0, zIndex: -3 }}>
                         {backgroundImageUrl && <FadeScaleImage source={backgroundImageUrl} style={{ flex: 1, width: null, height: null, zIndex: -3 }} resizeMode={"contain"} />}
                     </View>
                     <FlatList
-                        data={thatHandLength}
-                        renderItem={() => <FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: 100, height: 200 }} />}
+                        data={thatHand}
+                        renderItem={({ index, item }) => {
+                            return (
+                                <CardFlip style={{ width: 100, height: 200 }} ref={(card) => this[`card${index}`] = card} >
+                                    <TouchableOpacity style={{ width: 100, height: 200 }} onPress={() => this.handleCardFlip(`card${index}`)}><FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
+                                    <TouchableOpacity style={{ width: 100, height: 200 }} onPress={() => this.handleCardFlip(`card${index}`)} ><FadeScaleImage source={{ uri: item.card_images[0].image_url_small }} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
+                                </CardFlip>)
+                        }}
                         keyExtractor={(item, index) => index.toString()}
                         horizontal={true}
                         scrollEnabled={true}
-                        style={{ position: "absolute", top: -120, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }] }} />
+                        style={{ position: "absolute", top: -90, left: 0, right: 0, zIndex: 5, transform: [{ rotate: '180deg' }] }} />
                     <View style={{ flex: 12 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-start", transform: [{ rotate: '180deg' }] }}>
-                        <DraggableOpponentBoard examineCard={this.examineCard} boardsRetrieved={boardsRetrieved} thatBanishedZone={thatBanishedZone} thatBoard={this.state[thatBoard]} thatGraveyard={thatGraveyard} requestAccessToOpponentGraveyard={this.requestAccessToOpponentGraveyard} />
+                        <DraggableOpponentBoard highlightCard={this.highlightCard} examineCard={this.examineCard} boardsRetrieved={boardsRetrieved} thatBanishedZone={thatBanishedZone} thatBoard={this.state[thatBoard]} thatGraveyard={thatGraveyard} requestAccessToOpponentGraveyard={this.requestAccessToOpponentGraveyard} />
                     </View>
                     <View style={{ flex: 20 / 32, flexDirection: 'row', flexWrap: 'wrap', justifyContent: "center", alignItems: "flex-end" }}>
                         {[1, 2].map(cardIndex => (
@@ -932,11 +990,11 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} ref={view => { this[`_banishedZone0`] = view; }}>
                             </View>
                         </TouchableOpacity>
-                        <View style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st6`] = view; }}>
+                        <View style={{ ...styles.viewStyles, borderColor: boardsRetrieved === true && this.state[thisBoard].st[6].highlighted ? "red" : "black" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st6`] = view; }}>
                             {boardsRetrieved === true && this.state[thisBoard].st[6].exists && <DraggableCardOnField  {...draggableCardOnFieldProps} zoneLocation={["st", 6]} item={this.state[thisBoard].st[6]} />}
                         </View>
                         {[1, 2, 3, 4, 5].map(cardIndex => (
-                            <View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_m1${cardIndex}`] = view }}>
+                            <View key={cardIndex} style={{ ...styles.viewStyles, borderColor: boardsRetrieved === true && this.state[thisBoard].m1[cardIndex].highlighted ? "red" : "black" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_m1${cardIndex}`] = view }}>
                                 {boardsRetrieved === true && this.state[thisBoard].m1[cardIndex].exists && <DraggableCardOnField  {...draggableCardOnFieldProps} zoneLocation={["m1", cardIndex]} item={this.state[thisBoard].m1[cardIndex]} />}
                             </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.toggleGraveyardPopup} onLongPress={this.handleGraveyardLongPress} disabled={boardsRetrieved && this.state[this.state.thisBoard].graveyard.length === 0}>
@@ -950,7 +1008,7 @@ class DraggableDuelingRoomPage extends Component {
                             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', flex: 1, borderRadius: 10, borderWidth: 1 }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_extraDeck0`] = view; }}>
                             </View>
                         </TouchableOpacity>
-                        {[1, 2, 3, 4, 5].map(cardIndex => (<View key={cardIndex} style={styles.viewStyles} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st${cardIndex}`] = view; }}>
+                        {[1, 2, 3, 4, 5].map(cardIndex => (<View key={cardIndex} style={{ ...styles.viewStyles, borderColor: boardsRetrieved === true && this.state[thisBoard].st[cardIndex].highlighted ? "red" : "black" }} onLayout={this.storeZoneLocations} collapsable={false} ref={view => { this[`_st${cardIndex}`] = view; }}>
                             {boardsRetrieved && this.state[thisBoard].st[cardIndex].exists && <DraggableCardOnField {...draggableCardOnFieldProps} storedCards={this.props.storedCards} zoneLocation={["st", cardIndex]} item={this.state[thisBoard].st[cardIndex]} />}
                         </View>))}
                         <TouchableOpacity style={{ ...styles.viewStyles, borderWidth: 0 }} onPress={this.presentDeckOptions} onLongPress={this.handleDeckLongPress} disabled={boardsRetrieved && this.state.mainDeck.length === 0}>
