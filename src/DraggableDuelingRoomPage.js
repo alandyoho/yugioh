@@ -4,7 +4,7 @@ import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopu
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createUser, updateSelectedDeck } from "./actions"
-import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePoints, highlightCard, requestAccessToHand, dismissRequestAccessToHand } from "../Firebase/FireMethods"
+import { retrieveCardsFromDeck, retrieveDeckInfo, leaveDuel, alterBoard, alterLinkZone, requestAccessToGraveyard, dismissRequestAccessToGraveyard, approveAccessToGraveyard, updateLifePoints, highlightCard, requestAccessToHand, dismissRequestAccessToHand, approveAccessToHand } from "../Firebase/FireMethods"
 import { firestore } from "../Firebase/Fire"
 import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import { GameLogic } from "./DuelingRoomPageComponents"
@@ -14,7 +14,7 @@ import Dialog, { DialogContent, ScaleAnimation, SlideAnimation } from 'react-nat
 import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
 import LifePointsCircle from "./LifePointsCircle"
-import CardFlip from 'react-native-card-flip';
+import CardFlip from './react-native-card-flip';
 
 
 class DraggableDuelingRoomPage extends Component {
@@ -54,7 +54,9 @@ class DraggableDuelingRoomPage extends Component {
             banishedZonePopupVisible: false,
             requestAccessToOpponentGraveyardPopupVisible: true,
             backgroundImageUrl: null,
-            lifePointsCircleExpanded: false
+            lifePointsCircleExpanded: false,
+            requestingAccessToHand: false,
+            hasBeenFlippedBefore: false
         }
         this.popupBackgroundColor = new Animated.Value(0)
         this.waitingForOpponentViewOpacity = new Animated.Value(0.50)
@@ -71,6 +73,37 @@ class DraggableDuelingRoomPage extends Component {
     }
     getRandomInt = () => {
         return Math.floor(Math.random() * Math.floor(7));
+    }
+    respondToOpponentRequest = (response) => {
+        if (response === "Approve") {
+            approveAccessToHand({ hostUsername: this.state.hostedBy, board1: this.state.thisBoard, board2: this.state.thatBoard })
+            setTimeout(() => {
+                dismissRequestAccessToHand({ hostUsername: this.state.hostedBy, board1: this.state.thisBoard, board2: this.state.thatBoard })
+            }, 3000)
+
+        } else {
+            dismissRequestAccessToHand({ hostUsername: this.state.hostedBy, board1: this.state.thisBoard, board2: this.state.thatBoard })
+        }
+        this.setState({ requestingAccessToHand: false })
+
+    }
+    flipOpponentHand = () => {
+        const opponentHandLength = this.state[this.state.thatBoard].hand.length
+        if (!this.state.hasBeenFlippedBefore) {
+            for (let i = 0; i < opponentHandLength; i++) {
+                this[`opponentHand${i}`].flip()
+            }
+            this.setState({ hasBeenFlippedBefore: true })
+        }
+        for (let i = 0; i < opponentHandLength; i++) {
+            this[`opponentHand${i}`].flip()
+        }
+        setTimeout(() => {
+            for (let i = 0; i < opponentHandLength; i++) {
+                this[`opponentHand${i}`].flip()
+            }
+        }, 8000)
+
     }
     listenForGameChanges = ({ hostedBy, hosting }) => {
         if (hostedBy === "") {
@@ -92,18 +125,32 @@ class DraggableDuelingRoomPage extends Component {
                         this.initialDraw()
                     }
                     if (this.state[thisBoard].requestingAccessToHand.popupVisible) {
-                        ActionSheetIOS.showActionSheetWithOptions(
-                            {
-                                options: ["Deny", "Approve"],
-                                cancelButtonIndex: 0,
-                                tintColor: "black"
-                            },
-                            index => index !== 0 && this.manageCardInDeck("Deny")
-                        );
+                        if (!this.state.requestingAccessToHand) {
+                            this.setState({ requestingAccessToHand: true })
+                            const options = ["Deny", "Approve"]
+                            ActionSheetIOS.showActionSheetWithOptions(
+                                {
+                                    title: `${this.state.opponent} would like to see your hand`,
+                                    options: options,
+                                    // cancelButtonIndex: 0,
+                                    tintColor: "black"
+                                },
+                                index => this.respondToOpponentRequest(options[index])
+                            );
+                        }
+
+                    } else if (this.state[thisBoard].requestingAccessToHand.approved) {
+                        this.flipOpponentHand()
+
+                        // setTimeout(() => {
+                        //     for (let i = 0; i < opponentHandLength; i++) {
+                        //         this[`opponentHand${i}`].flip()
+                        //     }
+                        // }, 2000)
                     }
 
+
                 } else {
-                    console.log("time to leave duel")
                     firestore.collection("users").doc(this.props.user.username).update({ hostedBy: "", hosting: false })
                     this.props.navigation.navigate("HomePage")
 
@@ -146,7 +193,6 @@ class DraggableDuelingRoomPage extends Component {
         });
     }
     storeZoneLocations = () => {
-        console.log("storeZoneLocations triggered")
         let zones = []
         for (let i = 1; i < 6; i++) {
             this[`_m1${i}`].measure((x, y, width, height, pageX, pageY) => {
@@ -207,7 +253,6 @@ class DraggableDuelingRoomPage extends Component {
         }
     }
     raiseSelectedZone = ([zone, idx]) => {
-        console.log([zone, idx])
         this[`_${zone}${idx}`].setNativeProps({
             zIndex: 100,
         });
@@ -267,7 +312,6 @@ class DraggableDuelingRoomPage extends Component {
     }
     manageCardInPopup = async (startLocation, endLocation, card) => {
         let { thisBoard, thatBoard } = this.state
-        console.log(card)
         let boardCopy = { ...this.state[thisBoard] }
 
         let startBoardCopy;
@@ -420,7 +464,6 @@ class DraggableDuelingRoomPage extends Component {
 
         let boardCopy = { ...this.state[thisBoard] }
         console.log(startCardZone, "=>", endCardZone)
-        console.log("card user", card.user, "device user", this.props.user.username)
         if (endCardZone === "extraDeck" && !(this.extraDeckTypes.includes(card.type)) || endCardZone === "mainDeck" && (this.extraDeckTypes.includes(card.type))) {
             this.toggleAppropriateZone(startCardZone)
             return console.log("bad request!")
@@ -565,7 +608,6 @@ class DraggableDuelingRoomPage extends Component {
         let requestType = type.split(" ").join("")
         let boardCopy = { ...this.state[thisBoard] }
         const filteredHand = [...boardCopy.hand]
-        console.log("***", type)
         if (requestType === "SendToGraveyard" || requestType === "SendToBanishedZone" || requestType === "SendToMainDeck") {
             if (requestType === "SendToMainDeck") {
                 this.setState({ mainDeck: [...this.state.mainDeck, card] })
@@ -710,7 +752,6 @@ class DraggableDuelingRoomPage extends Component {
     }
     flipCardPosition = async (location) => {
 
-        console.log("location", location)
 
         let [cardZone, cardZoneIndex] = location
         let board = this.state.thisBoard
@@ -740,7 +781,6 @@ class DraggableDuelingRoomPage extends Component {
         } else {
             pertinentCard.set = !pertinentCard.set
         }
-        console.log("changed position", pertinentCard)
         if (cardZone === "linkZone") {
             linkZoneCopy[cardZoneIndex] = pertinentCard
             await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
@@ -864,7 +904,11 @@ class DraggableDuelingRoomPage extends Component {
             await alterBoard({ hostUsername: this.state.hostedBy, location: [this.state.thatBoard, location[1]], zone: zoneCopy })
         }, 3000)
     }
-    handleCardFlip = (card) => {
+    handleCardFlip = (requestType) => {
+        Haptics.impactAsync("heavy")
+        if (requestType === "revert") {
+            // return dismissRequestAccessToHand()
+        }
         requestAccessToHand({ hostUsername: this.state.hostedBy, board: this.state.thatBoard })
         // this[card].flip()
     }
@@ -882,7 +926,6 @@ class DraggableDuelingRoomPage extends Component {
         const { hand: thisHand, graveyard: thisGraveyard, banishedZone: thisBanishedZone } = boardsRetrieved && this.state[thisBoard]
         const { hand: thatHand, graveyard: thatGraveyard, banishedZone: thatBanishedZone } = boardsRetrieved && this.state[thatBoard]
         const thatHandLength = boardsRetrieved && Array(thatHand.length).fill("")
-        console.log("let's see here", thatHand)
         const draggableCardOnFieldProps = { storedCards: this.props.storedCards, manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
         const HALFWIDTH = Dimensions.get("window").width / 2
         return (
@@ -899,9 +942,9 @@ class DraggableDuelingRoomPage extends Component {
                         data={thatHand}
                         renderItem={({ index, item }) => {
                             return (
-                                <CardFlip style={{ width: 100, height: 200 }} ref={(card) => this[`card${index}`] = card} >
-                                    <TouchableOpacity style={{ width: 100, height: 200 }} onPress={() => this.handleCardFlip(`card${index}`)}><FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
-                                    <TouchableOpacity style={{ width: 100, height: 200 }} onPress={() => this.handleCardFlip(`card${index}`)} ><FadeScaleImage source={{ uri: item.card_images[0].image_url_small }} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
+                                <CardFlip style={{ width: 100, height: 200 }} ref={(card) => this[`opponentHand${index}`] = card} onFlip={(idx) => console.log("what we have to work with", idx)} >
+                                    <TouchableOpacity style={{ width: 100, height: 200 }} onLongPress={() => this.handleCardFlip(`request`)}><FadeScaleImage source={require("../assets/default_card.png")} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
+                                    <TouchableOpacity style={{ width: 100, height: 200 }} onLongPress={() => this.handleCardFlip(`request`)}><FadeScaleImage source={{ uri: item.card_images[0].image_url_small }} resizeMode={"contain"} style={{ width: 100, height: 200 }} /></TouchableOpacity>
                                 </CardFlip>)
                         }}
                         keyExtractor={(item, index) => index.toString()}
