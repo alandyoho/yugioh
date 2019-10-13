@@ -97,6 +97,8 @@ class AuthLoadingScreen extends Component {
                 const valueAsObj = JSON.parse(value)
 
                 return valueAsObj
+            } else {
+                return {}
             }
         } catch (error) {
 

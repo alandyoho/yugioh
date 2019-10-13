@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, LayoutAnimation, ActionSheetIOS, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Dimensions, Image, Text, Animated, ImageBackground, LayoutAnimation, ActionSheetIOS, ActivityIndicator, Alert } from 'react-native';
 import { FadeScaleImage, FadeScaleText, DraggableCardInHand, DraggableCardInPopup, DraggableCardOnField, RequestAccessToOpponentGraveyardPopup } from "./ComplexComponents"
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -15,7 +15,7 @@ import DraggableOpponentBoard from "./DraggableOpponentBoard"
 import * as Haptics from 'expo-haptics';
 import LifePointsCircle from "./LifePointsCircle"
 import CardFlip from './react-native-card-flip';
-
+import ShakeEventExpo from "./ShakeGestureLogic"
 
 class DraggableDuelingRoomPage extends Component {
     constructor() {
@@ -67,6 +67,11 @@ class DraggableDuelingRoomPage extends Component {
     async componentDidMount() {
         const backgroundImages = [require("../assets/background-0.png"), require("../assets/background-1.png"), require("../assets/background-2.png"), require("../assets/background-3.png"), require("../assets/background-4.png"), require("../assets/background-5.png"), require("../assets/background-6.png"), require("../assets/background-7.png"), , require("../assets/background-8.png"), require("../assets/background-9.png")]
         const randomNum = this.getRandomInt()
+        // const sensorsEnabled = await Accelerometer.isAvailableAsync()
+        ShakeEventExpo.addListener(() => {
+            this.shuffleHand()
+        });
+        // console.log("sensors??", sensorsEnabled)
         this.setState({ backgroundImageUrl: backgroundImages[randomNum], waitingForOpponentPopupVisible: true })
         const { hostedBy, hosting } = await retrieveDeckInfo(this.props.user.username)
         this.listenForGameChanges({ hostedBy: hostedBy, hosting: hosting, initializeNewGame: true })
@@ -738,6 +743,25 @@ class DraggableDuelingRoomPage extends Component {
             this.setState({ mainDeck: GameLogic.shared.shuffleDeck(mainDeck) })
         }
     }
+    shuffleHand = async () => {
+        //when in Austin, implement this function in the proper location
+        const board = this.state.thisBoard
+        const boardCopy = this.state[board]
+        const modifiedHand = GameLogic.shared.shuffleDeck([...boardCopy.hand])
+        await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
+    }
+    drawCard = async () => {
+        const mainDeck = [...this.state.mainDeck]
+        if (mainDeck.length) {
+            const { drewCard, shallowCards } = GameLogic.shared.drawCard(mainDeck)
+            const board = this.state.thisBoard
+            const boardCopy = this.state[board]
+            const modifiedHand = [...boardCopy.hand, drewCard]
+            boardCopy.hand = modifiedHand
+            this.setState({ [board]: boardCopy, mainDeck: shallowCards })
+            await alterBoard({ location: [board, "hand"], hostUsername: this.state.hostedBy, zone: modifiedHand })
+        }
+    }
     drawCard = async () => {
         const mainDeck = [...this.state.mainDeck]
         if (mainDeck.length) {
@@ -851,6 +875,7 @@ class DraggableDuelingRoomPage extends Component {
         this.setState({ banishedZonePopupVisible: !this.state.banishedZonePopupVisible })
     }
     leaveDuel = async () => {
+        ShakeEventExpo.removeListener()
         leaveDuel([this.props.user.username, this.state.hostedBy])
         try {
             const enableAudio = this.props.navigation.getParam('enableAudio', 'NO-ID');
