@@ -59,19 +59,19 @@ class AuthLoadingScreen extends Component {
             }
         } else {
             console.log("directory present")
-            // try {
-            //     const storedCards = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "CARD_IMAGES")
-            //     console.log("stored cards {1}", storedCards)
-            //     storedCardsAsObj = storedCards.reduce(function (result, item, index, array) {
-            //         result[item] = true; //a, b, c
-            //         return result;
-            //     }, {})
-            //     console.log("stored cards {2}", storedCardsAsObj)
+            try {
+                const storedCards = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "CARD_IMAGES")
+                console.log("stored cards {1}", storedCards)
+                storedCardsAsObj = storedCards.reduce(function (result, item, index, array) {
+                    result[item] = true; //a, b, c
+                    return result;
+                }, {})
+                console.log("stored cards {2}", storedCardsAsObj)
 
-            //     this.props.updateStoredCardsList(storedCardsAsObj)
-            // } catch (e) {
-            //     console.info("ERROR,", e)
-            // }
+                this.props.updateStoredCardsList(storedCardsAsObj)
+            } catch (e) {
+                console.info("ERROR,", e)
+            }
         }
     }
     _retrieveData = async () => {

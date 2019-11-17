@@ -426,6 +426,7 @@ class DraggableDuelingRoomPage extends Component {
                 let extraDeck = [...this.state.extraDeck]
                 extraDeck.push(card)
                 this.setState({ extraDeck })
+                this.toggleAppropriateZone(startCardZone)
             }
         } else if (endCardZone === "linkZone") {
             if (this.state.linkZones[endCardIndex].exists) {
