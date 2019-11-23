@@ -13,6 +13,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
     const BUTTONHEIGHT = Dimensions.get("window").height * 0.05
     const WIDTH = Dimensions.get("window").width * 0.95
     const SPACE = Dimensions.get("window").width * 0.025
+    const token = { "id": "token", "card_images": [{ "image_url_small": "https://vignette.wikia.nocookie.net/yugioh/images/8/8d/Token-CT14-EN-UR-LE-YugiMutoYamiYugi.png/revision/latest?cb=20170824231645" }] }
     return (
         <React.Fragment>
             <Dialog
@@ -555,7 +556,7 @@ const DuelingRoomDialogs = ({ waitingForOpponentPopupVisible, cardInHandPressedP
             >
                 <DialogContent style={{ flex: 1, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "white", height: Dimensions.get("window").height * 0.80 }}>
                     <FlatList
-                        data={extraDeck}
+                        data={[token, ...extraDeck]}
                         style={{ flex: 1 }}
                         renderItem={({ item }) => (
                             <View style={{

@@ -478,6 +478,9 @@ class DraggableDuelingRoomPage extends Component {
                 //prevent user from putting opponent's cards in his own deck
                 return
             }
+            if (card.desc === "This card can be used as any Token.") {
+                return
+            }
             if ("counters" in card) {
                 card.counters = 0
             }
@@ -490,6 +493,9 @@ class DraggableDuelingRoomPage extends Component {
         } else if ((endCardZone === "mainDeck" || endCardZone === "extraDeck") && startCardZone === "linkZone") {
             if (card.user !== this.props.user.username) {
                 //prevent user from putting opponent's cards in his own deck
+                return
+            }
+            if (card.desc === "This card can be used as any Token.") {
                 return
             }
 
@@ -519,8 +525,10 @@ class DraggableDuelingRoomPage extends Component {
             if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
             } else {
-                boardCopy[startCardZone][startCardIndex] = { card: { defenseMode: false, exists: false } }
-                boardCopy[endCardZone].push(card)
+                if (card.desc !== "This card can be used as any Token.") {
+                    boardCopy[startCardZone][startCardIndex] = { card: { defenseMode: false, exists: false } }
+                    boardCopy[endCardZone].push(card)
+                }
             }
         } else if ((endCardZone === "graveyard" || endCardZone === "banishedZone" || endCardZone === "cancel") && startCardZone === "linkZone") {
             if (card.user !== this.props.user.username) {
@@ -1031,6 +1039,8 @@ class DraggableDuelingRoomPage extends Component {
         const thatHandLength = boardsRetrieved && Array(thatHand.length).fill("")
         const draggableCardOnFieldProps = { storedCards: this.props.storedCards, manageCardOnField: this.manageCardOnField, raiseSelectedZone: this.raiseSelectedZone, lowerSelectedZone: this.lowerSelectedZone, clearZoneBackgrounds: this.clearZoneBackgrounds, highlightClosestZone: this.highlightClosestZone, coords: coords, toggleHandZone: this.toggleHandZone, examineCard: this.examineCard, dismissExaminePopup: () => this.setState({ examinePopupVisible: false }), flipCardPosition: this.flipCardPosition }
         const HALFWIDTH = Dimensions.get("window").width / 2
+        const token = { "user": this.props.user.username, "id": "token", "desc": "This card can be used as any Token.", "card_images": [{ "image_url": "https://vignette.wikia.nocookie.net/yugioh/images/8/8d/Token-CT14-EN-UR-LE-YugiMutoYamiYugi.png/revision/latest?cb=20170824231645", "image_url_small": "https://vignette.wikia.nocookie.net/yugioh/images/8/8d/Token-CT14-EN-UR-LE-YugiMutoYamiYugi.png/revision/latest?cb=20170824231645" }] }
+
         return (
             <SideMenu openMenuOffset={HALFWIDTH} menu={<CustomSideMenu screen={"DuelingRoomPage"} navigation={this.props.navigation} leaveDuel={this.leaveDuel} />}>
                 <View style={{ flex: 1, backgroundColor: "#FFF" }}>
@@ -1203,7 +1213,7 @@ class DraggableDuelingRoomPage extends Component {
                         <DialogContent style={{ width: Dimensions.get("window").width, flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "transparent", height: Dimensions.get("window").height * 0.50, zIndex: 31 }}>
                             <View style={{ position: "absolute", left: 0, right: 0, top: 0, zIndex: 32, backgroundColor: "transparent", height: Dimensions.get("window").height, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center" }} >
                                 <FlatList
-                                    data={extraDeck}
+                                    data={[token, ...extraDeck]}
                                     renderItem={({ item }) => <DraggableCardInPopup storedCards={this.props.storedCards} location={"ExtraDeckView"} inDreamState={this.state.inDreamState} toggleExtraDeckPopup={this.toggleExtraDeckPopup} dispelInfiniteTsukuyomi={this.dispelInfiniteTsukuyomi} createInfiniteTsukuyomi={this.createInfiniteTsukuyomi} manageCardInPopup={this.manageCardInPopup} clearPopupZoneBackgrounds={this.clearPopupZoneBackgrounds} popupZoneCoords={this.state.popupZoneCoords} item={item} toggleHandZone={this.toggleHandZone} coords={this.state.coords} dragBegin={dragBegin} presentHandOptions={this.presentHandOptions} examineCard={this.examineCard} dismissExaminePopup={() => this.setState({ examinePopupVisible: false })} highlightClosestZone={this.highlightClosestZone} clearZoneBackgrounds={this.clearZoneBackgrounds} />}
                                     keyExtractor={(item, index) => index.toString()}
                                     style={{ height: Dimensions.get("window").height * 0.15, width: Dimensions.get("window").width }}
