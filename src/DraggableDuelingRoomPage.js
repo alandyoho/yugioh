@@ -603,11 +603,13 @@ class DraggableDuelingRoomPage extends Component {
             } else {
                 if (boardCopy[endCardZone][endCardIndex].exists) {
                     let existingCard = boardCopy[endCardZone][endCardIndex]
-                    existingCard.exists = false
-                    existingCard.set = false
-                    existingCard.defensePosition = false
-                    boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
-                    await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                    if (existingCard.desc !== "This card can be used as any Token.") {
+                        existingCard.exists = false
+                        existingCard.set = false
+                        existingCard.defensePosition = false
+                        boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
+                        await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                    }
                 }
                 if (startCardZone === "linkZone") {
                     let linkZones = this.state.linkZones
@@ -626,6 +628,7 @@ class DraggableDuelingRoomPage extends Component {
         await alterBoard({ location: [thisBoard, endCardZone], hostUsername: this.state.hostedBy, zone: boardCopy[endCardZone] })
     }
     manageCardInHand = async (type, location, card) => {
+
         let { thisBoard } = this.state
         let [cardZone, cardZoneIndex] = location
         let requestType = type.split(" ").join("")
@@ -657,13 +660,17 @@ class DraggableDuelingRoomPage extends Component {
             }
             //update locally
             if (boardCopy[cardZone][cardZoneIndex].exists) {
-                let existingCard = boardCopy[cardZone][cardZoneIndex]
-                existingCard.exists = false
-                existingCard.set = false
-                existingCard.defensePosition = false
 
-                boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
-                await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                let existingCard = boardCopy[cardZone][cardZoneIndex]
+                if (existingCard.desc !== "This card can be used as any Token.") {
+                    existingCard.exists = false
+                    existingCard.set = false
+                    existingCard.defensePosition = false
+
+                    boardCopy["graveyard"] = [...boardCopy["graveyard"], existingCard]
+                    await alterBoard({ location: [thisBoard, "graveyard"], hostUsername: this.state.hostedBy, zone: boardCopy["graveyard"] })
+                }
+
             }
             boardCopy[cardZone][cardZoneIndex] = card
             filteredHand.splice(filteredHand.findIndex(e => e.id === card.id), 1);
