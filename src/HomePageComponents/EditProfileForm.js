@@ -12,7 +12,9 @@ import Image from 'react-native-image-progress';
 import ProgressBar from 'react-native-progress/Pie'
 
 import { functions, auth, storage } from "../../Firebase/Fire"
-import { ImagePicker, Permissions } from 'expo';
+// import { ImagePicker, Permissions } from 'expo';
+import * as ImagePicker from 'expo-image-picker'
+import * as Permissions from 'expo-permissions'
 import uuid from 'uuid';
 import { TouchableOpacity } from "react-native-gesture-handler";
 

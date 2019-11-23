@@ -34,7 +34,12 @@ class GameLogic {
             const cardQuantity = cards[i].quantity
             for (let a = 0; a < cardQuantity; a++) {
                 // //
+                const canHoldCounters = cards[i]["desc"].includes("Counter") || cards[i]["desc"].includes("counter")
+                if (canHoldCounters) {
+                    cards[i].counters = 0
+                }
                 cards[i].user = this.user
+
 
                 expandedCards.push(cards[i])
             }

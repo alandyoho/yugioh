@@ -11,6 +11,8 @@
     "expo": "^33.0.0",
     "expo-file-system": "^5.0.1",
     "expo-haptics": "^5.0.1",
+    "expo-image-picker": "^5.0.2",
+    "expo-permissions": "^5.0.1",
     "expo-sensors": "^7.0.0",
     "firebase-admin": "^8.2.0",
     "firebase-functions": "^3.0.1",

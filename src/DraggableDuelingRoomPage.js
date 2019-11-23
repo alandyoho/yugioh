@@ -135,7 +135,7 @@ class DraggableDuelingRoomPage extends Component {
                             const options = ["Deny", "Approve"]
                             ActionSheetIOS.showActionSheetWithOptions(
                                 {
-                                    title: `${this.state.opponent} would like to see your hand`,
+                                    title: `${this.state.opponent === this.props.user.username ? this.state.hostedBy : this.state.opponent} would like to see your hand`,
                                     options: options,
                                     // cancelButtonIndex: 0,
                                     tintColor: "black"
@@ -158,7 +158,6 @@ class DraggableDuelingRoomPage extends Component {
                 } else {
                     firestore.collection("users").doc(this.props.user.username).update({ hostedBy: "", hosting: false })
                     this.props.navigation.navigate("HomePage")
-
                 }
             })
     }
@@ -479,6 +478,9 @@ class DraggableDuelingRoomPage extends Component {
                 //prevent user from putting opponent's cards in his own deck
                 return
             }
+            if ("counters" in card) {
+                card.counters = 0
+            }
             card.exists = false
             card.set = false
             card.defensePosition = false
@@ -509,6 +511,10 @@ class DraggableDuelingRoomPage extends Component {
             card.exists = false
             card.set = false
             card.defensePosition = false
+            //start here
+            if ("counters" in card) {
+                card.counters = 0
+            }
             if (endCardZone === "cancel") endCardZone = "hand"
             if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
                 this.setState({ extraDeck: [...this.state.extraDeck, card] })
@@ -524,6 +530,9 @@ class DraggableDuelingRoomPage extends Component {
             card.exists = false
             card.set = false
             card.defensePosition = false
+            if ("counters" in card) {
+                card.counters = 0
+            }
             let linkZones = [...this.state.linkZones]
             if (endCardZone === "cancel") endCardZone = "hand"
             if (endCardZone === "hand" && this.extraDeckTypes.includes(card.type)) {
@@ -682,9 +691,74 @@ class DraggableDuelingRoomPage extends Component {
     toggleExaminePopup = () => {
         this.setState({ examinePopupVisible: !this.state.examinePopupVisible })
     }
-    examineCard = (examinedCard) => {
+    examineCard = (examinedCard, zoneLocation = null) => {
+        console.log("what we have to work with ...", zoneLocation)
         this.setState({ examinedCard })
-        this.toggleExaminePopup()
+        console.log("card to be examined", examinedCard)
+        //beans beans
+        //determine if card's desc property contains the word "Counter" or "counter"
+        //if so, present actionSheet asking whether they'd like to examine the card or add counter or remove counter
+
+        const canHoldCounters = examinedCard["desc"].includes("Counter") || examinedCard["desc"].includes("counter")
+        const isOwnedByRequester = examinedCard['user'] === this.props.user.username
+        if (!examinedCard["counters"]) examinedCard["counters"] = 0
+        const hasZeroCounters = canHoldCounters && examinedCard["counters"] === 0
+        const isOnField = examinedCard["exists"]
+        console.log("the card in question", canHoldCounters)
+        if (canHoldCounters && isOwnedByRequester && isOnField) {
+            let options;
+            if (hasZeroCounters) {
+                options = ["Cancel", "Add Counter", "Examine"]
+            } else {
+                options = ["Cancel", "Add Counter", "Remove Counter", "Examine"]
+            }
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    options: options,
+                    cancelButtonIndex: 0,
+                    tintColor: "black"
+                },
+                async (index) => {
+                    if (index !== 0) {
+                        if (options[index] === "Add Counter") {
+                            let [cardZone, cardZoneIndex] = zoneLocation
+                            let board = this.state.thisBoard
+                            let boardCopy = { ...this.state[board] }
+                            let linkZoneCopy = [...this.state.linkZones]
+                            examinedCard.counters++
+                            if (cardZone === "linkZone") {
+                                linkZoneCopy[cardZoneIndex] = examinedCard
+                                await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+                            } else {
+                                boardCopy[cardZone][cardZoneIndex] = examinedCard
+                                await alterBoard({ location: [board, cardZone], zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+                            }
+                            //beans beans beans
+                            console.log("we wanna add a counter")
+                        } else if (options[index] === "Remove Counter") {
+                            let [cardZone, cardZoneIndex] = zoneLocation
+                            let board = this.state.thisBoard
+                            let boardCopy = { ...this.state[board] }
+                            let linkZoneCopy = [...this.state.linkZones]
+                            examinedCard.counters--
+                            if (cardZone === "linkZone") {
+                                linkZoneCopy[cardZoneIndex] = examinedCard
+                                await alterLinkZone({ location: ["linkZones"], updates: linkZoneCopy, hostUsername: this.state.hostedBy })
+                            } else {
+                                boardCopy[cardZone][cardZoneIndex] = examinedCard
+                                await alterBoard({ location: [board, cardZone], zone: boardCopy[cardZone], hostUsername: this.state.hostedBy })
+                            }
+                            console.log("we wanna remove a counter")
+                        } else if (options[index] === "Examine") {
+                            this.toggleExaminePopup()
+                        }
+                    }
+                }
+            );
+        } else {
+            this.toggleExaminePopup()
+        }
+
     }
     presentDeckOptions = () => {
         if (this.state.mainDeck.length > 0) {
@@ -926,8 +1000,11 @@ class DraggableDuelingRoomPage extends Component {
         console.log(zoneCopy)
         await alterBoard({ hostUsername: this.state.hostedBy, location: [this.state.thatBoard, location[1]], zone: zoneCopy })
         setTimeout(async () => {
+            let zoneCopy = [...this.state[this.state.thatBoard][location[1]]]
             zoneCopy[location[2]].highlighted = false
             await alterBoard({ hostUsername: this.state.hostedBy, location: [this.state.thatBoard, location[1]], zone: zoneCopy })
+            //if card exists in location, update highlighted property to false and alterboard
+            //else: alter zoneCopy to reflect lack of card and alterboard
         }, 3000)
     }
     handleCardFlip = (requestType) => {
@@ -1335,7 +1412,6 @@ class DraggableDuelingRoomPage extends Component {
                                     contentContainerStyle={{ top: Dimensions.get("window").height * 0.25 }}
                                     horizontal={true}
                                 />
-
                             </View>
                             <View style={{ height: Dimensions.get("window").height * 0.50, width: Dimensions.get("window").width, flexDirection: "column", justifyContent: "center", alignItems: "center", backgroundColor: this.state.popupBackgroundColor, borderBottomRightRadius: 20, borderBottomLeftRadius: 20, opacity: this.state.popupOpacity }}>
                                 <View style={{ height: Dimensions.get("window").height * 0.10, width: Dimensions.get("window").width, justifyContent: "center", alignItems: "center", borderColor: this.state.popupFontColor, borderTopColor: "transparent", borderLeftColor: "transparent", borderRightColor: "transparent", borderBottomColor: this.state.popupFontColor, borderWidth: 1 }} onLayout={(event) => { this.storePopupZoneLocations(event) }} collapsable={false} ref={view => { this[`_SendToBanishedZone0`] = view; }}>
